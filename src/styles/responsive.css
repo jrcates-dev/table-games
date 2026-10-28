@@ -379,6 +379,44 @@
 @media (max-height: 500px) {
   :root {
     --dock-bottom: 6px;
+    /* Sideways, the home bar's margin is far deeper than the bar itself: the
+       dock stands in the top of it, every pixel it gives back going to the felt. */
+    --dock-floor: max(var(--dock-bottom), var(--safe-b) - 12px);
+  }
+
+  /* -- At a table the screen is the felt. The carpet, the walnut and the
+        leather go; the cloth runs to every edge, lit from above the middle,
+        and the printing, the tray and the cards lie straight on it -- */
+
+  .room__ground,
+  .table-body {
+    display: none;
+  }
+
+  .room__felt {
+    display: block;
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1s ease;
+    /* A layer of its own, painted once: whatever repaints over it never repaints it. */
+    will-change: opacity;
+    background:
+      radial-gradient(48% 62% at 50% 44%, rgba(255, 242, 208, 0.1), transparent 100%),
+      radial-gradient(85% 110% at 50% 42%, var(--felt-hi) 0%, var(--felt-mid) 42%, var(--felt-lo) 82%, var(--felt-edge) 120%);
+  }
+
+  .room__felt::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise);
+    background-size: 160px;
+    opacity: 0.07;
+  }
+
+  .room--table .room__felt {
+    opacity: 1;
   }
 
   /* -- Top bar -- */
@@ -386,6 +424,16 @@
   .topbar {
     gap: 10px;
     padding: 5px 10px;
+  }
+
+  /* Its shade runs past the notch to both edges, as the felt under it does. */
+  .bj > .topbar,
+  .cr > .topbar,
+  .tv > .topbar {
+    left: calc(-1 * var(--safe-l));
+    right: calc(-1 * var(--safe-r));
+    padding-left: calc(10px + var(--safe-l));
+    padding-right: calc(10px + var(--safe-r));
   }
 
   .stage__zoom-btn {

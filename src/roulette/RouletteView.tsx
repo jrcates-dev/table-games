@@ -27,6 +27,13 @@ import { Rail } from './Rail'
 import { Wheel } from './Wheel'
 
 /**
+ * Sideways on a phone: the wheel and the layout, drawn as large as the room
+ * allows (see Stage's `fill`). Centred a little right of their middle, so the
+ * far end of the layout stays clear of the bets tab in the corner.
+ */
+const PHONE_FILL = { left: 96, top: 200, right: 1564, bottom: 690 }
+
+/**
  * The roulette table: the wheel set into the felt at the left, the layout
  * running away from it, every bet priced on the rail and under the pointer.
  */
@@ -86,6 +93,7 @@ export default function RouletteView() {
       <div className="tv__stage">
         <Stage width={STAGE.w} height={STAGE.h} safeBottom={650} reserve={compact ? COMPACT_RESERVE : 134}
           reserveTop={compact ? COMPACT_TOPBAR : TOPBAR}
+          fill={compact ? PHONE_FILL : undefined}
           zoom={{ focus: '[data-spot]', playing: game.phase === 'spinning', betting: game.phase === 'betting' }}
         >
           <div className="bj-camera" style={{ perspective: CAMERA.perspective }}>

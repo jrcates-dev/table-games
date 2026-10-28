@@ -2,7 +2,7 @@ import { Drawer } from '../components/Drawer'
 import { IconBook, IconSettings, IconStats } from '../components/icons'
 import { Stage } from '../components/Stage'
 import { TopBar, TopBarButton } from '../components/TopBar'
-import { COMPACT_RESERVE, useCompact } from '../lib/compact'
+import { COMPACT_RESERVE, COMPACT_TOPBAR, useCompact } from '../lib/compact'
 import { money } from '../lib/format'
 import { useSessionNet } from '../lib/session'
 import { usePrefs } from '../prefs/prefsStore'
@@ -29,6 +29,14 @@ import { StatsPanel } from './panels/StatsPanel'
 import { StrategyPanel } from './panels/StrategyPanel'
 import { payoutWords } from './rulesText'
 import { BlackjackTable, DiscardRack, Shoe } from './Table'
+
+/**
+ * Sideways on a phone, the part of the table that has to be seen: from the
+ * dealer's cards down to the betting circle, from the discard rack to the
+ * shoe. The table is drawn as large as that allows (see Stage's `fill`), the
+ * dealer's tray and the top of the shoe going under the top bar.
+ */
+const PHONE_FILL = { left: 318, top: 240, right: 1315, bottom: 772 }
 
 /**
  * The blackjack table.
@@ -103,7 +111,14 @@ export default function BlackjackView() {
 
       <div className="bj__stage">
         {/* The betting circle and its chips must always clear the dock. */}
-        <Stage width={STAGE.w} height={STAGE.h} safeBottom={772} reserve={compact ? COMPACT_RESERVE : 134}>
+        <Stage
+          width={STAGE.w}
+          height={STAGE.h}
+          safeBottom={772}
+          reserve={compact ? COMPACT_RESERVE : 134}
+          reserveTop={compact ? COMPACT_TOPBAR : 0}
+          fill={compact ? PHONE_FILL : undefined}
+        >
           <div className="bj-camera" style={{ perspective: CAMERA.perspective }}>
             <div
               className="bj-plane"

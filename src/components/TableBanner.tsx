@@ -45,18 +45,35 @@ export function TableBanner({ headline }: { headline: Headline | null }) {
           <motion.div
             key={shown.key}
             className={`banner banner--${shown.tone}`}
-            initial={{ opacity: 0, scale: 0.7, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 1.06, y: -8 }}
+            initial={{ opacity: 0, transform: 'translateY(10px) scale(0.7)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
+            exit={{ opacity: 0, transform: 'translateY(-8px) scale(1.06)' }}
             transition={{ type: 'spring', stiffness: 360, damping: 22 }}
           >
             <span className="banner__rule" />
-            <span className="banner__title">{shown.title}</span>
-            {shown.sub && <span className="banner__sub num">{shown.sub}</span>}
+            <BannerLine className="banner__title" text={shown.title} gold={shown.tone === 'gold'} />
+            {shown.sub && <BannerLine className="banner__sub num" text={shown.sub} gold={shown.tone === 'gold'} />}
             <span className="banner__rule" />
           </motion.div>
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+/**
+ * One line of a headline. A gold line is foil with a light running across it:
+ * a bright copy of the words in a window that slides over them (the same
+ * compositor-only glint as the lobby sign; see .banner__glint).
+ */
+export function BannerLine({ className, text, gold }: { className: string; text: string; gold: boolean }) {
+  if (!gold) return <span className={className}>{text}</span>
+  return (
+    <span className={`${className} banner__foil`}>
+      <span className="banner__foil-text">{text}</span>
+      <span className="banner__glint" aria-hidden="true">
+        <span>{text}</span>
+      </span>
+    </span>
   )
 }

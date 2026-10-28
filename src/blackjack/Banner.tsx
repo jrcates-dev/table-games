@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { burstAt } from '../components/celebrate'
+import { BannerLine } from '../components/TableBanner'
 import { evaluate } from '../engine/hand'
 import { signedMoney } from '../lib/format'
 import { isBigWin, useGameStore } from '../store/gameStore'
@@ -64,14 +65,14 @@ export function ResultBanner() {
           <motion.div
             key={headline.title}
             className={`banner banner--${headline.tone}`}
-            initial={{ opacity: 0, scale: 0.7, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 1.06, y: -8 }}
+            initial={{ opacity: 0, transform: 'translateY(10px) scale(0.7)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
+            exit={{ opacity: 0, transform: 'translateY(-8px) scale(1.06)' }}
             transition={{ type: 'spring', stiffness: 360, damping: 22 }}
           >
             <span className="banner__rule" />
-            <span className="banner__title">{headline.title}</span>
-            {headline.sub && <span className="banner__sub num">{headline.sub}</span>}
+            <BannerLine className="banner__title" text={headline.title} gold={headline.tone === 'gold'} />
+            {headline.sub && <BannerLine className="banner__sub num" text={headline.sub} gold={headline.tone === 'gold'} />}
             <span className="banner__rule" />
           </motion.div>
         )}

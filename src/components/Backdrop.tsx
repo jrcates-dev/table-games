@@ -55,6 +55,11 @@ function toppers(...cabinets: number[]): string {
  *
  * Everything is static apart from a few lights, and none of it is blurred or
  * blended while it moves, so the room costs next to nothing once painted.
+ *
+ * Sideways on a phone there is no space to spare for a room. Sitting down
+ * there, felt comes up over it from edge to edge of the screen instead, and
+ * the table is drawn on it without its walnut and leather, so the game is
+ * all there is to see.
  */
 export const Backdrop = memo(function Backdrop({ variant = 'table' }: { variant?: 'table' | 'lobby' }) {
   const tex = roomTextures()
@@ -85,6 +90,7 @@ export const Backdrop = memo(function Backdrop({ variant = 'table' }: { variant?
       </div>
       <div className="room__pool" />
       <div className="room__vignette" />
+      <div className="room__felt" />
     </div>
   )
 })

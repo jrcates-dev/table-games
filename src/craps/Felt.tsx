@@ -1,6 +1,8 @@
 import { memo, useMemo, type ReactNode } from 'react'
 import { ChipTube } from '../components/ChipTube'
 import { denomination } from '../components/chips'
+import { Soft } from '../components/Soft'
+import { useEffectsLevel } from '../lib/effects'
 import { noiseDataUrl } from '../lib/noise'
 import {
   BOX_NUMBERS,
@@ -359,6 +361,9 @@ const TRAY_FILL = [0.7, 0.85, 1, 0.9, 1, 1, 0.9, 1, 1, 0.95, 0.85, 1, 0.92, 1, 0
 
 export const CrapsFelt = memo(function CrapsFelt() {
   const noise = useMemo(() => noiseDataUrl(), [])
+  // Lighter effects lay the felt's grain and light on unblended, and leave the
+  // grain off the dark wood and leather, where blended it barely shows (see Soft).
+  const light = useEffectsLevel() === 'reduced'
   const outer = rectPath(0, 0, PLANE.w, PLANE.h, OUTER_R)
   const railInner = rectPath(RAIL, RAIL, PLANE.w - RAIL, PLANE.h - RAIL, OUTER_R - RAIL)
   const felt = rectPath(FELT.x0, FELT.y0, FELT.x1, FELT.y1, FELT.r)
@@ -406,36 +411,49 @@ export const CrapsFelt = memo(function CrapsFelt() {
         </filter>
       </defs>
 
-      {/* The table's shadow on the floor, then the tub itself. */}
-      <rect x="40" y="120" width={PLANE.w - 80} height={PLANE.h - 40} rx={OUTER_R} fill="#000" opacity="0.75" filter="url(#cr-shadow)" />
-      {/* The padded leather rail: dark, rounding up to a soft highlight along its crown. */}
-      <path d={outer} fill="#0d090a" />
-      <path d={rectPath(24, 24, PLANE.w - 24, PLANE.h - 24, OUTER_R - 24)} fill="none" stroke="#33272a" strokeWidth="30" filter="url(#cr-rail-blur)" />
-      <path d={rectPath(27, 27, PLANE.w - 27, PLANE.h - 27, OUTER_R - 27)} fill="none" stroke="#715c60" strokeWidth="7" opacity="0.55" filter="url(#cr-rail-blur)" />
-      <path d={outer} fill="url(#cr-noise)" opacity="0.25" style={{ mixBlendMode: 'overlay' }} />
-      <path d={outer} fill="url(#cr-rail-sheen)" />
-      <path d={rectPath(10, 10, PLANE.w - 10, PLANE.h - 10, OUTER_R - 10)} fill="none" stroke="#b58e5e" strokeOpacity="0.35" strokeWidth="1.3" strokeDasharray="7 5" />
-      <path d={railInner} fill="#0a0709" />
+      {/* The table itself, which a phone leaves out (see the blackjack table).
+          The bank goes with it: set into the far rail, it would sit under the
+          top bar there. */}
+      <g className="table-body">
+        {/* The table's shadow on the floor, then the tub itself. */}
+        <Soft blur={34} filter="url(#cr-shadow)">
+          <rect x="40" y="120" width={PLANE.w - 80} height={PLANE.h - 40} rx={OUTER_R} fill="#000" opacity="0.75" />
+        </Soft>
+        {/* The padded leather rail: dark, rounding up to a soft highlight along its crown. */}
+        <path d={outer} fill="#0d090a" />
+        <Soft blur={5} filter="url(#cr-rail-blur)">
+          <path d={rectPath(24, 24, PLANE.w - 24, PLANE.h - 24, OUTER_R - 24)} fill="none" stroke="#33272a" strokeWidth="30" />
+        </Soft>
+        <Soft blur={5} filter="url(#cr-rail-blur)">
+          <path d={rectPath(27, 27, PLANE.w - 27, PLANE.h - 27, OUTER_R - 27)} fill="none" stroke="#715c60" strokeWidth="7" opacity="0.55" />
+        </Soft>
+        {!light && <path d={outer} fill="url(#cr-noise)" opacity="0.25" style={{ mixBlendMode: 'overlay' }} />}
+        <path d={outer} fill="url(#cr-rail-sheen)" />
+        <path d={rectPath(10, 10, PLANE.w - 10, PLANE.h - 10, OUTER_R - 10)} fill="none" stroke="#b58e5e" strokeOpacity="0.35" strokeWidth="1.3" strokeDasharray="7 5" />
+        <path d={railInner} fill="#0a0709" />
 
-      {/* The dealers' bank, set into the far rail. */}
-      <g>
-        <rect x="690" y="14" width="620" height="44" rx="8" fill="#0d0c11" stroke="url(#gold-foil)" strokeWidth="1.4" />
-        {TRAY_VALUES.map((value, i) => (
-          <ChipTube key={i} x={700 + i * 37.5} y={19} w={32} len={34} denom={denomination(value)} fill={TRAY_FILL[i]} seed={i + 3} />
-        ))}
-      </g>
+        {/* The dealers' bank, set into the far rail. */}
+        <g>
+          <rect x="690" y="14" width="620" height="44" rx="8" fill="#0d0c11" stroke="url(#gold-foil)" strokeWidth="1.4" />
+          {TRAY_VALUES.map((value, i) => (
+            <ChipTube key={i} x={700 + i * 37.5} y={19} w={32} len={34} denom={denomination(value)} fill={TRAY_FILL[i]} seed={i + 3} />
+          ))}
+        </g>
 
-      {/* Pyramid rubber, then the felt inside it. */}
-      <path d={railInner} fill="url(#cr-pyramids)" />
-      <path d={railInner} fill="none" stroke="url(#gold-foil)" strokeWidth="2.4" />
-      <path d={felt} fill="url(#cr-felt-g)" />
-      <g clipPath="url(#cr-felt-clip)">
-        <rect width={PLANE.w} height={PLANE.h} fill="url(#cr-noise)" opacity="0.15" style={{ mixBlendMode: 'overlay' }} />
-        <ellipse cx="520" cy="460" rx="620" ry="420" fill="url(#cr-spot)" style={{ mixBlendMode: 'screen' }} />
-        <ellipse cx="1150" cy="420" rx="520" ry="380" fill="url(#cr-spot)" style={{ mixBlendMode: 'screen' }} opacity="0.8" />
-        <path d={felt} fill="none" stroke="#000" strokeOpacity="0.6" strokeWidth="60" filter="url(#cr-soft)" />
+        {/* Pyramid rubber, then the felt inside it. */}
+        <path d={railInner} fill="url(#cr-pyramids)" />
+        <path d={railInner} fill="none" stroke="url(#gold-foil)" strokeWidth="2.4" />
+        <path d={felt} fill="url(#cr-felt-g)" />
+        <g clipPath="url(#cr-felt-clip)">
+          <rect width={PLANE.w} height={PLANE.h} fill="url(#cr-noise)" opacity="0.15" style={light ? undefined : { mixBlendMode: 'overlay' }} />
+          <ellipse cx="520" cy="460" rx="620" ry="420" fill="url(#cr-spot)" style={light ? undefined : { mixBlendMode: 'screen' }} />
+          <ellipse cx="1150" cy="420" rx="520" ry="380" fill="url(#cr-spot)" style={light ? undefined : { mixBlendMode: 'screen' }} opacity="0.8" />
+          <Soft blur={18} filter="url(#cr-soft)">
+            <path d={felt} fill="none" stroke="#000" strokeOpacity="0.6" strokeWidth="60" />
+          </Soft>
+        </g>
+        <path d={felt} fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2" />
       </g>
-      <path d={felt} fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2" />
 
       {/* Printing */}
       <EndLayout mirrored={false} />

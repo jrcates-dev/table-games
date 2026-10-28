@@ -28,13 +28,22 @@ interface StageProps {
    */
   safeBottom?: number
   reserve?: number
+  /**
+   * Where room is short (a phone held sideways), the part of the composition
+   * that has to be seen, in logical pixels. The picture is then scaled until
+   * that part fills the room between the top bar and the dock, and the rest
+   * (the dealer's tray, the top of the shoe, the far end of the craps layout)
+   * may run off the edges or under the bars. There the table has no walnut
+   * or leather to be cut off: the felt runs to every edge (see Backdrop).
+   */
+  fill?: { left: number; top: number; right: number; bottom: number }
   /** Screen pixels the top bar covers, kept clear when the picture is zoomed. */
   reserveTop?: number
   /** Let a finger look closer: pinch, drag, and a button. See stageZoom. */
   zoom?: StageZoom
 }
 
-export function Stage({ width, height, children, className, maxScale = 1.6, safeBottom, reserve = 0, reserveTop = 0, zoom }: StageProps) {
+export function Stage({ width, height, children, className, maxScale = 1.6, safeBottom, reserve = 0, reserveTop = 0, fill, zoom }: StageProps) {
   const ref = useRef<HTMLDivElement>(null)
   const layer = useRef<HTMLDivElement>(null)
   const [box, setBox] = useState({ w: width, h: height })
@@ -49,17 +58,26 @@ export function Stage({ width, height, children, className, maxScale = 1.6, safe
     return () => observer.disconnect()
   }, [])
 
-  let scale = Math.min(box.w / width, box.h / height)
-  if (safeBottom) scale = Math.min(scale, (box.h - reserve) / safeBottom)
-  scale = Math.min(maxScale, Math.max(0.2, scale))
+  let scale: number, top: number, left: number
+  if (fill) {
+    // The part that matters, as large as the room between the bars allows and centred in it.
+    const room = box.h - reserveTop - reserve
+    scale = Math.min(maxScale, room / (fill.bottom - fill.top), box.w / (fill.right - fill.left))
+    scale = Math.max(0.2, scale)
+    top = reserveTop + (room - (fill.bottom - fill.top) * scale) / 2 - fill.top * scale
+    left = box.w / 2 - ((fill.left + fill.right) / 2) * scale
+  } else {
+    scale = Math.min(box.w / width, box.h / height)
+    if (safeBottom) scale = Math.min(scale, (box.h - reserve) / safeBottom)
+    scale = Math.min(maxScale, Math.max(0.2, scale))
+    // Centred, unless centring would push the playable area under the dock —
+    // in which case the picture rises just far enough to clear it.
+    top = (box.h - height * scale) / 2
+    if (safeBottom && top + safeBottom * scale > box.h - reserve) top = box.h - reserve - safeBottom * scale
+    left = (box.w - width * scale) / 2
+  }
 
-  // Centred, unless centring would push the playable area under the dock — in
-  // which case the picture rises just far enough to clear it.
-  let top = (box.h - height * scale) / 2
-  if (safeBottom && top + safeBottom * scale > box.h - reserve) top = box.h - reserve - safeBottom * scale
-  const left = (box.w - width * scale) / 2
-
-  const floor = safeBottom ?? height
+  const floor = fill?.bottom ?? safeBottom ?? height
   const frame = useMemo(
     () => ({ scale, left, top, w: box.w, h: box.h, width, floor, reserveTop, reserve }),
     [scale, left, top, box.w, box.h, width, floor, reserveTop, reserve],

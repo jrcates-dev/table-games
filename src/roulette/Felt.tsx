@@ -1,7 +1,9 @@
 import { memo, useMemo } from 'react'
 import { ChipTray } from '../components/DTable'
+import { Soft } from '../components/Soft'
 import { Monogram } from '../components/TopBar'
 import { DOUBLE_ZERO, pocketColor, pocketLabel, pockets, type WheelType } from '../engine/roulette/wheel'
+import { useEffectsLevel } from '../lib/effects'
 import { noiseDataUrl } from '../lib/noise'
 import {
   BANK,
@@ -34,6 +36,9 @@ const GREEN = '#0f7a44'
 
 export const RouletteFelt = memo(function RouletteFelt({ wheel }: { wheel: WheelType }) {
   const noise = useMemo(() => noiseDataUrl(), [])
+  // Lighter effects lay the felt's grain and light on unblended, and leave the
+  // grain off the dark wood and leather, where blended it barely shows (see Soft).
+  const light = useEffectsLevel() === 'reduced'
   const inset = 12
   const felt = inset + TABLE.rail
   return (
@@ -73,32 +78,40 @@ export const RouletteFelt = memo(function RouletteFelt({ wheel }: { wheel: Wheel
         </filter>
       </defs>
 
-      <rect x="0" y="0" width={PLANE.w} height={PLANE.h} rx={TABLE.r} fill="url(#ro-wood)" />
-      <rect x="0" y="0" width={PLANE.w} height={PLANE.h} rx={TABLE.r} fill="url(#ro-noise)" opacity="0.18" style={{ mixBlendMode: 'overlay' }} />
-      <rect x={inset} y={inset} width={PLANE.w - 2 * inset} height={PLANE.h - 2 * inset} rx={TABLE.r - inset} fill="url(#ro-rail)" />
-      <rect
-        x={inset + TABLE.rail / 2}
-        y={inset + TABLE.rail / 2}
-        width={PLANE.w - 2 * inset - TABLE.rail}
-        height={PLANE.h - 2 * inset - TABLE.rail}
-        rx={TABLE.r - inset - TABLE.rail / 2}
-        fill="none"
-        stroke="#5f4b4f"
-        strokeOpacity="0.55"
-        strokeWidth="10"
-        filter="url(#ro-soft)"
-      />
-      <rect x={inset + 8} y={inset + 8} width={PLANE.w - 2 * inset - 16} height={PLANE.h - 2 * inset - 16} rx={TABLE.r - inset - 8} fill="none" stroke="#b58e5e" strokeOpacity="0.35" strokeWidth="1.2" strokeDasharray="6 5" />
+      {/* The table itself, which a phone leaves out (see the blackjack table). */}
+      <g className="table-body">
+        <rect x="0" y="0" width={PLANE.w} height={PLANE.h} rx={TABLE.r} fill="url(#ro-wood)" />
+        {!light && <rect x="0" y="0" width={PLANE.w} height={PLANE.h} rx={TABLE.r} fill="url(#ro-noise)" opacity="0.18" style={{ mixBlendMode: 'overlay' }} />}
+        <rect x={inset} y={inset} width={PLANE.w - 2 * inset} height={PLANE.h - 2 * inset} rx={TABLE.r - inset} fill="url(#ro-rail)" />
+        <Soft blur={14} filter="url(#ro-soft)">
+          <rect
+            x={inset + TABLE.rail / 2}
+            y={inset + TABLE.rail / 2}
+            width={PLANE.w - 2 * inset - TABLE.rail}
+            height={PLANE.h - 2 * inset - TABLE.rail}
+            rx={TABLE.r - inset - TABLE.rail / 2}
+            fill="none"
+            stroke="#5f4b4f"
+            strokeOpacity="0.55"
+            strokeWidth="10"
+          />
+        </Soft>
+        <rect x={inset + 8} y={inset + 8} width={PLANE.w - 2 * inset - 16} height={PLANE.h - 2 * inset - 16} rx={TABLE.r - inset - 8} fill="none" stroke="#b58e5e" strokeOpacity="0.35" strokeWidth="1.2" strokeDasharray="6 5" />
 
-      <rect x={felt} y={felt} width={PLANE.w - 2 * felt} height={PLANE.h - 2 * felt} rx={TABLE.r - felt} fill="url(#ro-felt)" />
-      <g clipPath="url(#ro-felt-clip)">
-        <rect width={PLANE.w} height={PLANE.h} fill="url(#ro-noise)" opacity="0.16" style={{ mixBlendMode: 'overlay' }} />
-        <ellipse cx={900} cy={380} rx={760} ry={420} fill="url(#ro-spot)" style={{ mixBlendMode: 'screen' }} />
-        <rect x={felt} y={felt} width={PLANE.w - 2 * felt} height={PLANE.h - 2 * felt} rx={TABLE.r - felt} fill="none" stroke="#000" strokeOpacity="0.5" strokeWidth="40" filter="url(#ro-soft)" />
-        {/* The bowl's shadow on the felt. */}
-        <circle cx={WHEEL.cx} cy={WHEEL.cy + 10} r={WHEEL.bowl + 40} fill="#000" opacity="0.35" filter="url(#ro-soft)" />
+        <rect x={felt} y={felt} width={PLANE.w - 2 * felt} height={PLANE.h - 2 * felt} rx={TABLE.r - felt} fill="url(#ro-felt)" />
+        <g clipPath="url(#ro-felt-clip)">
+          <rect width={PLANE.w} height={PLANE.h} fill="url(#ro-noise)" opacity="0.16" style={light ? undefined : { mixBlendMode: 'overlay' }} />
+          <ellipse cx={900} cy={380} rx={760} ry={420} fill="url(#ro-spot)" style={light ? undefined : { mixBlendMode: 'screen' }} />
+          <Soft blur={14} filter="url(#ro-soft)">
+            <rect x={felt} y={felt} width={PLANE.w - 2 * felt} height={PLANE.h - 2 * felt} rx={TABLE.r - felt} fill="none" stroke="#000" strokeOpacity="0.5" strokeWidth="40" />
+          </Soft>
+          {/* The bowl's shadow on the felt. */}
+          <Soft blur={14} filter="url(#ro-soft)">
+            <circle cx={WHEEL.cx} cy={WHEEL.cy + 10} r={WHEEL.bowl + 40} fill="#000" opacity="0.35" />
+          </Soft>
+        </g>
+        <rect x={felt + 1} y={felt + 1} width={PLANE.w - 2 * felt - 2} height={PLANE.h - 2 * felt - 2} rx={TABLE.r - felt - 1} fill="none" stroke="url(#gold-foil)" strokeWidth="3" />
       </g>
-      <rect x={felt + 1} y={felt + 1} width={PLANE.w - 2 * felt - 2} height={PLANE.h - 2 * felt - 2} rx={TABLE.r - felt - 1} fill="none" stroke="url(#gold-foil)" strokeWidth="3" />
 
       <ChipTray x={BANK[0]} y={BANK[1] + 52} w={420} h={62} />
       <Layout wheel={wheel} />

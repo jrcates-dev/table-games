@@ -3,6 +3,7 @@ import { memo, useEffect, useRef } from 'react'
 import { play } from '../audio'
 import { Billboard } from '../components/Billboard'
 import { ChipStack } from '../components/ChipStack'
+import { stackAt, stackMove } from '../components/feltMotion'
 import { fromTip, pickOrPlace, type Describe } from '../components/pick'
 import { tipHandlers, useTip } from '../components/tip'
 import { betById } from '../engine/roulette/bets'
@@ -115,7 +116,6 @@ interface StackItem {
 }
 
 const SIZE = 40
-const EASE: [number, number, number, number] = [0.25, 0.7, 0.3, 1]
 
 function seedOf(id: string): number {
   let h = 7
@@ -167,20 +167,12 @@ export const BetLayer = memo(function BetLayer() {
 function Stack({ item }: { item: StackItem }) {
   const start = item.from ?? item.at
   const delay = item.from || item.swept ? (item.delay ?? 0) : 0
-  const target = item.swept
-    ? { x: BANK[0] + ((item.seed * 37) % 300) - 150, y: BANK[1] + 52, scale: 0.01 }
-    : { x: item.at[0], y: item.at[1], scale: 1 }
+  const end = item.swept ? ([BANK[0] + ((item.seed * 37) % 300) - 150, BANK[1] + 52] as const) : item.at
   return (
     <motion.div
       className="bj-stack"
-      initial={{ x: start[0], y: start[1], scale: item.from ? 0.45 : 1 }}
-      animate={target}
-      exit={item.swept ? { opacity: 0, transition: { duration: 0 } } : { x: RACK[0], y: RACK[1], transition: { duration: 0.6, ease: [0.5, 0, 0.3, 1] } }}
-      transition={{
-        x: { duration: item.swept ? 0.6 : 0.55, delay, ease: EASE },
-        y: { duration: item.swept ? 0.6 : 0.55, delay, ease: EASE },
-        scale: item.swept ? { duration: 0.22, delay: delay + 0.5 } : { duration: 0.45, delay, ease: EASE },
-      }}
+      {...stackMove(start, end, { grow: !!item.from, swept: !!item.swept, delay, sinkAt: 0.5 })}
+      exit={item.swept ? { opacity: 0, transition: { duration: 0 } } : { transform: stackAt(RACK), transition: { duration: 0.6, ease: [0.5, 0, 0.3, 1] } }}
     >
       <div className="bj-stack__shadow" style={{ width: SIZE * 1.1, height: SIZE * 0.9 }} />
       <ChipStack amount={item.amount} size={SIZE} tilt={CAMERA.tilt} seed={item.seed} dropIn={!item.from} />

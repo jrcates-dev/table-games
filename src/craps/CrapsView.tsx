@@ -28,6 +28,14 @@ import { SpotTooltip } from './Tooltip'
 const DiceOverlay = lazy(() => import('./dice/DiceOverlay').then((m) => ({ default: m.DiceOverlay })))
 
 /**
+ * Sideways on a phone: your end of the table and the middle, from the line
+ * bets up to where the dice come to rest off the far wall, and as far toward
+ * the other end as they land (see Stage's `fill`). The mirrored end runs off
+ * the edge.
+ */
+const PHONE_FILL = { left: 59, top: 200, right: 1400, bottom: 776 }
+
+/**
  * True once the table has finished rising into view. The dice bring three.js,
  * a WebGL context and their shaders, a second or more of work on an older
  * phone; started after the entrance, none of it stutters the move.
@@ -74,6 +82,7 @@ export default function CrapsView() {
         {/* The pass line is the one bet every player makes; it must never sit under the dock. */}
         <Stage width={STAGE.w} height={STAGE.h} safeBottom={776} reserve={compact ? COMPACT_RESERVE : 150}
           reserveTop={compact ? COMPACT_TOPBAR : TOPBAR}
+          fill={compact ? PHONE_FILL : undefined}
           zoom={{ focus: '[data-spot]', playing: game.phase === 'rolling', betting: game.phase === 'betting' }}
         >
           <div className="cr-camera" style={{ perspective: CAMERA.perspective }}>

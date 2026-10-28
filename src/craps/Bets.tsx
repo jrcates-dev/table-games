@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { memo, useEffect, useRef, useState } from 'react'
 import { play } from '../audio'
 import { ChipStack } from '../components/ChipStack'
+import { stackAt } from '../components/feltMotion'
 import * as craps from '../engine/craps/craps'
 import type { Bet, CrapsState, PointNumber, Resolution } from '../engine/craps/types'
 import { useCrapsStore } from '../store/crapsStore'
@@ -76,9 +77,9 @@ export const BetLayer = memo(function BetLayer() {
             <motion.div
               key={bet.id}
               className="cr-stack"
-              initial={from ? { x: from[0], y: from[1] } : { x, y, scale: 1 }}
-              animate={{ x, y, scale: 1 }}
-              exit={{ scale: 0.01, transition: { duration: 0.18 } }}
+              initial={{ transform: stackAt(from ?? [x, y]) }}
+              animate={{ transform: stackAt([x, y]) }}
+              exit={{ transform: stackAt([x, y], 0.01), transition: { duration: 0.18 } }}
               transition={{ duration: from ? 0.6 : 0.3, delay: from ? 0.35 : 0, ease: [0.3, 0.7, 0.3, 1] }}
             >
               <Stack amount={bet.amount} seed={seedOf(bet.id)} dropIn={!from} />
@@ -104,11 +105,11 @@ export const BetLayer = memo(function BetLayer() {
         <motion.div
           key={g.key}
           className="cr-stack"
-          initial={{ x: g.from[0], y: g.from[1], scale: g.from === BANK ? 0.4 : 1 }}
+          initial={{ transform: stackAt(g.from, g.from === BANK ? 0.4 : 1) }}
           animate={{
-            x: g.via ? [g.from[0], g.via[0], g.via[0], g.to[0]] : [g.from[0], g.to[0]],
-            y: g.via ? [g.from[1], g.via[1], g.via[1], g.to[1]] : [g.from[1], g.to[1]],
-            scale: g.via ? [0.4, 1, 1, 0.3] : [1, 0.01],
+            transform: g.via
+              ? [stackAt(g.from, 0.4), stackAt(g.via), stackAt(g.via), stackAt(g.to, 0.3)]
+              : [stackAt(g.from), stackAt(g.to, 0.01)],
           }}
           transition={{ duration: g.via ? 1.7 : 0.55, delay: g.delay, ease: 'easeInOut', times: g.via ? [0, 0.32, 0.72, 1] : undefined }}
         >

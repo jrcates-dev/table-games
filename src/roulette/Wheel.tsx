@@ -1,4 +1,5 @@
 import { memo, useEffect, useLayoutEffect, useRef } from 'react'
+import { Soft } from '../components/Soft'
 import { pocketColor, pocketLabel, wheelOrder, type Pocket, type WheelType } from '../engine/roulette/wheel'
 import { DROP_AT, useRouletteStore } from '../store/rouletteStore'
 import { onWheel, PLANE, WHEEL } from './geometry'
@@ -121,7 +122,9 @@ export const Wheel = memo(function Wheel() {
         </defs>
 
         {/* The cabinet and bowl. */}
-        <circle cx={WHEEL.cx + 6} cy={WHEEL.cy + 16} r={WHEEL.bowl + 24} fill="#000" opacity="0.6" filter="url(#ro-wheel-shadow)" />
+        <Soft blur={14} filter="url(#ro-wheel-shadow)">
+          <circle cx={WHEEL.cx + 6} cy={WHEEL.cy + 16} r={WHEEL.bowl + 24} fill="#000" opacity="0.6" />
+        </Soft>
         <circle cx={WHEEL.cx} cy={WHEEL.cy} r={WHEEL.bowl + 16} fill="#1a0c05" />
         <circle cx={WHEEL.cx} cy={WHEEL.cy} r={WHEEL.bowl + 15} fill="none" stroke="url(#gold-foil)" strokeWidth="2.4" />
         <circle cx={WHEEL.cx} cy={WHEEL.cy} r={WHEEL.bowl} fill="url(#ro-bowl)" />

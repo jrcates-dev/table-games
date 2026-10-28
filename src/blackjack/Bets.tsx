@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { memo, useEffect, useRef } from 'react'
 import { play } from '../audio'
 import { ChipStack } from '../components/ChipStack'
+import { stackAt, stackMove } from '../components/feltMotion'
 import type { GameState } from '../engine/types'
 import { BET_Y, CAMERA, CIRCLE, handCenters, INSURANCE_SPOT, TRAY } from './geometry'
 
@@ -129,33 +130,23 @@ export const BetLayer = memo(function BetLayer({ game }: { game: GameState }) {
   )
 })
 
-const EASE: [number, number, number, number] = [0.25, 0.7, 0.3, 1]
-
 function Stack({ item }: { item: StackItem }) {
   const start = item.from ?? { x: item.x, y: item.y }
   const fromTray = item.from !== undefined && item.from.y < BET_Y
   const delay = item.from || item.swept ? item.delay ?? 0 : 0
   // Raked stacks shrink away into the tray rather than fading: fading a
   // stood-up stack would flatten it onto the felt for the length of the fade.
-  const target = item.swept
-    ? { x: TRAY.x + ((item.seed * 37) % 160) - 80, y: TRAY.y + 8, scale: 0.01 }
-    : { x: item.x, y: item.y, scale: 1 }
+  const end = item.swept ? ([TRAY.x + ((item.seed * 37) % 160) - 80, TRAY.y + 8] as const) : ([item.x, item.y] as const)
 
   return (
     <motion.div
       className="bj-stack"
-      initial={{ x: start.x, y: start.y, scale: fromTray ? 0.45 : 1 }}
-      animate={target}
+      {...stackMove([start.x, start.y], end, { grow: fromTray, swept: !!item.swept, delay, sinkAt: 0.42 })}
       exit={
         item.handOff || item.swept
           ? { opacity: 0, transition: { duration: 0 } }
-          : { y: PLAYER_SIDE.y + 40, transition: { duration: 0.6, ease: [0.5, 0, 0.3, 1] } }
+          : { transform: stackAt([item.x, PLAYER_SIDE.y + 40]), transition: { duration: 0.6, ease: [0.5, 0, 0.3, 1] } }
       }
-      transition={{
-        x: { duration: item.swept ? 0.5 : 0.55, delay, ease: EASE },
-        y: { duration: item.swept ? 0.5 : 0.55, delay, ease: EASE },
-        scale: item.swept ? { duration: 0.22, delay: delay + 0.42 } : { duration: 0.45, delay, ease: EASE },
-      }}
     >
       <div className="bj-stack__shadow" style={{ width: SIZE * 1.1, height: SIZE * 0.9 }} />
       <ChipStack amount={item.amount} size={SIZE} tilt={CAMERA.tilt} seed={item.seed} dropIn={item.dropIn} />

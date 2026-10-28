@@ -6,7 +6,7 @@
   position: absolute;
   z-index: 20;
   left: 50%;
-  bottom: max(var(--dock-bottom), var(--safe-b));
+  bottom: var(--dock-floor);
   translate: -50% 0;
   display: flex;
   justify-content: center;

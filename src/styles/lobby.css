@@ -186,7 +186,8 @@
 
 /* The window crosses from just off the first letter to just past the last
    (100% of the word is 100 / 36 of the window), then rests out of sight. The
-   copy moves back by exactly as much, as a share of its own width. */
+   copy moves back by exactly as much, as a share of its own width. The gold
+   result banner's lines glint the same way. */
 @keyframes glint-window {
   0% {
     transform: translateX(-100%);
@@ -210,17 +211,6 @@
 /* Lighter effects: the foil sits still. */
 [data-effects='reduced'] .lobby__glint {
   display: none;
-}
-
-/* The gold win banner's foil still slides its gradient: it is up for a moment, not for as long as the lobby is open. */
-@keyframes foil {
-  0%,
-  100% {
-    background-position: 100% 0;
-  }
-  50% {
-    background-position: 0% 0;
-  }
 }
 
 .lobby__subtitle {

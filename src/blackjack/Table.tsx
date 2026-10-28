@@ -2,9 +2,11 @@ import { memo, useMemo } from 'react'
 import { Box3D } from '../components/Box3D'
 import { ChipTube } from '../components/ChipTube'
 import { denomination } from '../components/chips'
+import { Soft } from '../components/Soft'
 import { CardBackFace } from '../components/PlayingCard'
 import { Monogram } from '../components/TopBar'
 import type { RuleSet } from '../engine/types'
+import { useEffectsLevel } from '../lib/effects'
 import { noiseDataUrl } from '../lib/noise'
 import type { CardBack } from '../prefs/prefsStore'
 import { CARD, CIRCLE, DISCARD, FELT, PLANE, SHOE, TABLE, TRAY } from './geometry'
@@ -47,6 +49,9 @@ const TRAY_FILL = [0.7, 0.85, 0.9, 1, 0.95, 1, 1, 0.85, 1, 0.92]
 export const BlackjackTable = memo(function BlackjackTable({ rules }: { rules: RuleSet }) {
   const noise = useMemo(() => noiseDataUrl(), [])
   const railScale = TABLE.rx / TABLE.ry
+  // Lighter effects lay the felt's grain and light on unblended, and leave the
+  // grain off the dark wood and leather, where blended it barely shows (see Soft).
+  const light = useEffectsLevel() === 'reduced'
 
   return (
     <svg className="bj-table" width={PLANE.w} height={PLANE.h} viewBox={`0 0 ${PLANE.w} ${PLANE.h}`} aria-hidden="true">
@@ -105,28 +110,38 @@ export const BlackjackTable = memo(function BlackjackTable({ rules }: { rules: R
         <path id="bj-arc-ins" d={arcPath(876, 676, 28)} />
       </defs>
 
-      {/* The table's shadow on the carpet. */}
-      <ellipse cx={cx} cy={edgeY + 360} rx={WOOD.rx + 30} ry={WOOD.ry * 0.62} fill="#000" opacity="0.7" filter="url(#bj-shadow)" />
+      {/* The table itself, which a phone leaves out: there the felt runs to
+          every edge of the screen behind the printing (see .room__felt). */}
+      <g className="table-body">
+        {/* The table's shadow on the carpet. */}
+        <Soft blur={30} filter="url(#bj-shadow)">
+          <ellipse cx={cx} cy={edgeY + 360} rx={WOOD.rx + 30} ry={WOOD.ry * 0.62} fill="#000" opacity="0.7" />
+        </Soft>
 
-      {/* Walnut edge, padded rail, stitching. */}
-      <path d={WOOD_PATH} fill="url(#bj-wood)" />
-      <path d={WOOD_PATH} fill="url(#bj-noise)" opacity="0.18" style={{ mixBlendMode: 'overlay' }} />
-      <path d={RAIL_PATH} fill="url(#bj-rail)" />
-      <path d={RAIL_PATH} fill="url(#bj-noise)" opacity="0.22" style={{ mixBlendMode: 'overlay' }} />
-      <path d={ellipseArc(TABLE.rx - 9, TABLE.ry - 9)} fill="none" stroke="#b58e5e" strokeOpacity="0.4" strokeWidth="1.3" strokeDasharray="6 5" />
-      <path d={ellipseArc(FELT.rx + 9, FELT.ry + 9)} fill="none" stroke="#b58e5e" strokeOpacity="0.3" strokeWidth="1.1" strokeDasharray="6 5" />
+        {/* Walnut edge, padded rail, stitching. */}
+        <path d={WOOD_PATH} fill="url(#bj-wood)" />
+        {!light && <path d={WOOD_PATH} fill="url(#bj-noise)" opacity="0.18" style={{ mixBlendMode: 'overlay' }} />}
+        <path d={RAIL_PATH} fill="url(#bj-rail)" />
+        {!light && <path d={RAIL_PATH} fill="url(#bj-noise)" opacity="0.22" style={{ mixBlendMode: 'overlay' }} />}
+        <path d={ellipseArc(TABLE.rx - 9, TABLE.ry - 9)} fill="none" stroke="#b58e5e" strokeOpacity="0.4" strokeWidth="1.3" strokeDasharray="6 5" />
+        <path d={ellipseArc(FELT.rx + 9, FELT.ry + 9)} fill="none" stroke="#b58e5e" strokeOpacity="0.3" strokeWidth="1.1" strokeDasharray="6 5" />
 
-      {/* Felt, its grain, the light from the pendant, and the dark where the rail overhangs. */}
-      <path d={FELT_PATH} fill="url(#bj-felt)" />
-      <g clipPath="url(#bj-felt-clip)">
-        <rect width={PLANE.w} height={PLANE.h} fill="url(#bj-noise)" opacity="0.16" style={{ mixBlendMode: 'overlay' }} />
-        <ellipse cx={cx} cy={360} rx={700} ry={470} fill="url(#bj-spot)" style={{ mixBlendMode: 'screen' }} />
-        <path d={ellipseArc(FELT.rx, FELT.ry)} fill="none" stroke="#000" strokeOpacity="0.55" strokeWidth="46" filter="url(#bj-soft)" />
-        <rect x={cx - FELT.rx} y={edgeY - 30} width={FELT.rx * 2} height={46} fill="#000" opacity="0.45" filter="url(#bj-soft)" />
+        {/* Felt, its grain, the light from the pendant, and the dark where the rail overhangs. */}
+        <path d={FELT_PATH} fill="url(#bj-felt)" />
+        <g clipPath="url(#bj-felt-clip)">
+          <rect width={PLANE.w} height={PLANE.h} fill="url(#bj-noise)" opacity="0.16" style={light ? undefined : { mixBlendMode: 'overlay' }} />
+          <ellipse cx={cx} cy={360} rx={700} ry={470} fill="url(#bj-spot)" style={light ? undefined : { mixBlendMode: 'screen' }} />
+          <Soft blur={16} filter="url(#bj-soft)">
+            <path d={ellipseArc(FELT.rx, FELT.ry)} fill="none" stroke="#000" strokeOpacity="0.55" strokeWidth="46" />
+          </Soft>
+          <Soft blur={16} filter="url(#bj-soft)">
+            <rect x={cx - FELT.rx} y={edgeY - 30} width={FELT.rx * 2} height={46} fill="#000" opacity="0.45" />
+          </Soft>
+        </g>
+        <path d={ellipseArc(FELT.rx - 1, FELT.ry - 1)} fill="none" stroke="url(#gold-foil)" strokeWidth="3.2" />
+        <path d={ellipseArc(FELT.rx - 10, FELT.ry - 10)} fill="none" stroke="#e3c170" strokeOpacity="0.35" strokeWidth="1" />
+        <line x1={cx - FELT.rx} y1={edgeY + 1} x2={cx + FELT.rx} y2={edgeY + 1} stroke="url(#gold-foil)" strokeWidth="3" />
       </g>
-      <path d={ellipseArc(FELT.rx - 1, FELT.ry - 1)} fill="none" stroke="url(#gold-foil)" strokeWidth="3.2" />
-      <path d={ellipseArc(FELT.rx - 10, FELT.ry - 10)} fill="none" stroke="#e3c170" strokeOpacity="0.35" strokeWidth="1" />
-      <line x1={cx - FELT.rx} y1={edgeY + 1} x2={cx + FELT.rx} y2={edgeY + 1} stroke="url(#gold-foil)" strokeWidth="3" />
 
       {/* Printing */}
       <g className="bj-print">

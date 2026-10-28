@@ -347,6 +347,12 @@
   background: radial-gradient(110% 90% at 50% 52%, transparent 38%, rgba(0, 0, 0, 0.88) 100%);
 }
 
+/* Felt from edge to edge, which takes the room's place at a table on a phone
+   (see the phone section of responsive.css). */
+.room__felt {
+  display: none;
+}
+
 /* ---- Stage ---------------------------------------------------------------- */
 
 .stage {

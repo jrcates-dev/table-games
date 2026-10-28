@@ -1,6 +1,7 @@
 import { motion, useAnimate } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { play } from '../audio'
+import { angleBetween, cardAt, cardLift, cardTurn, shadowAt } from './feltMotion'
 import type { DealtCard } from '../engine/types'
 import type { CardBack } from '../prefs/prefsStore'
 import { CardBackFace, CardFace } from './PlayingCard'
@@ -68,7 +69,11 @@ export function FeltCard({
     shownDown.current = card.faceDown
     play('card', { at: entryDelay })
     if (!card.faceDown) {
-      void animateFlip(flipScope.current, { rotateY: 0 }, { delay: entryDelay + flight * 0.12, duration: flight * 0.78, ease: 'easeInOut' })
+      void animateFlip(
+        flipScope.current,
+        { transform: cardTurn(0) },
+        { delay: entryDelay + flight * 0.12, duration: flight * 0.78, ease: 'easeInOut' },
+      )
     }
     // Mount only — every later change of face is a turn, handled below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,7 +83,12 @@ export function FeltCard({
     if (shownDown.current === card.faceDown) return
     shownDown.current = card.faceDown
     play('cardFlip')
-    void animateFlip(flipScope.current, { rotateY: card.faceDown ? 180 : 0, z: [0, 74, 0] }, { duration: 0.52, ease: [0.45, 0, 0.25, 1] })
+    const [turnFrom, turnTo] = card.faceDown ? [0, 180] : [180, 0]
+    void animateFlip(
+      flipScope.current,
+      { transform: [cardTurn(turnFrom), cardTurn((turnFrom + turnTo) / 2, 74), cardTurn(turnTo)] },
+      { duration: 0.52, ease: [0.45, 0, 0.25, 1] },
+    )
   }, [card.faceDown, animateFlip, flipScope])
 
   const move = landed ? { duration: 0.42, ease: EASE_PITCH } : { duration: flight, delay: entryDelay, ease: EASE_PITCH }
@@ -86,31 +96,36 @@ export function FeltCard({
   return (
     <motion.div
       className="bj-card"
-      initial={{ x: from.x, y: from.y - 20 }}
-      animate={{ x, y }}
-      exit={{ x: away.x, y: away.y, transition: { duration: 0.55, delay: order * 0.03, ease: [0.5, 0, 0.3, 1] } }}
+      initial={{ transform: cardAt(from.x, from.y - 20) }}
+      animate={{ transform: cardAt(x, y) }}
+      exit={{ transform: cardAt(away.x, away.y), transition: { duration: 0.55, delay: order * 0.03, ease: [0.5, 0, 0.3, 1] } }}
       transition={move}
       onAnimationComplete={() => setLanded(true)}
     >
       <motion.div
         className="bj-card__shadow"
-        initial={{ opacity: 0, scale: 1.25 }}
-        animate={{ opacity: 1, scale: 1, rotate: spin }}
+        initial={{ opacity: 0, transform: shadowAt(1.25, 0) }}
+        animate={{ opacity: 1, transform: shadowAt(1, spin) }}
         exit={{ opacity: 0, transition: { duration: 0.4 } }}
         transition={landed ? { duration: 0.4 } : { duration: flight, delay: entryDelay }}
       />
       <motion.div
         className="bj-card__spin"
-        initial={{ rotateZ: from.angle, z: 60 }}
-        animate={{ rotateZ: spin, z: [null, 118, rest] }}
-        exit={{ rotateZ: away.angle, z: [null, 26, 4], scale: 0.86, transition: { duration: 0.55, delay: order * 0.03 } }}
+        initial={{ transform: cardLift(60, from.angle) }}
+        animate={{
+          transform: landed
+            ? cardLift(rest, spin)
+            : [cardLift(60, from.angle), cardLift(118, angleBetween(from.angle, spin)), cardLift(rest, spin)],
+        }}
+        exit={{
+          transform: [cardLift(rest, spin), cardLift(26, angleBetween(spin, away.angle), 0.93), cardLift(4, away.angle, 0.86)],
+          transition: { duration: 0.55, delay: order * 0.03 },
+        }}
         transition={
-          landed
-            ? { duration: 0.42 }
-            : { duration: flight, delay: entryDelay, ease: EASE_PITCH, z: { duration: flight, delay: entryDelay, times: [0, 0.42, 1] } }
+          landed ? { duration: 0.42 } : { duration: flight, delay: entryDelay, times: [0, 0.42, 1], ease: ['easeOut', EASE_PITCH] }
         }
       >
-        <motion.div ref={flipScope} className="bj-card__flip" initial={{ rotateY: 180 }}>
+        <motion.div ref={flipScope} className="bj-card__flip" initial={{ transform: cardTurn(180) }}>
           <div className={`bj-card__face bj-card__face--front${dim ? ' is-dim' : ''}${lit ? ' is-lit' : ''}`}>
             <CardFace rank={card.rank} suit={card.suit} />
           </div>

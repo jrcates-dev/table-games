@@ -86,7 +86,8 @@
      that is higher; whatever the home bar adds lifts the stage and the panels
      that stop above the dock by the same amount. */
   --dock-bottom: 16px;
-  --dock-lift: calc(max(var(--dock-bottom), var(--safe-b)) - var(--dock-bottom));
+  --dock-floor: max(var(--dock-bottom), var(--safe-b));
+  --dock-lift: calc(var(--dock-floor) - var(--dock-bottom));
 
   /* Felt — overridden per theme below */
   --felt-hi: #1f8a5e;

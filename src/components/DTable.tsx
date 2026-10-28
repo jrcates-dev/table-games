@@ -1,8 +1,10 @@
 import { memo, useMemo, type ReactNode } from 'react'
 import { FELT, PLANE, TABLE, TRAY } from '../blackjack/geometry'
+import { useEffectsLevel } from '../lib/effects'
 import { noiseDataUrl } from '../lib/noise'
 import { ChipTube } from './ChipTube'
 import { denomination } from './chips'
+import { Soft } from './Soft'
 
 /**
  * The D-shaped card table every carnival game in the pit is dealt on — the
@@ -52,6 +54,9 @@ export const DTable = memo(function DTable({
   children?: ReactNode
 }) {
   const noise = useMemo(() => noiseDataUrl(), [])
+  // Lighter effects lay the felt's grain and light on unblended, and leave the
+  // grain off the dark wood and leather, where blended it barely shows (see Soft).
+  const light = useEffectsLevel() === 'reduced'
   const railScale = TABLE.rx / TABLE.ry
   const ref = (name: string) => `url(#${id}-${name})`
 
@@ -108,25 +113,34 @@ export const DTable = memo(function DTable({
         {defs}
       </defs>
 
-      <ellipse cx={cx} cy={edgeY + 360} rx={WOOD.rx + 30} ry={WOOD.ry * 0.62} fill="#000" opacity="0.7" filter={ref('shadow')} />
+      {/* The table itself, which a phone leaves out (see the blackjack table). */}
+      <g className="table-body">
+        <Soft blur={30} filter={ref('shadow')}>
+          <ellipse cx={cx} cy={edgeY + 360} rx={WOOD.rx + 30} ry={WOOD.ry * 0.62} fill="#000" opacity="0.7" />
+        </Soft>
 
-      <path d={WOOD_PATH} fill={ref('wood')} />
-      <path d={WOOD_PATH} fill={ref('noise')} opacity="0.18" style={{ mixBlendMode: 'overlay' }} />
-      <path d={RAIL_PATH} fill={ref('rail')} />
-      <path d={RAIL_PATH} fill={ref('noise')} opacity="0.22" style={{ mixBlendMode: 'overlay' }} />
-      <path d={ellipseArc(TABLE.rx - 9, TABLE.ry - 9)} fill="none" stroke="#b58e5e" strokeOpacity="0.4" strokeWidth="1.3" strokeDasharray="6 5" />
-      <path d={ellipseArc(FELT.rx + 9, FELT.ry + 9)} fill="none" stroke="#b58e5e" strokeOpacity="0.3" strokeWidth="1.1" strokeDasharray="6 5" />
+        <path d={WOOD_PATH} fill={ref('wood')} />
+        {!light && <path d={WOOD_PATH} fill={ref('noise')} opacity="0.18" style={{ mixBlendMode: 'overlay' }} />}
+        <path d={RAIL_PATH} fill={ref('rail')} />
+        {!light && <path d={RAIL_PATH} fill={ref('noise')} opacity="0.22" style={{ mixBlendMode: 'overlay' }} />}
+        <path d={ellipseArc(TABLE.rx - 9, TABLE.ry - 9)} fill="none" stroke="#b58e5e" strokeOpacity="0.4" strokeWidth="1.3" strokeDasharray="6 5" />
+        <path d={ellipseArc(FELT.rx + 9, FELT.ry + 9)} fill="none" stroke="#b58e5e" strokeOpacity="0.3" strokeWidth="1.1" strokeDasharray="6 5" />
 
-      <path d={FELT_PATH} fill={ref('felt')} />
-      <g clipPath={ref('felt-clip')}>
-        <rect width={PLANE.w} height={PLANE.h} fill={ref('noise')} opacity="0.16" style={{ mixBlendMode: 'overlay' }} />
-        <ellipse cx={cx} cy={360} rx={700} ry={470} fill={ref('spot')} style={{ mixBlendMode: 'screen' }} />
-        <path d={ellipseArc(FELT.rx, FELT.ry)} fill="none" stroke="#000" strokeOpacity="0.55" strokeWidth="46" filter={ref('soft')} />
-        <rect x={cx - FELT.rx} y={edgeY - 30} width={FELT.rx * 2} height={46} fill="#000" opacity="0.45" filter={ref('soft')} />
+        <path d={FELT_PATH} fill={ref('felt')} />
+        <g clipPath={ref('felt-clip')}>
+          <rect width={PLANE.w} height={PLANE.h} fill={ref('noise')} opacity="0.16" style={light ? undefined : { mixBlendMode: 'overlay' }} />
+          <ellipse cx={cx} cy={360} rx={700} ry={470} fill={ref('spot')} style={light ? undefined : { mixBlendMode: 'screen' }} />
+          <Soft blur={16} filter={ref('soft')}>
+            <path d={ellipseArc(FELT.rx, FELT.ry)} fill="none" stroke="#000" strokeOpacity="0.55" strokeWidth="46" />
+          </Soft>
+          <Soft blur={16} filter={ref('soft')}>
+            <rect x={cx - FELT.rx} y={edgeY - 30} width={FELT.rx * 2} height={46} fill="#000" opacity="0.45" />
+          </Soft>
+        </g>
+        <path d={ellipseArc(FELT.rx - 1, FELT.ry - 1)} fill="none" stroke="url(#gold-foil)" strokeWidth="3.2" />
+        <path d={ellipseArc(FELT.rx - 10, FELT.ry - 10)} fill="none" stroke="#e3c170" strokeOpacity="0.35" strokeWidth="1" />
+        <line x1={cx - FELT.rx} y1={edgeY + 1} x2={cx + FELT.rx} y2={edgeY + 1} stroke="url(#gold-foil)" strokeWidth="3" />
       </g>
-      <path d={ellipseArc(FELT.rx - 1, FELT.ry - 1)} fill="none" stroke="url(#gold-foil)" strokeWidth="3.2" />
-      <path d={ellipseArc(FELT.rx - 10, FELT.ry - 10)} fill="none" stroke="#e3c170" strokeOpacity="0.35" strokeWidth="1" />
-      <line x1={cx - FELT.rx} y1={edgeY + 1} x2={cx + FELT.rx} y2={edgeY + 1} stroke="url(#gold-foil)" strokeWidth="3" />
 
       {children}
 

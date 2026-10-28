@@ -26,6 +26,9 @@ import { BaccaratStatsPanel } from './panels/StatsPanel'
 import { Rail } from './Rail'
 import { BetLayer, CardLayer, SpotLayer, Totals } from './Table'
 
+/** Sideways on a phone: the two hands down to the bets, the discard rack to the shoe (see Stage's `fill`). */
+const PHONE_FILL = { left: 318, top: 248, right: 1315, bottom: 792 }
+
 /**
  * The mini-baccarat table: the blackjack table's walnut and felt, an eight-deck
  * shoe at the dealer's right, the two hands turned over in their boxes, and an
@@ -88,6 +91,7 @@ export default function BaccaratView() {
       <div className="tv__stage">
         <Stage width={STAGE.w} height={STAGE.h} safeBottom={792} reserve={compact ? COMPACT_RESERVE : 134}
           reserveTop={compact ? COMPACT_TOPBAR : TOPBAR}
+          fill={compact ? PHONE_FILL : undefined}
           zoom={{ focus: '[data-spot]', playing: game.phase === 'dealt', betting: game.phase === 'betting' }}
         >
           <div className="bj-camera" style={{ perspective: CAMERA.perspective }}>
