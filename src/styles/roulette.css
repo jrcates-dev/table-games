@@ -1,0 +1,442 @@
+/* ---------------------------------------------------------------------------
+   Roulette
+   --------------------------------------------------------------------------- */
+
+.ro-felt,
+.ro-wheel,
+.ro-wheel > svg,
+.ro-lights {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* The two moving parts of the wheel, each a layer the compositor moves. */
+.ro-wheel__head,
+.ro-wheel__ball {
+  position: absolute;
+  will-change: transform;
+}
+
+.ro-wheel__head svg {
+  display: block;
+}
+
+.ro-wheel__ball {
+  left: -12px;
+  top: -12px;
+  width: 24px;
+  height: 24px;
+  visibility: hidden;
+}
+
+/* ---- The layout's targets and lights ------------------------------------------ */
+
+.ro-spot {
+  stroke-width: 2.4;
+}
+
+/* Lines, corners and streets are small: show them as the chip-sized patch they are. */
+@media (hover: hover) {
+  .ro-spot--l1:hover,
+  .ro-spot--l2:hover,
+  .ro-spot--l3:hover {
+    fill: rgba(255, 238, 190, 0.32);
+  }
+}
+
+.ro-light {
+  fill: rgba(255, 233, 168, 0.28);
+  stroke: rgba(255, 226, 150, 0.95);
+  stroke-width: 2.5;
+}
+
+.ro-light--win {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.ro-light--glow {
+  fill: rgba(255, 255, 255, 0.24);
+}
+
+.ro-lights--glow {
+  animation: ro-win 1.2s ease-in-out infinite alternate;
+  will-change: opacity;
+}
+
+@keyframes ro-win {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---- The dolly ------------------------------------------------------------------ */
+
+.ro-dolly {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.5));
+}
+
+.ro-dolly__crown {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 5px;
+  border-radius: 50%;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 19px;
+  font-variant-numeric: lining-nums;
+  color: #fff;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), rgba(225, 230, 240, 0.75) 55%, rgba(160, 170, 190, 0.85));
+  box-shadow:
+    inset 0 -3px 6px rgba(0, 0, 0, 0.25),
+    0 0 0 2px rgba(255, 255, 255, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.ro-dolly--red .ro-dolly__crown {
+  color: #b51d28;
+  text-shadow: none;
+}
+
+.ro-dolly--black .ro-dolly__crown {
+  color: #121014;
+  text-shadow: none;
+}
+
+.ro-dolly--green .ro-dolly__crown {
+  color: #0f7a44;
+  text-shadow: none;
+}
+
+.ro-dolly__stem {
+  width: 8px;
+  height: 18px;
+  margin-top: -2px;
+  background: linear-gradient(90deg, rgba(200, 210, 225, 0.8), rgba(255, 255, 255, 0.95), rgba(170, 180, 200, 0.8));
+}
+
+.ro-dolly__base {
+  width: 30px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.95), rgba(170, 180, 200, 0.85));
+}
+
+/* ---- The rail ------------------------------------------------------------------ */
+
+.ro-prices {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ro-prices__lead,
+.ro-prices__foot {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+.ro-prices__foot {
+  margin: 6px 0 0;
+  font-size: 11px;
+}
+
+.ro-price {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+  font-size: 12px;
+}
+
+.ro-price__name {
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.ro-price__pays {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.ro-price.is-worst {
+  border-color: rgba(255, 107, 114, 0.4);
+  background: rgba(255, 107, 114, 0.06);
+}
+
+.ro-summary {
+  flex-shrink: 0;
+  padding: 9px 11px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+}
+
+.ro-summary__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ro-summary__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  margin-top: 7px;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+.ro-summary__grid strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--text-1);
+}
+
+.ro-summary__grid strong.tone-win {
+  color: var(--win);
+}
+
+.ro-summary__grid strong.tone-lose {
+  color: var(--lose);
+}
+
+.ro-summary__warn {
+  margin: 7px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lose);
+}
+
+.ro-history {
+  flex-shrink: 0;
+  padding: 9px 11px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+}
+
+.ro-history__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.ro-history__tally {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ro-history__black {
+  color: var(--text-2);
+}
+
+.ro-history__empty {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  color: var(--text-4);
+}
+
+.ro-history__numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+/* Opened out, the board gives way before the bets do: it scrolls, and the
+   bets above keep their room. */
+.ro-history.is-open {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The marquee: a dark inset board under a gold hairline, ten numbers to a row. */
+.ro-history__board {
+  min-height: 0;
+  max-height: min(38vh, 340px);
+  overflow-y: auto;
+  margin-top: 8px;
+  padding: 6px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.38);
+  border: 1px solid var(--gold-line);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+
+.ro-history__grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.ro-history__grid .ro-num {
+  min-width: 0;
+  height: 22px;
+  padding: 0;
+  border-radius: 5px;
+  font-size: 12.5px;
+}
+
+.ro-history__fair {
+  margin: 7px 2px 1px;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+.ro-history__fair span {
+  font-weight: 800;
+}
+
+.ro-history__more {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--glass-edge);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  transition: color 160ms ease;
+}
+
+@media (hover: hover) {
+  .ro-history__more:hover {
+    color: var(--gold-1);
+  }
+}
+
+.ro-history__chevron {
+  transform: rotate(90deg);
+  transition: transform 160ms ease;
+}
+
+.ro-history.is-open .ro-history__chevron {
+  transform: rotate(-90deg);
+}
+
+/* A number as the tote board shows it. */
+.ro-num {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 4px;
+  border-radius: 7px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 14px;
+  font-variant-numeric: lining-nums;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.ro-num--red {
+  background: #b51d28;
+}
+
+.ro-num--black {
+  background: #17151b;
+}
+
+.ro-num--green {
+  background: #0f7a44;
+}
+
+.ro-num.is-latest {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 0 2px var(--gold-1);
+}
+
+.ro-num--big {
+  min-width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  font-size: 28px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 0 2px var(--gold-line);
+}
+
+/* ---- The book ------------------------------------------------------------------ */
+
+.ro-wheels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ro-wheel-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+}
+
+.ro-wheel-card.is-current {
+  border-color: var(--gold-line);
+  background: rgba(227, 193, 112, 0.06);
+}
+
+.ro-wheel-card .reference__note {
+  margin: 0;
+}
+
+.reference__row.is-warning {
+  border-color: rgba(255, 107, 114, 0.35);
+}
+
+/* ---- The dock ------------------------------------------------------------------ */
+
+.dock--roulette.dock--over .ro-num--big {
+  margin-right: 4px;
+}
+
+/* Room for the longest call ("33 black · odd · high"), so the number that
+   came up never nudges Rebet & spin. */
+.dock--roulette.dock--over .settled {
+  min-width: 170px;
+}
+
+/* The headline sits over the far felt, clear of the layout and the wheel. */
+.tv--roulette .banner-anchor {
+  top: 19%;
+  left: 47%;
+}

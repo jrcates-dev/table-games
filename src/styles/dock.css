@@ -1,0 +1,494 @@
+/* ---------------------------------------------------------------------------
+   The dock: the player's side of the rail.
+   --------------------------------------------------------------------------- */
+
+.dock-wrap {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  bottom: max(var(--dock-bottom), var(--safe-b));
+  translate: -50% 0;
+  display: flex;
+  justify-content: center;
+  width: max-content;
+  max-width: calc(100% - 24px);
+}
+
+/* A console set into the rail: walnut frame, black leather inside, a brass
+   hairline along the top edge. */
+.dock {
+  position: relative;
+  min-height: 92px;
+  padding: 12px 16px;
+  border-radius: 26px;
+  border: 3px solid transparent;
+  background:
+    radial-gradient(120% 140% at 50% -20%, rgba(255, 214, 150, 0.07), transparent 60%) padding-box,
+    linear-gradient(180deg, #1b1416 0%, #0c090a 100%) padding-box,
+    linear-gradient(100deg, #2a160c 0%, #6a4022 22%, #3b2011 45%, #74482a 68%, #2a160c 100%) border-box;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 236, 190, 0.08),
+    inset 0 0 24px rgba(0, 0, 0, 0.5);
+}
+
+.dock::before {
+  content: '';
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  top: -3px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 228, 170, 0.75), transparent);
+}
+
+.dock__row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 68px;
+}
+
+.dock__row--center {
+  justify-content: center;
+}
+
+.dock__buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dock__message {
+  max-width: 420px;
+}
+
+.dock__message p {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.dock__message b {
+  color: var(--gold-1);
+}
+
+.dock__coach {
+  color: var(--gold-2);
+}
+
+.never-ask {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.never-ask input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--gold-2);
+  cursor: pointer;
+}
+
+.never-ask__note {
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+/* ---- The rack --------------------------------------------------------------- */
+
+.rack {
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px 4px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.2)),
+    linear-gradient(90deg, #2a1a10, #3d2616 50%, #2a1a10);
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 0 rgba(255, 220, 160, 0.12);
+}
+
+.rack__chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 2px;
+  border-radius: 50%;
+  transition:
+    transform 180ms var(--ease-spring),
+    filter 180ms ease;
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.55));
+}
+
+.rack__chip svg {
+  display: block;
+}
+
+@media (hover: hover) {
+  .rack__chip:hover:not(:disabled) {
+    transform: translateY(-7px) rotate(-6deg);
+    filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.6)) brightness(1.08);
+  }
+}
+
+.rack__chip:active:not(:disabled) {
+  transform: translateY(-2px) scale(0.94);
+}
+
+.rack__chip:disabled {
+  filter: grayscale(0.85) brightness(0.45);
+}
+
+.rack__chip kbd {
+  height: 15px;
+  min-width: 15px;
+  font-size: 9px;
+  border-width: 1px;
+  color: var(--text-3);
+}
+
+.rack__chip.is-selected {
+  transform: translateY(-9px);
+  filter: drop-shadow(0 0 14px rgba(245, 223, 160, 0.6)) drop-shadow(0 10px 10px rgba(0, 0, 0, 0.6));
+}
+
+.rack__chip.is-selected::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 26px;
+  height: 3px;
+  margin-left: -13px;
+  border-radius: 3px;
+  background: var(--gold-1);
+  box-shadow: 0 0 10px var(--gold-2);
+}
+
+/* ---- Wager ------------------------------------------------------------------ */
+
+.wager {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  line-height: 1.05;
+}
+
+.wager__value {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 38px;
+  color: var(--text-3);
+  transition: color 200ms ease;
+}
+
+.wager__value.is-set {
+  color: var(--gold-0);
+  text-shadow: 0 0 22px rgba(227, 193, 112, 0.3);
+}
+
+.wager__hint {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.deal-btn {
+  min-width: 158px;
+}
+
+.count-suggest {
+  border-color: rgba(79, 224, 160, 0.4);
+  color: var(--win);
+}
+
+/* ---- Actions ---------------------------------------------------------------- */
+
+.hand-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+  line-height: 1.1;
+}
+
+.hand-info__total {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 36px;
+  color: var(--text-1);
+}
+
+.hand-info__bet {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+.hand-info__bet b {
+  color: var(--text-1);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action {
+  --accent: var(--text-2);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 104px;
+  height: 70px;
+  border-radius: 18px;
+  color: var(--text-1);
+  background:
+    radial-gradient(90% 70% at 50% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 80%),
+    linear-gradient(180deg, #24201f 0%, #131011 100%);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, rgba(255, 244, 214, 0.08));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 0 color-mix(in srgb, var(--accent) 22%, #060405),
+    0 10px 20px rgba(0, 0, 0, 0.45);
+  transition:
+    transform 140ms var(--ease-out),
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+@media (hover: hover) {
+  .action:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+    background:
+      radial-gradient(90% 80% at 50% 0%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 80%),
+      linear-gradient(180deg, #2a2523 0%, #151213 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 6px 0 color-mix(in srgb, var(--accent) 26%, #060405),
+      0 14px 26px rgba(0, 0, 0, 0.5),
+      0 0 22px color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+}
+
+.action:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 1px 0 color-mix(in srgb, var(--accent) 22%, #060405),
+    0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+.action:disabled {
+  opacity: 0.3;
+}
+
+.action__icon {
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 45%, transparent));
+}
+
+.action__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.action__label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.action kbd {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  height: 15px;
+  min-width: 15px;
+  font-size: 8.5px;
+  border-width: 1px;
+  opacity: 0.45;
+}
+
+.action--hit {
+  --accent: #6ff0b8;
+}
+
+.action--stand {
+  --accent: #ff9ca1;
+}
+
+.action--double {
+  --accent: var(--gold-1);
+}
+
+.action--split {
+  --accent: #9fc2ff;
+}
+
+.action--surrender {
+  --accent: #c9c4d8;
+}
+
+.action--wide {
+  width: auto;
+  min-width: 150px;
+  padding: 0 22px;
+  flex-direction: row;
+  gap: 10px;
+  height: 58px;
+}
+
+.action--wide kbd {
+  position: static;
+  opacity: 0.6;
+}
+
+.action.is-recommended {
+  border-color: rgba(255, 228, 160, 0.95);
+  background:
+    radial-gradient(90% 80% at 50% 0%, rgba(245, 214, 140, 0.32), transparent 80%),
+    linear-gradient(180deg, #2c2418 0%, #15110c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 200, 0.25),
+    0 4px 0 #5c4419,
+    0 0 0 3px rgba(227, 193, 112, 0.22),
+    0 0 28px rgba(227, 193, 112, 0.4),
+    0 10px 20px rgba(0, 0, 0, 0.45);
+}
+
+/* The pulse is a wider glow fading in and out over the button, so the
+   compositor runs it: animating the shadow itself repaints every frame. */
+.action.is-recommended::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 6px rgba(227, 193, 112, 0.12),
+    0 0 42px rgba(227, 193, 112, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  animation: glow-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  50% {
+    opacity: 1;
+  }
+}
+
+.action__book {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  translate: -50% 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #2a1d06;
+  background: linear-gradient(180deg, #f7e2a6, #d6ae5c);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.book-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+}
+
+/* ---- Settled & waiting ---------------------------------------------------- */
+
+.settled {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  line-height: 1.05;
+}
+
+.settled__net {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 38px;
+}
+
+.waiting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 30px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.waiting__dots {
+  display: flex;
+  gap: 5px;
+}
+
+.waiting__dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold-2);
+  animation: dot 1s ease-in-out infinite;
+}
+
+.waiting__dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.waiting__dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dot {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* ---- FX ---------------------------------------------------------------------- */
+
+.fx-layer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 80;
+  pointer-events: none;
+}

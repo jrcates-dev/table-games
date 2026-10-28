@@ -1,0 +1,1095 @@
+/* ---------------------------------------------------------------------------
+   Lobby
+   --------------------------------------------------------------------------- */
+
+.lobby {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(22px, 4vh, 44px);
+  padding: 28px 24px 22px;
+  overflow-y: auto;
+}
+
+.lobby__corner {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  right: 22px;
+}
+
+.lobby__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 26px;
+}
+
+/* ---- The marquee ---------------------------------------------------------- */
+
+.marquee {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 38px 78px 24px;
+  border-radius: 28px;
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgba(255, 196, 120, 0.14), transparent 60%),
+    linear-gradient(180deg, #210e12 0%, #0f0608 100%);
+  box-shadow:
+    0 0 0 2px #5c4419,
+    0 0 0 5px #d9b46a,
+    0 0 0 6px #fff1c9,
+    0 0 0 9px #6b4a1c,
+    0 0 0 10px rgba(217, 180, 106, 0.6),
+    0 0 70px rgba(255, 186, 96, 0.28),
+    0 30px 70px rgba(0, 0, 0, 0.65),
+    inset 0 0 50px rgba(0, 0, 0, 0.75);
+}
+
+.marquee__bulbs {
+  position: absolute;
+  inset: 13px;
+  pointer-events: none;
+}
+
+.marquee__bulb {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #7d5f33, #2e2010 75%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 1px 0 rgba(255, 230, 170, 0.12);
+}
+
+/* A bank of lit lamps over the sockets; the bank, not each lamp, flashes. */
+.marquee__lights {
+  position: absolute;
+  inset: 0;
+  animation: bulb-chase 1.05s steps(1) infinite;
+  animation-delay: calc(var(--phase) * -0.35s);
+  will-change: opacity;
+}
+
+.marquee__lamp {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ffffff, #ffeec4 40%, #ffbd5a 100%);
+  box-shadow:
+    0 0 6px 2px rgba(255, 204, 110, 0.8),
+    0 0 18px 5px rgba(255, 170, 70, 0.32);
+}
+
+@keyframes bulb-chase {
+  0% {
+    opacity: 1;
+  }
+  33.333% {
+    opacity: 0.1;
+  }
+}
+
+.marquee__crest {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  translate: -50% -58%;
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1b0c0f 55%, transparent 70%);
+}
+
+.marquee__crest .monogram {
+  filter: drop-shadow(0 0 22px rgba(227, 193, 112, 0.5));
+}
+
+.lobby__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(52px, 8.4vh, 104px);
+  letter-spacing: 0.34em;
+  margin-right: -0.34em;
+  line-height: 1;
+}
+
+.lobby__title-text {
+  background: linear-gradient(
+    110deg,
+    #8a6526 0%,
+    #c89a47 18%,
+    #f6dd9b 32%,
+    #fff6d8 40%,
+    #e9c77c 48%,
+    #b98a3a 62%,
+    #f4d994 78%,
+    #8a6526 100%
+  );
+  background-size: 250% 100%;
+  background-position: 60% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(255, 200, 110, 0.35)) drop-shadow(0 4px 2px rgba(0, 0, 0, 0.6));
+}
+
+/*
+ * The light running across the foil. Sliding the gradient itself repainted
+ * the lettering and both its shadows every frame; instead the foil is painted
+ * once, and a narrow window carrying a bright copy of the word slides over it
+ * while the copy slides back the other way, so the copy stays in register
+ * with the letters and only the window moves. Both are transforms — the
+ * compositor runs it and the page never repaints.
+ */
+.lobby__title-word {
+  position: relative;
+  display: inline-block;
+}
+
+.lobby__glint {
+  --glint: 36%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--glint);
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(105deg, transparent 4%, #000 38%, #000 62%, transparent 96%);
+  mask-image: linear-gradient(105deg, transparent 4%, #000 38%, #000 62%, transparent 96%);
+  animation: glint-window 7s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+}
+
+.lobby__glint > span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+  color: #fff7dc;
+  opacity: 0.85;
+  animation: glint-word 7s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+}
+
+/* The window crosses from just off the first letter to just past the last
+   (100% of the word is 100 / 36 of the window), then rests out of sight. The
+   copy moves back by exactly as much, as a share of its own width. */
+@keyframes glint-window {
+  0% {
+    transform: translateX(-100%);
+  }
+  50%,
+  100% {
+    transform: translateX(calc(100% * 100 / 36));
+  }
+}
+
+@keyframes glint-word {
+  0% {
+    transform: translateX(36%);
+  }
+  50%,
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Lighter effects: the foil sits still. */
+[data-effects='reduced'] .lobby__glint {
+  display: none;
+}
+
+/* The gold win banner's foil still slides its gradient: it is up for a moment, not for as long as the lobby is open. */
+@keyframes foil {
+  0%,
+  100% {
+    background-position: 100% 0;
+  }
+  50% {
+    background-position: 0% 0;
+  }
+}
+
+.lobby__subtitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(16px, 2.3vh, 22px);
+  letter-spacing: 0.08em;
+  color: var(--gold-1);
+}
+
+.lobby__rule {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-3), transparent);
+}
+
+.lobby__games {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(12px, 1.2vw, 22px);
+}
+
+/* One figure for every table's rack, centred under the tables, with the choice of one bankroll or five tucked beneath. */
+.rack-reset-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.rack-reset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  max-width: 100%;
+  padding: 7px 7px 7px 18px;
+  border-radius: 999px;
+  background: rgba(7, 4, 5, 0.78);
+  border: 1px solid rgba(217, 180, 106, 0.22);
+}
+
+/* Too narrow for one line: the field and the button stack, so the pill squares off. */
+@media (max-width: 560px) {
+  .rack-reset {
+    padding: 12px 16px;
+    border-radius: 22px;
+  }
+}
+
+.rack-reset__field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rack-reset__field .eyebrow {
+  color: var(--gold-3);
+  white-space: nowrap;
+}
+
+.rack-reset .money-input {
+  width: 140px;
+}
+
+.rack-reset .money-input input {
+  height: 34px;
+  padding-left: 24px;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold-0);
+  border-color: var(--gold-line-strong);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.rack-reset .money-input input:focus {
+  border-color: var(--gold-2);
+  box-shadow: 0 0 0 3px rgba(227, 193, 112, 0.18);
+}
+
+.rack-reset .money-input span {
+  font-family: var(--font-serif);
+  font-size: 16px;
+}
+
+/* On a backing of its own: the carpet is too busy to read small type from. */
+.rack-reset__share {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 14px 6px 9px;
+  border-radius: 999px;
+  background: rgba(7, 4, 5, 0.72);
+  border: 1px solid rgba(217, 180, 106, 0.16);
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.rack-reset__share:has(input:disabled) {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* A box in the house gold rather than the browser's own. */
+.rack-reset__share input {
+  appearance: none;
+  display: grid;
+  place-content: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border-radius: 5px;
+  border: 1px solid var(--gold-line-strong);
+  background: rgba(0, 0, 0, 0.35);
+  cursor: inherit;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.rack-reset__share input::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border: 2px solid #1a1306;
+  border-top: 0;
+  border-right: 0;
+  transform: translateY(-1px) rotate(-45deg) scale(0);
+  transition: transform 0.15s;
+}
+
+.rack-reset__share input:checked {
+  background: var(--gold-2);
+  border-color: var(--gold-2);
+}
+
+.rack-reset__share input:checked::after {
+  transform: translateY(-1px) rotate(-45deg) scale(1);
+}
+
+.rack-reset__share input:focus-visible {
+  box-shadow: 0 0 0 3px rgba(227, 193, 112, 0.25);
+}
+
+@media (hover: hover) {
+  .rack-reset__share:hover input:not(:disabled) {
+    border-color: var(--gold-2);
+  }
+}
+
+/* The question about every rack: over the whole floor, in the middle of the screen. */
+.rack-reset__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(4, 3, 4, 0.62);
+}
+
+.rack-reset__dialog {
+  width: min(460px, 100%);
+  padding: 22px 24px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(28, 24, 18, 0.97), rgba(12, 11, 14, 0.97));
+  border: 1px solid var(--gold-line-strong);
+  box-shadow:
+    var(--shadow-3),
+    0 0 50px rgba(227, 193, 112, 0.15);
+  text-align: center;
+}
+
+.rack-reset__dialog .eyebrow {
+  color: var(--gold-3);
+}
+
+.rack-reset__text {
+  margin: 10px 0 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.rack-reset__text strong {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  color: var(--gold-0);
+}
+
+.rack-reset__buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ---- Game card ------------------------------------------------------------- */
+
+.game-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Five tables abreast on a desktop screen. */
+  width: clamp(250px, calc((100vw - 136px) / 5), 340px);
+  border-radius: 28px;
+  cursor: pointer;
+  background: linear-gradient(180deg, #1c1013 0%, #0e090b 100%);
+  border: 1px solid rgba(217, 180, 106, 0.28);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 236, 190, 0.12);
+  overflow: hidden;
+  /* The footer arranges itself by the card's own width; see below. */
+  container: game-card / inline-size;
+  transition:
+    border-color 300ms ease,
+    box-shadow 400ms ease,
+    translate 400ms var(--ease-out);
+}
+
+.game-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(160deg, rgba(246, 221, 155, 0.55), transparent 35%, transparent 65%, rgba(201, 156, 69, 0.45));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.45;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .game-card:hover {
+    border-color: rgba(245, 223, 160, 0.6);
+    box-shadow:
+      0 44px 100px rgba(0, 0, 0, 0.75),
+      0 0 70px rgba(255, 196, 110, 0.2),
+      inset 0 1px 0 rgba(255, 236, 190, 0.18);
+  }
+}
+
+.game-card.is-featured::before {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .game-card:hover::before {
+    opacity: 1;
+  }
+}
+
+/* Picked up a touch, flat: the card never tilts, so nothing on it moves under the pointer. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .game-card:hover {
+    translate: 0 -4px;
+  }
+}
+
+.game-card__body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 14px 20px 20px;
+}
+
+.game-card__tagline {
+  color: var(--gold-3);
+}
+
+.game-card__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 29px;
+  letter-spacing: 0.07em;
+  margin: 2px 0 10px;
+  color: var(--text-1);
+  white-space: nowrap;
+}
+
+.game-card__rules {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.game-card__rules li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  line-height: 1.3;
+}
+
+.game-card__rules li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 5px;
+  height: 5px;
+  transform: rotate(45deg);
+  background: var(--gold-3);
+}
+
+.game-card__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--glass-edge);
+}
+
+.game-card__bankroll {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  /* As tall as the buy-in field below, whichever shows, so the cards keep their height as the racks load. */
+  min-height: 81px;
+}
+
+.game-card__bankroll .money {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--gold-0);
+  line-height: 1;
+}
+
+/* Until the first hand, the rack is typed in rather than read off. */
+.game-card__stake {
+  flex: 1 1 96px;
+  max-width: 170px;
+  gap: 5px;
+  cursor: default;
+}
+
+/*
+ * Too narrow for the field and "Return to table" side by side, the button
+ * drops below the field on every card alike, so all five footers line up.
+ */
+@container game-card (max-width: 299px) {
+  .game-card__foot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .game-card__stake {
+    flex: none;
+    max-width: none;
+  }
+}
+
+.game-card__stake .eyebrow {
+  color: var(--gold-3);
+}
+
+.game-card__stake .money-input input {
+  height: 40px;
+  padding-left: 24px;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--gold-0);
+  border-color: var(--gold-line-strong);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.game-card__stake .money-input input:focus {
+  border-color: var(--gold-2);
+  box-shadow: 0 0 0 3px rgba(227, 193, 112, 0.18);
+}
+
+.game-card__stake .money-input span {
+  font-family: var(--font-serif);
+  font-size: 18px;
+}
+
+.game-card__foot .btn {
+  height: 42px;
+  padding: 0 13px;
+  font-size: 11.5px;
+}
+
+.game-card__stake-hint {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+/* ---- Card art ----------------------------------------------------------------- */
+
+.game-card__art {
+  position: relative;
+  height: 196px;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * The picture leans toward the pointer by depth: --px and --py run from -1 to
+ * 1 across the card (set in Lobby.tsx), and each layer moves by its --depth in
+ * pixels, the felt the other way from what lies on it.
+ */
+.art > * {
+  translate: calc(var(--px, 0) * var(--depth, 5) * 1px) calc(var(--py, 0) * var(--depth, 5) * 0.6px);
+}
+
+.art > .art__felt {
+  --depth: -3;
+}
+
+.art > .art__chips {
+  --depth: 8;
+}
+
+.art__felt {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  top: 16%;
+  height: 160%;
+  border-radius: 50%;
+  background:
+    radial-gradient(50% 32% at 50% 26%, color-mix(in srgb, var(--felt-hi) 85%, white 15%) 0%, transparent 100%),
+    radial-gradient(70% 60% at 50% 40%, var(--felt-mid) 0%, var(--felt-lo) 70%, var(--felt-edge) 100%);
+  box-shadow:
+    0 0 0 2px #e3c170,
+    0 0 0 3px rgba(0, 0, 0, 0.5),
+    0 0 0 20px #2a1217,
+    0 0 0 21px rgba(217, 180, 106, 0.35),
+    0 -6px 30px 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 8px rgba(0, 0, 0, 0.18),
+    inset 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+.art__felt::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--noise);
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+}
+
+.art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(12, 11, 16, 0.95) 100%);
+  pointer-events: none;
+}
+
+.art__cards {
+  position: absolute;
+  left: 50%;
+  top: 22px;
+  width: 0;
+  height: 0;
+}
+
+.art__card {
+  position: absolute;
+  width: 108px;
+  height: 151px;
+  top: 0;
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.5));
+  transition: transform 500ms var(--ease-out);
+}
+
+.art__card--a {
+  left: -104px;
+  transform: rotate(-11deg);
+}
+
+.art__card--b {
+  left: -18px;
+  transform: rotate(7deg) translateY(4px);
+}
+
+@media (hover: hover) {
+  .game-card:hover .art__card--a {
+    transform: rotate(-16deg) translate(-10px, -6px);
+  }
+}
+
+@media (hover: hover) {
+  .game-card:hover .art__card--b {
+    transform: rotate(12deg) translate(8px, -2px);
+  }
+}
+
+.art__chips {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  width: 0;
+  height: 0;
+}
+
+.art__stack {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.5));
+}
+
+.art__chips--left {
+  left: 13%;
+  bottom: 44px;
+}
+
+.art__chips--right {
+  left: 85%;
+  bottom: 56px;
+}
+
+.art__dice {
+  position: absolute;
+  left: 50%;
+  top: 36px;
+  width: 0;
+  height: 0;
+  perspective: 600px;
+}
+
+.art__die {
+  position: absolute;
+  animation: tumble 9s linear infinite;
+}
+
+.art__die--a {
+  left: -88px;
+  top: 10px;
+  animation-duration: 11s;
+}
+
+.art__die--b {
+  left: 16px;
+  top: 34px;
+  animation-duration: 8.5s;
+  animation-direction: reverse;
+}
+
+@keyframes tumble {
+  0% {
+    transform: rotateX(-24deg) rotateY(30deg) rotateZ(8deg);
+  }
+  50% {
+    transform: rotateX(-44deg) rotateY(210deg) rotateZ(-6deg);
+  }
+  100% {
+    transform: rotateX(-24deg) rotateY(390deg) rotateZ(8deg);
+  }
+}
+
+@media (hover: hover) {
+  .game-card:hover .art__die {
+    animation-duration: 2.4s;
+  }
+}
+
+.art__puck {
+  position: absolute;
+  right: 18%;
+  top: 126px;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(60% 60% at 40% 35%, #ffffff, #dcd6c8);
+  color: #111;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  box-shadow:
+    0 4px 0 #9d978b,
+    0 10px 18px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.art--craps .art__chips {
+  left: 30%;
+  bottom: 40px;
+}
+
+/* ---- Baccarat: a coup in its boxes ------------------------------------------- */
+
+.art__box {
+  position: absolute;
+  top: 62px;
+  width: 41%;
+  height: 160px;
+  border-radius: 14px;
+  border: 1.5px solid;
+}
+
+.art__box--player {
+  left: 7%;
+  border-color: rgba(143, 184, 255, 0.55);
+  background: rgba(36, 87, 197, 0.12);
+}
+
+.art__box--banker {
+  right: 7%;
+  border-color: rgba(255, 143, 150, 0.55);
+  background: rgba(200, 32, 46, 0.12);
+}
+
+.art__box-label {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.art__box--player .art__box-label {
+  color: #a9c7ff;
+}
+
+.art__box--banker .art__box-label {
+  color: #ffa9af;
+}
+
+.art__pair {
+  position: absolute;
+  top: 88px;
+  width: 0;
+  height: 0;
+}
+
+.art__pair--player {
+  left: 27.5%;
+}
+
+.art__pair--banker {
+  left: 72.5%;
+}
+
+/* A card dealt a size down: the board, a baccarat hand. */
+.art__mini {
+  position: absolute;
+  top: 0;
+  width: 64px;
+  height: 90px;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.5));
+  transition: transform 500ms var(--ease-out);
+}
+
+.art__pair .art__mini--a {
+  left: -54px;
+  transform: rotate(-6deg);
+}
+
+.art__pair .art__mini--b {
+  left: -10px;
+  transform: rotate(5deg) translateY(3px);
+}
+
+@media (hover: hover) {
+  .game-card:hover .art__pair .art__mini--a {
+    transform: rotate(-10deg) translate(-4px, -4px);
+  }
+}
+
+@media (hover: hover) {
+  .game-card:hover .art__pair .art__mini--b {
+    transform: rotate(9deg) translate(4px, -1px);
+  }
+}
+
+/* ---- Roulette: the wheel from the rail ---------------------------------------- */
+
+.art__wheel {
+  position: absolute;
+  left: 50%;
+  top: 26px;
+  width: 236px;
+  height: 236px;
+  margin-left: -118px;
+  transform: perspective(700px) rotateX(48deg);
+  transform-origin: 50% 40%;
+}
+
+.art__wheel > * {
+  position: absolute;
+  inset: 0;
+}
+
+.art__wheel svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The shadow falls from the bowl alone: the rotor and ball turn inside it, and
+   a filter over them would have to be redrawn as they move. */
+.art__bowl {
+  filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.55));
+}
+
+/* Over the card both spin up by playback rate (useSpinUp in TableArt.tsx), not by duration, so neither jumps. */
+.art__rotor {
+  animation: art-rotor 40s linear infinite;
+  will-change: transform;
+}
+
+.art__ball-orbit {
+  animation: art-ball 7s linear infinite;
+  will-change: transform;
+}
+
+@keyframes art-rotor {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes art-ball {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.art__chips--roulette {
+  left: 14%;
+  bottom: 30px;
+}
+
+/* ---- Ultimate Texas Hold'em: the board and your two cards --------------------- */
+
+/* The five board cards scale with the picture, so the river never runs off a narrow card. */
+.art__board {
+  position: absolute;
+  left: 50%;
+  top: 72px;
+  width: 0;
+  height: 0;
+  margin-left: -41.5cqw;
+}
+
+.art__board .art__mini {
+  left: calc(var(--slot) * 17cqw);
+  width: 15cqw;
+  height: 21cqw;
+}
+
+.art__hole {
+  position: absolute;
+  left: 50%;
+  top: 130px;
+  width: 0;
+  height: 0;
+}
+
+.art__hole .art__card {
+  width: 80px;
+  height: 112px;
+}
+
+.art__hole .art__card--a {
+  left: -84px;
+  transform: rotate(-9deg);
+}
+
+.art__hole .art__card--b {
+  left: -14px;
+  transform: rotate(7deg) translateY(4px);
+}
+
+.art__chips--uth {
+  left: 86%;
+  bottom: 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art__rotor,
+  .art__ball-orbit {
+    animation: none;
+  }
+}
+
+/* ---- The limit sign every table carries ------------------------------------ */
+
+.limit-sign {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 11px 6px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #0b0a0d, #16141a);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+.limit-sign__label {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #8f897b;
+}
+
+.limit-sign__value {
+  position: relative;
+  font-family: ui-monospace, 'Cascadia Mono', 'Consolas', 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  color: #ff5a43;
+  text-shadow:
+    0 0 6px rgba(255, 80, 55, 0.85),
+    0 0 16px rgba(255, 60, 40, 0.45);
+}
+
+.limit-sign__value::after {
+  /* The LED matrix: the glow seen through a grid of tiny dots. */
+  content: '';
+  position: absolute;
+  inset: -2px -4px;
+  background-image: radial-gradient(circle, transparent 0.7px, rgba(11, 10, 13, 0.55) 1px);
+  background-size: 2.5px 2.5px;
+}

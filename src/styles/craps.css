@@ -1,0 +1,1442 @@
+/* ---------------------------------------------------------------------------
+   Craps
+   --------------------------------------------------------------------------- */
+
+.cr {
+  position: absolute;
+  inset: 0 var(--safe-r) 0 var(--safe-l);
+}
+
+.cr > .topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.cr__stage {
+  position: absolute;
+  inset: 0 0 var(--dock-lift);
+}
+
+.cr-camera {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1600px;
+  height: 900px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+}
+
+.cr-plane {
+  position: absolute;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+}
+
+.cr-felt,
+.cr-spots {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+
+/* The camera wrapper sits at z = 0, in front of the pushed-back felt, and a
+   transparent box still catches the pointer. Everything structural lets the
+   pointer through; only the bet shapes themselves take it. */
+.cr-camera,
+.cr-plane,
+.cr-felt,
+.cr-spots {
+  pointer-events: none;
+}
+
+/* ---- Click targets ------------------------------------------------------------ */
+
+.cr-spot {
+  pointer-events: visiblePainted;
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 3;
+  cursor: pointer;
+  transition:
+    fill 140ms ease,
+    stroke 140ms ease;
+}
+
+@media (hover: hover) {
+  .cr-spot:hover {
+    fill: rgba(255, 238, 190, 0.12);
+    stroke: rgba(255, 226, 150, 0.95);
+  }
+}
+
+.cr-spot.is-blocked {
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .cr-spot.is-blocked:hover {
+    fill: rgba(255, 110, 100, 0.08);
+    stroke: rgba(255, 130, 120, 0.6);
+  }
+}
+
+/* ---- Chips, OFF buttons, the puck ------------------------------------------------ */
+
+.cr-stack {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.cr-stack__shadow {
+  position: absolute;
+  width: 58px;
+  height: 46px;
+  transform: translate(-50%, -50%) translateY(4px);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
+}
+
+.cr-off {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transform-origin: 50% 100%;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  border: 1.5px solid #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+  /* The stack it sits on lets clicks through to the spot; the button itself
+     takes them, so a click on it flips the bet on or off. */
+  pointer-events: auto;
+  transition:
+    box-shadow 140ms ease,
+    border-color 140ms ease;
+}
+
+.cr-off.is-on {
+  background: #f4f0e6;
+  color: #111;
+  border-color: #111;
+}
+
+@media (hover: hover) {
+  .cr-off:not(:disabled):hover {
+    border-color: rgba(255, 226, 150, 0.95);
+    box-shadow:
+      0 3px 8px rgba(0, 0, 0, 0.5),
+      0 0 0 3px rgba(255, 226, 150, 0.35);
+  }
+}
+
+.cr-puck {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.cr-puck__shadow {
+  position: absolute;
+  width: 74px;
+  height: 56px;
+  transform: translate(-50%, -50%) translateY(6px);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+}
+
+.cr-puck__stand {
+  position: absolute;
+  left: -34px;
+  bottom: 0;
+  width: 68px;
+  transform-origin: 50% 100%;
+  transform-style: preserve-3d;
+}
+
+.cr-puck__disc {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(70% 70% at 40% 35%, #3a3a42, #0c0c10);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  box-shadow:
+    0 7px 0 #050507,
+    0 7px 0 1px rgba(255, 255, 255, 0.12),
+    0 14px 18px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.18);
+  transform: translateY(-7px);
+}
+
+.cr-puck__disc.is-on {
+  background: radial-gradient(70% 70% at 40% 35%, #ffffff, #d8d2c3);
+  color: #111;
+  box-shadow:
+    0 7px 0 #9b958a,
+    0 14px 18px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.12),
+    0 0 30px rgba(255, 255, 255, 0.25);
+}
+
+/* ---- Dice overlay ---------------------------------------------------------------- */
+
+.cr-dice {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1600px;
+  height: 900px;
+  pointer-events: none;
+  /* They arrive once the table is in place (see CrapsView), so they fade in. */
+  animation: dice-in 0.4s ease both;
+}
+
+@keyframes dice-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The renderer wraps its canvas in a div that takes pointer events by default;
+   none of it may, or the dice would swallow every click meant for the felt. */
+.cr-dice,
+.cr-dice * {
+  pointer-events: none !important;
+}
+
+/* ---- Callout ------------------------------------------------------------------------ */
+
+.callout-anchor {
+  position: absolute;
+  z-index: 18;
+  left: 50%;
+  top: 86px;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.callout {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px 12px 14px;
+  border-radius: 22px;
+  white-space: nowrap;
+  background: linear-gradient(180deg, rgba(30, 20, 20, 0.96), rgba(10, 7, 8, 0.97));
+  border: 1px solid rgba(217, 180, 106, 0.3);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 236, 190, 0.1);
+}
+
+.callout__dice {
+  display: flex;
+  gap: 6px;
+}
+
+.callout__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.callout__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-1);
+}
+
+.callout__sub {
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+.callout__net {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 30px;
+  padding-left: 16px;
+  border-left: 1px solid var(--glass-edge-strong);
+}
+
+.callout--win .callout__title {
+  color: var(--win);
+}
+
+.callout--lose .callout__title {
+  color: #ff8a8f;
+}
+
+.callout--big {
+  border-color: rgba(245, 223, 160, 0.55);
+  box-shadow:
+    0 0 50px rgba(227, 193, 112, 0.3),
+    0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.callout--big .callout__title {
+  background: var(--gold-foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- Roll history -------------------------------------------------------------------- */
+
+.roll-history {
+  position: absolute;
+  z-index: 16;
+  left: 22px;
+  top: 78px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.roll-history__row {
+  display: flex;
+  gap: 4px;
+}
+
+.roll-history__roll {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(12, 11, 16, 0.8);
+  border: 1px solid var(--glass-edge-strong);
+}
+
+.roll-history__total {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-2);
+}
+
+.roll-history__roll.is-seven {
+  background: rgba(200, 20, 40, 0.35);
+  border-color: rgba(255, 110, 120, 0.6);
+}
+
+.roll-history__roll.is-seven .roll-history__total {
+  color: #ffc2c6;
+}
+
+.roll-history__roll.is-point {
+  border-color: var(--gold-2);
+  box-shadow: 0 0 10px rgba(227, 193, 112, 0.35);
+}
+
+.roll-history__roll.is-point .roll-history__total {
+  color: var(--gold-0);
+}
+
+.roll-history__roll.is-made {
+  background: rgba(40, 180, 110, 0.3);
+  border-color: rgba(79, 224, 160, 0.6);
+}
+
+/* ---- The dock, craps flavour -------------------------------------------------------------- */
+
+.dock--craps .rack {
+  gap: 2px;
+}
+
+.mode-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mode-picker .segmented button {
+  padding: 0 10px;
+  height: 30px;
+}
+
+.odds-btn.is-ready {
+  border-color: rgba(79, 224, 160, 0.55);
+  color: var(--win);
+  box-shadow: 0 0 18px rgba(79, 224, 160, 0.18);
+}
+
+.roll-btn {
+  min-width: 150px;
+}
+
+.roll-btn__label {
+  display: inline-grid;
+  justify-items: center;
+}
+
+.roll-btn__label > * {
+  grid-area: 1 / 1;
+}
+
+.roll-btn__label > [aria-hidden='true'] {
+  visibility: hidden;
+}
+
+/* Armed, the button breathes: a glow fading in and out round it (see the
+   recommended action in dock.css). */
+.roll-btn.is-armed::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 40px rgba(227, 193, 112, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  animation: glow-pulse 2.2s ease-in-out infinite;
+}
+
+/* Above the buttons, not below: the dock grows up from the rail, so the note
+   coming and going never moves what is under the pointer. */
+.dock__blocked {
+  margin-bottom: 6px;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-3);
+}
+
+.dealer-notice {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  white-space: nowrap;
+  background: rgba(40, 14, 18, 0.94);
+  border: 1px solid rgba(255, 120, 120, 0.4);
+  color: #ffd6d8;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.dealer-notice .eyebrow {
+  color: #ff9ea4;
+}
+
+/* ---- Tooltip ---------------------------------------------------------------------------- */
+
+.spot-tip {
+  position: fixed;
+  z-index: 70;
+  width: 272px;
+  padding: 13px 15px 12px;
+  border-radius: 16px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(24, 21, 29, 0.97), rgba(12, 11, 15, 0.97));
+  border: 1px solid rgba(255, 244, 214, 0.16);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* Held open by a finger (see lib/touch), the card takes taps: its button, and
+   a tap on it leaves it open. */
+.spot-tip.is-pinned {
+  pointer-events: auto;
+}
+
+.spot-tip__take {
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+}
+
+.spot-tip__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+
+.spot-tip__head strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  color: var(--text-1);
+}
+
+.spot-tip__head span {
+  font-weight: 800;
+  color: var(--gold-1);
+  text-align: right;
+}
+
+.spot-tip__rows div {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 6px;
+}
+
+.spot-tip__rows em,
+.bet-row__needs em,
+.reference__detail em {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.spot-tip__edge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--text-3);
+}
+
+.spot-tip__hint,
+.spot-tip__limit,
+.spot-tip__mode {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--glass-edge);
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+.spot-tip__limit,
+.spot-tip__mode {
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: 0;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.spot-tip__mode {
+  text-transform: capitalize;
+}
+
+.spot-tip__reason {
+  margin-top: 8px;
+  padding: 7px 9px;
+  border-radius: 9px;
+  background: rgba(255, 107, 114, 0.1);
+  color: #ffb3b7;
+  font-weight: 700;
+}
+
+.edge-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.edge-pill--none {
+  background: rgba(79, 224, 160, 0.18);
+  color: #8ff5c9;
+}
+.edge-pill--low {
+  background: rgba(79, 224, 160, 0.12);
+  color: #b4f0d4;
+}
+.edge-pill--fair {
+  background: rgba(227, 193, 112, 0.16);
+  color: var(--gold-1);
+}
+.edge-pill--poor {
+  background: rgba(255, 150, 80, 0.16);
+  color: #ffc39a;
+}
+.edge-pill--terrible {
+  background: rgba(255, 90, 100, 0.18);
+  color: #ffadb2;
+}
+
+/* ---- The rail -------------------------------------------------------------------------------- */
+
+.rail {
+  position: absolute;
+  z-index: 19;
+  top: 78px;
+  right: 16px;
+  bottom: calc(136px + var(--dock-lift));
+  width: 316px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(30, 20, 20, 0.96), rgba(12, 8, 9, 0.97));
+  border: 1px solid rgba(217, 180, 106, 0.24);
+  box-shadow: var(--shadow-3), inset 0 1px 0 rgba(255, 236, 190, 0.1);
+}
+
+.rail__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.rail__head > div:first-child {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.rail__count {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.04em;
+}
+
+.rail__risk {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.rail__risk strong {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  color: var(--gold-0);
+  line-height: 1;
+}
+
+.rail__fold {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+
+.rail__fold svg {
+  width: 15px;
+  height: 15px;
+}
+
+.rail__list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 2px;
+}
+
+.rail__empty {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-3);
+  padding: 6px 2px;
+}
+
+.rail__empty strong {
+  color: var(--gold-1);
+}
+
+.rail-tab {
+  position: absolute;
+  z-index: 19;
+  top: 78px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(30, 20, 20, 0.96), rgba(12, 8, 9, 0.97));
+  border: 1px solid rgba(217, 180, 106, 0.24);
+  box-shadow: var(--shadow-2);
+}
+
+.rail-tab__label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.rail-tab strong {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  color: var(--gold-0);
+}
+
+.point-status {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+}
+
+.point-status__puck {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(70% 70% at 40% 35%, #3a3a42, #0c0c10);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.point-status.is-on .point-status__puck {
+  background: radial-gradient(70% 70% at 40% 35%, #fff, #d8d2c3);
+  color: #111;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.2);
+}
+
+.point-status__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.point-status__text strong {
+  font-size: 14px;
+}
+
+.point-status__text span {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.point-status__dice {
+  display: flex;
+  gap: 4px;
+}
+
+/* Bet rows */
+
+.bet-row {
+  --band: var(--gold-3);
+  position: relative;
+  flex-shrink: 0;
+  padding: 10px 12px 9px 14px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+  overflow: hidden;
+}
+
+.bet-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--band);
+}
+
+.bet-row--none,
+.bet-row--low {
+  --band: #4fe0a0;
+}
+.bet-row--fair {
+  --band: #e3c170;
+}
+.bet-row--poor {
+  --band: #ff9a5a;
+}
+.bet-row--terrible {
+  --band: #ff5a64;
+}
+
+.bet-row.is-off {
+  opacity: 0.62;
+}
+
+.bet-row.is-win {
+  border-color: rgba(79, 224, 160, 0.5);
+  background: rgba(79, 224, 160, 0.07);
+}
+
+.bet-row__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.bet-row__name {
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.bet-row__amount {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--gold-0);
+}
+
+.bet-row__needs {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+
+.bet-row__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.bet-row__pays strong {
+  color: var(--text-1);
+}
+
+.bet-row__off {
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.bet-row__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.bet-row__actions button {
+  height: 25px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--text-2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-edge-strong);
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+
+@media (hover: hover) {
+  .bet-row__actions button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-1);
+  }
+}
+
+.bet-row__actions .is-odds {
+  color: var(--win);
+  border-color: rgba(79, 224, 160, 0.45);
+}
+
+@media (hover: hover) {
+  .bet-row__actions .is-danger:hover {
+    color: #ffb3b7;
+    border-color: rgba(255, 107, 114, 0.5);
+  }
+}
+
+.bet-row__locked {
+  font-size: 10.5px;
+  color: var(--text-4);
+  font-style: italic;
+}
+
+/* Next roll projection */
+
+.next-roll {
+  flex-shrink: 0;
+  padding: 10px 10px 8px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--glass-edge);
+}
+
+.next-roll__grid {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.next-roll__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.next-roll__bar-wrap {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 30px;
+}
+
+.next-roll__bar {
+  width: 100%;
+  border-radius: 3px 3px 1px 1px;
+  background: var(--text-4);
+}
+
+.next-roll__cell.is-win .next-roll__bar {
+  background: linear-gradient(180deg, #6ff0b8, #1f9e66);
+}
+
+.next-roll__cell.is-lose .next-roll__bar {
+  background: linear-gradient(180deg, #ff8f96, #b3303a);
+}
+
+.next-roll__total {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-1);
+}
+
+.next-roll__net {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-3);
+}
+
+.next-roll__cell.is-win .next-roll__net {
+  color: var(--win);
+}
+
+.next-roll__cell.is-lose .next-roll__net {
+  color: #ff9ea4;
+}
+
+/* Side bet progress */
+
+.side-progress {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 138, 76, 0.06);
+  border: 1px solid rgba(255, 138, 76, 0.2);
+}
+
+.side-progress__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+}
+
+.side-progress__row > span:first-child {
+  width: 42px;
+  font-weight: 800;
+}
+
+.side-progress__row em {
+  font-style: normal;
+  color: var(--text-3);
+  font-size: 11px;
+}
+
+.fire-pips {
+  display: flex;
+  gap: 4px;
+}
+
+.fire-pips span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 138, 76, 0.35);
+}
+
+.fire-pips span.is-lit {
+  background: radial-gradient(circle, #ffd27a, #ff6a2a);
+  box-shadow: 0 0 8px rgba(255, 120, 40, 0.8);
+}
+
+.ats-set {
+  display: flex;
+  gap: 3px;
+}
+
+.ats-set span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-3);
+}
+
+.ats-set span.is-hit {
+  background: rgba(227, 193, 112, 0.25);
+  color: var(--gold-0);
+}
+
+/* ---- Reference & shoot history ------------------------------------------------------------------ */
+
+.reference__primer ol {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  display: grid;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.reference__primer strong,
+.reference__primer em {
+  color: var(--text-1);
+}
+
+.reference__note {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+
+.reference__group {
+  margin-top: 22px;
+}
+
+.reference__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reference__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+}
+
+.reference__main {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.reference__pays {
+  font-weight: 800;
+  color: var(--gold-1);
+  text-align: right;
+  font-size: 12px;
+}
+
+.reference__detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+
+.reference__edge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edge-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.edge-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--gold-3);
+}
+
+.edge-bar--none i,
+.edge-bar--low i {
+  background: var(--win);
+}
+.edge-bar--poor i {
+  background: #ff9a5a;
+}
+.edge-bar--terrible i {
+  background: var(--lose);
+}
+
+.shoot__head {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  text-align: left;
+}
+
+.shoot__summary {
+  grid-column: 1;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.shoot__head .history__net {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+}
+
+.shoot__rolls {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+  font-size: 11.5px;
+}
+
+.shoot__rolls li {
+  display: grid;
+  grid-template-columns: 40px 30px 1fr auto;
+  gap: 8px;
+  color: var(--text-3);
+}
+
+.shoot__rolls li strong {
+  color: var(--text-1);
+}
+
+.shoot__rolls li.is-sevenOut strong {
+  color: var(--lose);
+}
+
+.shoot__rolls li.is-pointMade strong {
+  color: var(--win);
+}
+
+/* ---- What happened last roll --------------------------------------------------------------- */
+
+.last-roll {
+  /* Gives way before the bets do: on a short window the reasons scroll, and
+     the head and the bets below both stay in view. */
+  flex: 0 1 auto;
+  min-height: 52px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+  transition: opacity 200ms ease;
+}
+
+.last-roll.is-win {
+  border-color: rgba(79, 224, 160, 0.3);
+}
+
+.last-roll.is-lose {
+  border-color: rgba(255, 107, 114, 0.28);
+}
+
+/* The dice are in the air: this is about to be replaced. */
+.last-roll.is-stale {
+  opacity: 0.5;
+}
+
+.last-roll__head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  text-align: left;
+  border-radius: 14px;
+}
+
+@media (hover: hover) {
+  .last-roll__head:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+.last-roll__dice {
+  flex: none;
+  display: flex;
+  gap: 3px;
+}
+
+.last-roll__title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.last-roll__title .eyebrow {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+}
+
+.last-roll__title strong {
+  font-size: 13.5px;
+}
+
+.last-roll__net {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text-2);
+}
+
+.last-roll__net.is-win {
+  color: var(--win);
+}
+
+.last-roll__net.is-lose {
+  color: #ff9ea4;
+}
+
+.last-roll__chevron {
+  flex: none;
+  color: var(--text-3);
+  transform: rotate(90deg);
+  transition: transform 160ms ease;
+}
+
+.last-roll.is-open .last-roll__chevron {
+  transform: rotate(-90deg);
+}
+
+.last-roll__body {
+  /* Never the whole rail: the bets themselves still need room below. */
+  min-height: 0;
+  max-height: min(30vh, 280px);
+  overflow-y: auto;
+  padding: 0 12px 10px;
+}
+
+.last-roll__summary {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.last-roll__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.last-roll__item {
+  --tone: var(--text-4);
+  position: relative;
+  padding: 6px 8px 6px 11px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.last-roll__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--tone);
+}
+
+.last-roll__item.is-won {
+  --tone: var(--win);
+}
+
+.last-roll__item.is-lost {
+  --tone: var(--lose);
+}
+
+.last-roll__item.is-push,
+.last-roll__item.is-point,
+.last-roll__item.is-moved {
+  --tone: var(--gold-2);
+}
+
+.last-roll__item.is-off {
+  --tone: var(--text-3);
+}
+
+.last-roll__row {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.last-roll__tag {
+  flex: none;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tone);
+}
+
+.last-roll__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.last-roll__amount {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.last-roll__item.is-won .last-roll__amount {
+  color: var(--win);
+}
+
+.last-roll__item.is-lost .last-roll__amount {
+  color: #ff9ea4;
+}
+
+.last-roll__why {
+  margin: 2px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.last-roll__fate {
+  color: var(--text-3);
+}
+
+/* The bets the roll left alone: one quiet line each. */
+.last-roll__quiet-head {
+  display: block;
+  margin: 10px 0 2px;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+}
+
+.last-roll__quiet {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.last-roll__quiet li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 8px;
+  padding: 4px 0 4px 2px;
+  border-top: 1px solid var(--glass-edge);
+}
+
+.last-roll__quiet li:first-child {
+  border-top: 0;
+}
+
+.last-roll__quiet .last-roll__name {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.last-roll__quiet .last-roll__amount {
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.last-roll__quiet .last-roll__why {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+/* With the last roll above them, the bets keep at least a row and a half. */
+.rail__list {
+  min-height: 128px;
+}

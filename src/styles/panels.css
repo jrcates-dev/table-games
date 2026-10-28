@@ -1,0 +1,406 @@
+/* ---------------------------------------------------------------------------
+   Drawer contents: the strategy card, statistics, history, settings.
+   --------------------------------------------------------------------------- */
+
+/* ---- Strategy chart ----------------------------------------------------------- */
+
+.chart__live {
+  position: sticky;
+  top: -18px;
+  z-index: 2;
+  margin: -18px -22px 18px;
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: linear-gradient(180deg, rgba(22, 20, 27, 0.98), rgba(18, 16, 22, 0.96));
+  border-bottom: 1px solid var(--glass-edge);
+}
+
+.chart__live p {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.chart__live strong {
+  color: var(--text-1);
+}
+
+.chart__live .eyebrow {
+  width: 100%;
+  margin-bottom: -8px;
+}
+
+.chart__advice {
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.chart__idle {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.chart__section + .chart__section {
+  margin-top: 22px;
+}
+
+.chart__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.chart__head h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  color: var(--gold-1);
+}
+
+.chart__head span {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.chart__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 3px;
+  table-layout: fixed;
+}
+
+.chart__table th {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--text-3);
+  padding: 3px 0;
+  transition: color 200ms ease;
+}
+
+.chart__table thead th.is-col,
+.chart__table tr.is-row th {
+  color: var(--gold-0);
+}
+
+.chart__table tbody th {
+  text-align: right;
+  padding-right: 8px;
+  width: 54px;
+  white-space: nowrap;
+}
+
+.cell {
+  height: 26px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  transition:
+    opacity 200ms ease,
+    transform 200ms var(--ease-spring),
+    box-shadow 200ms ease;
+}
+
+.cell--H {
+  background: rgba(79, 224, 160, 0.14);
+  color: #86f2c6;
+}
+
+.cell--S {
+  background: rgba(255, 107, 114, 0.15);
+  color: #ffabb0;
+}
+
+.cell--D,
+.cell--Ds {
+  background: rgba(227, 193, 112, 0.2);
+  color: var(--gold-1);
+}
+
+.cell--P,
+.cell--Pd {
+  background: rgba(127, 168, 255, 0.18);
+  color: #b3cbff;
+}
+
+.cell--Rh,
+.cell--Rs,
+.cell--Rp {
+  background: rgba(210, 205, 225, 0.14);
+  color: #e6e2f0;
+}
+
+.chart.is-focused .chart__table td {
+  opacity: 0.32;
+}
+
+.chart.is-focused .chart__table tr.is-row td,
+.chart.is-focused .chart__table td.is-live {
+  opacity: 1;
+}
+
+.cell.is-live {
+  transform: scale(1.18);
+  box-shadow:
+    0 0 0 2px var(--gold-1),
+    0 0 18px rgba(245, 223, 160, 0.6);
+  position: relative;
+  z-index: 1;
+}
+
+.chart__legend {
+  margin-top: 22px;
+  display: grid;
+  gap: 7px;
+}
+
+.chart__legend-row {
+  display: grid;
+  grid-template-columns: 34px 120px 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.chart__legend-row .cell {
+  display: grid;
+  place-items: center;
+}
+
+.chart__legend-row strong {
+  color: var(--text-1);
+}
+
+.chart__foot {
+  margin-top: 18px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+.chart__foot strong {
+  color: var(--text-2);
+}
+
+/* ---- Statistics ------------------------------------------------------------------ */
+
+.stats__hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.stats__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+}
+
+.stat--big {
+  padding: 14px 16px;
+  background: linear-gradient(180deg, rgba(227, 193, 112, 0.08), rgba(255, 255, 255, 0.02));
+  border-color: var(--gold-line);
+}
+
+.stat__label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.stat__value {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--text-1);
+}
+
+.stat--big .stat__value {
+  font-size: 30px;
+}
+
+.stat__value.is-good {
+  color: var(--win);
+}
+
+.stat__value.is-bad {
+  color: var(--lose);
+}
+
+.stats__runs {
+  margin-bottom: 22px;
+}
+
+.runs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.runs li {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.runs strong {
+  color: var(--gold-1);
+}
+
+/* ---- History ---------------------------------------------------------------------- */
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history__row {
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--glass-edge);
+}
+
+.history__head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+
+.history__time {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.history__net {
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.history__line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.history__who {
+  width: 58px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.card-chip {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: #f7f2e6;
+  color: #17161f;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.card-chip.is-red {
+  color: #c01a33;
+}
+
+.history__outcome {
+  margin-left: auto;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.history__outcome.is-blackjack {
+  color: var(--gold-1);
+}
+
+.history__outcome.is-win {
+  color: var(--win);
+}
+
+.history__outcome.is-lose,
+.history__outcome.is-bust,
+.history__outcome.is-dealerBlackjack {
+  color: var(--lose);
+}
+
+.history__mistakes {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  list-style: none;
+  border-radius: 9px;
+  background: rgba(255, 193, 94, 0.07);
+  border: 1px solid rgba(255, 193, 94, 0.18);
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+
+.history__mistakes strong {
+  color: var(--gold-1);
+}
+
+/* ---- Settings bits ------------------------------------------------------------------ */
+
+.confirm p {
+  font-size: 12.5px;
+  color: var(--text-2);
+  margin-bottom: 10px;
+}
+
+.confirm__buttons,
+.account-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.account-row span {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-2);
+}

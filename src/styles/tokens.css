@@ -1,0 +1,136 @@
+/* ---------------------------------------------------------------------------
+   Arena design tokens
+
+   Midnight and champagne gold. The felt is the only saturated colour on the
+   screen; everything layered over it is warm near-black glass, so cards, chips
+   and dice always read first.
+   --------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: dark;
+
+  /* Ink — warm near-blacks, never pure black */
+  --ink-0: #040406;
+  --ink-1: #09090d;
+  --ink-2: #101016;
+  --ink-3: #17161e;
+  --ink-4: #211f29;
+
+  /* Text */
+  --text-1: #f6efe0;
+  --text-2: #c2b9a6;
+  --text-3: #8a8374;
+  --text-4: #5d584e;
+
+  /* Champagne gold */
+  --gold-0: #fff4d2;
+  --gold-1: #f5dfa0;
+  --gold-2: #e3c170;
+  --gold-3: #c99c45;
+  --gold-4: #93702c;
+  --gold-5: #5c4419;
+  --gold-foil: linear-gradient(
+    135deg,
+    #fff1c9 0%,
+    #e9c77c 22%,
+    #b98a3a 45%,
+    #f6dd9b 62%,
+    #c89a47 80%,
+    #8a6526 100%
+  );
+  --gold-line: rgba(227, 193, 112, 0.28);
+  --gold-line-strong: rgba(227, 193, 112, 0.55);
+
+  /* Outcomes */
+  --win: #4fe0a0;
+  --win-deep: #1f9e66;
+  --lose: #ff6b72;
+  --lose-deep: #b3303a;
+  --push: #b9c4d8;
+  --warn: #ffc15e;
+
+  /* Glass */
+  --glass: rgba(14, 13, 19, 0.72);
+  --glass-strong: rgba(12, 11, 16, 0.9);
+  --glass-edge: rgba(255, 244, 214, 0.08);
+  --glass-edge-strong: rgba(255, 244, 214, 0.16);
+
+  /* Type */
+  --font-ui: 'Manrope Variable', 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
+  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+
+  /* Radii & elevation */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 26px;
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 30px 80px rgba(0, 0, 0, 0.6);
+  --inner-hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* The notch, the rounded corners and the home bar on a phone. Zero
+     everywhere else, so the chrome can always add them. */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+
+  /* The dock sits this far off the bottom edge, or clear of the home bar if
+     that is higher; whatever the home bar adds lifts the stage and the panels
+     that stop above the dock by the same amount. */
+  --dock-bottom: 16px;
+  --dock-lift: calc(max(var(--dock-bottom), var(--safe-b)) - var(--dock-bottom));
+
+  /* Felt — overridden per theme below */
+  --felt-hi: #1f8a5e;
+  --felt-mid: #0f5e3f;
+  --felt-lo: #062f1f;
+  --felt-edge: #03170f;
+  --felt-print: #f1dca2;
+  --felt-print-soft: rgba(241, 220, 162, 0.55);
+  --felt-glow: rgba(255, 236, 190, 0.2);
+}
+
+/* ---- Felt themes -------------------------------------------------------- */
+
+[data-felt='emerald'] {
+  --felt-hi: #1f8a5e;
+  --felt-mid: #0f5e3f;
+  --felt-lo: #062f1f;
+  --felt-edge: #03170f;
+}
+
+[data-felt='sapphire'] {
+  --felt-hi: #2566a8;
+  --felt-mid: #143f72;
+  --felt-lo: #0a1f3d;
+  --felt-edge: #050f20;
+}
+
+[data-felt='crimson'] {
+  --felt-hi: #9a2638;
+  --felt-mid: #6a1424;
+  --felt-lo: #360912;
+  --felt-edge: #1c0409;
+}
+
+[data-felt='violet'] {
+  --felt-hi: #5d3a92;
+  --felt-mid: #3c2266;
+  --felt-lo: #1e1036;
+  --felt-edge: #0e071a;
+}
+
+[data-felt='onyx'] {
+  --felt-hi: #353b48;
+  --felt-mid: #1f232d;
+  --felt-lo: #0f1117;
+  --felt-edge: #06070a;
+}

@@ -1,0 +1,846 @@
+/* ---------------------------------------------------------------------------
+   Blackjack
+   --------------------------------------------------------------------------- */
+
+.bj {
+  position: absolute;
+  inset: 0 var(--safe-r) 0 var(--safe-l);
+}
+
+.bj > .topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.bj__stage {
+  position: absolute;
+  inset: 0 0 var(--dock-lift);
+}
+
+/* ---- The tilted plane ---------------------------------------------------- */
+
+.bj-camera,
+.bj-plane {
+  pointer-events: none;
+}
+
+.bj-camera {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1600px;
+  height: 900px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+}
+
+.bj-plane {
+  position: absolute;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+}
+
+.bj-table {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+
+/* ---- Shoe & discard rack ----------------------------------------------------- */
+
+.bj-shoe,
+.bj-discard {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.bj-shoe__shadow,
+.bj-discard__shadow {
+  position: absolute;
+  left: -78px;
+  top: -112px;
+  width: 156px;
+  height: 236px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.55);
+  filter: blur(14px);
+  transform: translate(10px, 16px);
+}
+
+.bj-discard__shadow {
+  left: -72px;
+  top: -94px;
+  width: 144px;
+  height: 188px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.bj-shoe__face {
+  background: linear-gradient(160deg, #26242c, #0d0c11 70%);
+  border: 1px solid rgba(227, 193, 112, 0.35);
+  border-radius: 4px;
+  backface-visibility: hidden;
+}
+
+/* Double-click to shuffle up early; only between hands. */
+.bj-shoe.is-armed .bj-shoe__face {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+@media (hover: hover) {
+  .bj-shoe.is-armed:hover .bj-shoe__face {
+    border-color: var(--gold-line-strong);
+  }
+}
+
+.bj-shoe__face--front {
+  background: linear-gradient(180deg, #1e1c23, #09080c);
+}
+
+.bj-shoe__face--left {
+  background: linear-gradient(90deg, #0b0a0e, #1b1a21);
+}
+
+.bj-shoe__face--right {
+  background: linear-gradient(270deg, #0b0a0e, #25232b);
+}
+
+.bj-shoe__top {
+  position: absolute;
+  inset: 6px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0b0a0e;
+  box-shadow: inset 0 0 0 1px rgba(227, 193, 112, 0.25);
+}
+
+.bj-shoe__deck {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 14px;
+  bottom: 22px;
+  opacity: 0.55;
+  filter: brightness(0.55) blur(0.4px);
+}
+
+.bj-shoe__top::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, transparent 30%, transparent 70%, rgba(255, 255, 255, 0.06) 100%);
+}
+
+.bj-shoe__mouth {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 8px;
+  height: 16px;
+  border-radius: 3px 3px 1px 1px;
+  background: linear-gradient(180deg, #e6dfcf, #cfc6b3);
+  box-shadow:
+    0 -2px 0 rgba(0, 0, 0, 0.4) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.bj-discard__floor {
+  position: absolute;
+  left: -62px;
+  top: -82px;
+  width: 124px;
+  height: 164px;
+  border-radius: 4px;
+  background: linear-gradient(160deg, rgba(60, 56, 70, 0.55), rgba(10, 9, 13, 0.6));
+  border: 1px solid rgba(227, 193, 112, 0.35);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6);
+}
+
+.bj-discard__glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 3px;
+}
+
+.bj-discard__stack {
+  background: repeating-linear-gradient(0deg, #f4efe3 0 1px, #cfc6b3 1px 2px);
+  backface-visibility: hidden;
+}
+
+.bj-discard__top {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bj-discard__edge {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, #f7f2e6 0 1.2px, #bdb49f 1.2px 2.2px);
+}
+
+/* ---- Cards -------------------------------------------------------------------- */
+
+.bj-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.bj-card__spin,
+.bj-card__shadow {
+  position: absolute;
+  left: -60px;
+  top: -84px;
+  width: 120px;
+  height: 168px;
+}
+
+.bj-card__spin {
+  transform-style: preserve-3d;
+}
+
+.bj-card__shadow {
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  filter: blur(6px);
+  translate: 5px 9px;
+}
+
+.bj-card__flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.bj-card__face {
+  position: absolute;
+  inset: 0;
+  border-radius: 8.5px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(0, 0, 0, 0.25);
+  transition: filter 280ms ease;
+}
+
+.bj-card__face svg {
+  display: block;
+  border-radius: 8.5px;
+}
+
+.bj-card__face--back {
+  transform: rotateY(180deg);
+}
+
+.bj-card__face.is-dim {
+  filter: brightness(0.55) saturate(0.7);
+}
+
+/* ---- Chips on the felt ---------------------------------------------------------- */
+
+.bj-stack {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.bj-stack__shadow {
+  position: absolute;
+  transform: translate(-50%, -50%) translateY(6px);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0));
+}
+
+/* ---- Billboards: totals and results ----------------------------------------------- */
+
+.bj-billboard {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.bj-billboard__stand {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transform-origin: 50% 100%;
+  white-space: nowrap;
+}
+
+.total-pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 58px;
+  padding: 5px 13px 6px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(20, 18, 26, 0.92), rgba(8, 8, 11, 0.92));
+  border: 1px solid rgba(255, 244, 214, 0.2);
+  /* Tight shadows: these signs stand up off the felt, and a wide soft shadow
+     would hang over the cards behind them like a smear of light and dark. */
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--text-1);
+  line-height: 1;
+}
+
+.total-pill strong {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: 0.01em;
+}
+
+.total-pill__who {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 3px;
+}
+
+.total-pill.is-active {
+  border-color: var(--gold-line-strong);
+  box-shadow:
+    0 0 0 3px rgba(227, 193, 112, 0.18),
+    0 3px 8px rgba(0, 0, 0, 0.45);
+}
+
+.total-pill.is-active strong {
+  color: var(--gold-0);
+}
+
+.total-pill.is-21 strong,
+.total-pill.is-natural strong {
+  color: var(--gold-1);
+  text-shadow: 0 0 16px rgba(245, 223, 160, 0.6);
+}
+
+.total-pill.is-bust {
+  border-color: rgba(255, 107, 114, 0.5);
+}
+
+.total-pill.is-bust strong {
+  color: var(--lose);
+  font-size: 24px;
+}
+
+.result-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(22, 20, 28, 0.94), rgba(8, 8, 11, 0.94));
+  border: 1px solid rgba(255, 244, 214, 0.2);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+  line-height: 1;
+}
+
+.result-tag__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.result-tag__total {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--text-3);
+}
+
+.result-tag__net {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.result-tag--gold {
+  border-color: rgba(245, 223, 160, 0.7);
+  background: linear-gradient(180deg, rgba(60, 44, 16, 0.95), rgba(24, 17, 6, 0.95));
+  box-shadow:
+    0 0 0 3px rgba(227, 193, 112, 0.2),
+    0 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+.result-tag--gold .result-tag__label,
+.result-tag--gold .result-tag__net {
+  background: var(--gold-foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.result-tag--win {
+  border-color: rgba(79, 224, 160, 0.55);
+}
+
+.result-tag--win .result-tag__label,
+.result-tag--win .result-tag__net {
+  color: var(--win);
+}
+
+.result-tag--push .result-tag__label {
+  color: var(--push);
+}
+
+.result-tag--lose {
+  opacity: 0.88;
+}
+
+.result-tag--lose .result-tag__label,
+.result-tag--lose .result-tag__net {
+  color: #e58a8f;
+}
+
+.bj-active-glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 36px;
+  margin: -18px 0 0 -125px;
+  border-radius: 50%;
+  /* No blend mode here: any blending inside the tilted plane makes Chrome
+     flatten the whole plane, and the shoe and cards lose their depth. */
+  background: radial-gradient(closest-side, rgba(245, 223, 160, 0.38), rgba(245, 223, 160, 0));
+  animation: glow-breathe 1.8s ease-in-out infinite;
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ---- Result banner --------------------------------------------------------------- */
+
+.banner-anchor {
+  position: absolute;
+  left: 50%;
+  top: 46.5%;
+  width: 0;
+  height: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.banner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 44px 14px;
+  white-space: nowrap;
+  text-align: center;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(28, 18, 18, 0.94), rgba(8, 6, 7, 0.95));
+  border: 1px solid rgba(217, 180, 106, 0.3);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 236, 190, 0.1);
+}
+
+.banner__rule {
+  width: 140px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-2), transparent);
+  opacity: 0.8;
+}
+
+.banner__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 44px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  margin-top: 6px;
+}
+
+.banner__sub {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.banner--gold {
+  border-color: rgba(245, 223, 160, 0.45);
+  box-shadow:
+    0 0 60px rgba(227, 193, 112, 0.25),
+    0 24px 70px rgba(0, 0, 0, 0.6);
+}
+
+.banner--gold .banner__title,
+.banner--gold .banner__sub {
+  background: linear-gradient(110deg, #c89a47 0%, #fff6d8 35%, #e9c77c 55%, #f6dd9b 75%, #b98a3a 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: foil 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 22px rgba(227, 193, 112, 0.45));
+}
+
+.banner--win .banner__title {
+  color: var(--text-1);
+  text-shadow: 0 0 30px rgba(79, 224, 160, 0.35);
+}
+
+.banner--win .banner__sub {
+  color: var(--win);
+}
+
+.banner--push .banner__title {
+  color: var(--push);
+}
+
+.banner--push .banner__sub {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.banner--lose .banner__title {
+  font-size: 32px;
+  color: var(--text-2);
+}
+
+.banner--lose .banner__sub {
+  font-size: 24px;
+  color: #e58a8f;
+}
+
+/* ---- Count HUD ---------------------------------------------------------------------- */
+
+.count-hud {
+  position: absolute;
+  z-index: 12;
+  left: 22px;
+  top: 96px;
+  width: 210px;
+  padding: 14px 16px 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(30, 20, 20, 0.95), rgba(12, 8, 9, 0.96));
+  border: 1px solid rgba(217, 180, 106, 0.24);
+  box-shadow: var(--shadow-2), inset 0 1px 0 rgba(255, 236, 190, 0.08);
+  cursor: help;
+}
+
+.count-hud__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 10px 0 12px;
+}
+
+.count-hud__grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.count-hud__grid span {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+}
+
+.count-hud__grid strong {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.count-hud .is-hot {
+  color: var(--win);
+}
+
+.count-hud .is-cold {
+  color: var(--lose);
+}
+
+.count-hud__shoe {
+  position: relative;
+  height: 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: visible;
+}
+
+.count-hud__fill {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--gold-4), var(--gold-2));
+  transition: width 400ms ease;
+}
+
+.count-hud__cut {
+  position: absolute;
+  top: -4px;
+  width: 3px;
+  height: 14px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: #ff5a64;
+  box-shadow: 0 0 8px rgba(255, 90, 100, 0.7);
+}
+
+.count-hud:focus-visible {
+  outline: 2px solid var(--gold-2);
+  outline-offset: 2px;
+}
+
+.count-hud__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.count-hud__head svg {
+  transition: color 160ms ease;
+}
+
+.count-hud:focus-visible .count-hud__head svg {
+  color: var(--gold-2);
+}
+
+@media (hover: hover) {
+  .count-hud:hover .count-hud__head svg {
+    color: var(--gold-2);
+  }
+}
+
+/* The explainer hangs under the HUD on the felts' tooltip card (see .spot-tip in craps.css, which loads later). */
+.spot-tip.count-tip {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 300px;
+  transform-origin: top left;
+  cursor: auto;
+}
+
+.count-tip__rows {
+  display: grid;
+  gap: 5px;
+}
+
+.count-tip .count-tip__rows div {
+  grid-template-columns: 58px 1fr;
+}
+
+.count-tip__term {
+  color: var(--gold-2);
+}
+
+.count-tip__ramp {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  margin-top: 8px;
+}
+
+.count-tip__ramp div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 0 4px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.count-tip__ramp span {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.count-tip__ramp strong {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-1);
+}
+
+.count-tip__ramp .is-now {
+  background: rgba(217, 180, 106, 0.14);
+  border-color: rgba(217, 180, 106, 0.5);
+}
+
+.count-tip__ramp .is-now span,
+.count-tip__ramp .is-now strong {
+  color: var(--gold-1);
+}
+
+/* ---- Action prices ---------------------------------------------------------------------- */
+
+/* The coach's hover card on a decision: this play's worth, its cost against the book, and every other play's. */
+.spot-tip.action-tip {
+  width: 284px;
+}
+
+.action-tip__money {
+  color: var(--text-3);
+}
+
+.action-tip__money strong {
+  font-weight: 800;
+  color: var(--text-1);
+}
+
+.action-tip__plays {
+  display: grid;
+  gap: 2px;
+  margin-top: 9px;
+}
+
+.action-tip__plays div {
+  display: grid;
+  grid-template-columns: 1fr auto 62px;
+  align-items: baseline;
+  gap: 10px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.action-tip__plays strong {
+  font-weight: 800;
+  text-align: right;
+}
+
+.action-tip__plays div > span:last-child {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.action-tip__plays em {
+  margin-left: 6px;
+  font-style: normal;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-1);
+}
+
+.action-tip__plays .is-now {
+  background: rgba(217, 180, 106, 0.14);
+  border-color: rgba(217, 180, 106, 0.5);
+}
+
+.action-tip__plays .is-now > span:first-child {
+  color: var(--text-1);
+}
+
+/* ---- Fresh shoe ------------------------------------------------------------------------ */
+
+.shuffle-notice {
+  position: absolute;
+  z-index: 16;
+  right: 24px;
+  top: 92px;
+  max-width: 280px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--glass-strong);
+  border: 1px solid var(--gold-line);
+  box-shadow: var(--shadow-2);
+}
+
+.shuffle-notice p {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+/* ---- Coach challenge ------------------------------------------------------------------- */
+
+.challenge {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  top: 40%;
+  translate: -50% -50%;
+  width: min(460px, calc(100vw - 40px));
+  padding: 22px 24px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(28, 24, 18, 0.97), rgba(12, 11, 14, 0.97));
+  border: 1px solid var(--gold-line-strong);
+  box-shadow:
+    var(--shadow-3),
+    0 0 50px rgba(227, 193, 112, 0.15);
+  text-align: center;
+}
+
+.challenge__text {
+  margin: 10px 0 18px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.challenge__text strong {
+  color: var(--text-1);
+}
+
+.challenge__cost {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.challenge__correct {
+  color: var(--gold-1) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.challenge__buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}

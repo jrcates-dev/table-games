@@ -1,0 +1,961 @@
+/* ---------------------------------------------------------------------------
+   Smaller windows.
+
+   The tables scale as whole compositions (see Stage), so what adapts here is
+   the chrome around them: the dock and rail tighten, and the lobby compacts
+   on short screens rather than pushing its header off the top.
+   --------------------------------------------------------------------------- */
+
+.lobby {
+  justify-content: safe center;
+}
+
+@media (max-height: 940px) {
+  .lobby {
+    gap: 14px;
+    padding-top: 16px;
+    padding-bottom: 14px;
+  }
+
+  .lobby__head .monogram {
+    width: 50px;
+    height: 50px;
+  }
+
+  .lobby__title {
+    font-size: 62px;
+  }
+
+  .lobby__subtitle {
+    font-size: 17px;
+  }
+
+  .game-card__art {
+    height: 160px;
+  }
+
+  .art__cards {
+    top: 14px;
+  }
+
+  .art__card {
+    width: 96px;
+    height: 134px;
+  }
+
+  .art__dice {
+    top: 24px;
+  }
+
+  .art__puck {
+    top: 104px;
+  }
+
+  .art__box {
+    top: 56px;
+  }
+
+  .art__board {
+    top: 62px;
+  }
+
+  .art__pair {
+    top: 80px;
+  }
+
+  .art__wheel {
+    top: 20px;
+  }
+
+  .art__hole {
+    top: 106px;
+  }
+
+  .art__chips--uth {
+    bottom: 22px;
+  }
+
+  .game-card__body {
+    padding: 10px 18px 16px;
+  }
+
+  .game-card__title {
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+
+  .game-card__rules {
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 1440px), (max-height: 820px) {
+  .dock {
+    min-height: 80px;
+    padding: 10px 12px;
+    border-radius: 22px;
+  }
+
+  .dock__row {
+    gap: 12px;
+    min-height: 58px;
+  }
+
+  .rack__chip svg {
+    width: 46px;
+    height: 46px;
+  }
+
+  .action {
+    width: 90px;
+    height: 62px;
+    border-radius: 16px;
+  }
+
+  .btn--lg {
+    height: 50px;
+    padding: 0 22px;
+  }
+
+  .wager__value,
+  .settled__net,
+  .hand-info__total {
+    font-size: 32px;
+  }
+
+  .wager {
+    min-width: 120px;
+  }
+
+  .rail {
+    width: 282px;
+    bottom: calc(124px + var(--dock-lift));
+  }
+
+  .drawer {
+    bottom: calc(124px + var(--dock-lift));
+  }
+
+  .topbar {
+    padding: 10px 16px;
+  }
+
+  .bankroll__value {
+    font-size: 26px;
+  }
+}
+
+/* Narrow: the craps dock drops its button words and keeps the icons. */
+@media (max-width: 1240px) {
+  .dock--craps .dock__buttons .btn--sm {
+    padding: 0 10px;
+    font-size: 0;
+    gap: 0;
+  }
+
+  .dock--craps .dock__buttons .btn--sm svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .placard {
+    display: none;
+  }
+
+  .mode-picker .segmented button {
+    padding: 0 7px;
+  }
+}
+
+/* Not room for five abreast: three and two, a little larger. */
+@media (max-width: 1360px) {
+  .lobby__games {
+    max-width: 1040px;
+  }
+
+  .game-card {
+    width: 312px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .rail {
+    width: 256px;
+  }
+
+  .game-card {
+    width: 290px;
+  }
+}
+
+/* Short windows: the marquee gives up some of its frame so the tables fit. */
+@media (max-height: 940px) {
+  .lobby__head {
+    padding-top: 20px;
+  }
+
+  .marquee {
+    padding: 28px 58px 16px;
+    border-radius: 22px;
+  }
+
+  .marquee__crest {
+    width: 64px;
+    height: 64px;
+  }
+
+  .marquee__crest .monogram {
+    width: 46px;
+    height: 46px;
+  }
+}
+
+/*
+ * Phones: each table as wide as the screen, its picture shorter and its rules
+ * cut to the two that say the most, so the five are a short scroll rather
+ * than three thousand pixels of one.
+ */
+@media (max-width: 560px) {
+  .lobby {
+    gap: 16px;
+    padding: 16px 14px 14px;
+  }
+
+  .lobby__games {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .game-card {
+    width: min(100%, 400px);
+  }
+
+  .game-card__art {
+    height: 140px;
+  }
+
+  .game-card__rules li:nth-child(n + 3) {
+    display: none;
+  }
+
+  .art__wheel {
+    top: -6px;
+  }
+
+  /* The sign narrows to the screen, and the mute button keeps clear of its frame. */
+  .lobby__corner {
+    top: 8px;
+    right: 8px;
+  }
+
+  .lobby__head {
+    padding-top: 30px;
+  }
+
+  .marquee {
+    padding: 26px 18px 16px;
+  }
+
+  .lobby__title {
+    font-size: 46px;
+  }
+
+  .lobby__subtitle {
+    gap: 10px;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .lobby__rule {
+    width: 28px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Phones and tablets.
+
+   Held sideways, a phone is a very short window: the top bar, the dock and the
+   rail give the felt every pixel they can, and the tables reserve less room
+   for the dock to match (see lib/compact.ts). Narrow windows — a phone
+   sideways, a tablet either way up — tighten the dock so it fits across. Held
+   upright, a phone cannot show a table at all, so the table asks to be turned
+   (the lobby still works upright). Keyboard hints go wherever the pointer is a
+   finger.
+   --------------------------------------------------------------------------- */
+
+/* The lobby scrolls clear of the notch, the corners and the home bar; the
+   room behind it still runs edge to edge. */
+.lobby {
+  inset: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
+}
+
+@media (pointer: coarse) {
+  .dock kbd {
+    display: none !important;
+  }
+}
+
+/* ---- A dock that fits across ------------------------------------------------ */
+
+@media (max-height: 500px), (max-width: 1100px) {
+  .dock-wrap {
+    max-width: calc(100% - 12px);
+  }
+
+  .dock {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Seven chips do not always fit beside everything else: the rack scrolls
+     sideways under a thumb before anything is cut off. */
+  .rack {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .rack::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rack__chip {
+    flex: none;
+  }
+
+  .rack__chip svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .wager,
+  .settled,
+  .hand-info {
+    min-width: 0;
+    flex-shrink: 0;
+  }
+
+  .wager__hint,
+  .mode-picker .eyebrow {
+    display: none;
+  }
+
+  .dock__row {
+    gap: 8px;
+  }
+
+  .dock__buttons {
+    gap: 5px;
+  }
+
+  .btn--sm {
+    padding: 0 10px;
+  }
+
+  .deal-btn,
+  .roll-btn {
+    min-width: 0;
+  }
+
+  /* Craps: the buttons beside Roll are icons only, as on a narrow window. */
+  .dock--craps .dock__buttons .btn--sm {
+    width: 38px;
+    padding: 0;
+    font-size: 0;
+    gap: 0;
+  }
+
+  .dock--craps .dock__buttons .btn--sm svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+/* ---- A phone held sideways ------------------------------------------------- */
+
+@media (max-height: 500px) {
+  :root {
+    --dock-bottom: 6px;
+  }
+
+  /* -- Top bar -- */
+
+  .topbar {
+    gap: 10px;
+    padding: 5px 10px;
+  }
+
+  .stage__zoom-btn {
+    left: 10px;
+  }
+
+  .brand {
+    gap: 6px;
+    padding: 2px 8px 2px 0;
+  }
+
+  .brand .monogram {
+    width: 30px;
+    height: 30px;
+  }
+
+  .brand__name {
+    font-size: 13px;
+  }
+
+  .brand__game {
+    font-size: 10px;
+    margin-top: 1px;
+  }
+
+  .topbar__right {
+    gap: 10px;
+  }
+
+  .bankroll__label {
+    font-size: 9px;
+  }
+
+  .bankroll__value {
+    font-size: 20px;
+  }
+
+  .bankroll__session {
+    display: none;
+  }
+
+  .topbar__actions {
+    gap: 4px;
+  }
+
+  /* -- Dock -- */
+
+  .dock {
+    min-height: 0;
+    padding: 5px 8px;
+    border-radius: 16px;
+  }
+
+  .dock__row {
+    min-height: 0;
+  }
+
+  .rack__chip svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* The note that says why the button is dark floats above the dock rather
+     than growing it, so the dock never climbs onto the felt. */
+  .dock__blocked {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    translate: -50% 0;
+    margin: 0;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-size: 11px;
+    background: rgba(8, 6, 7, 0.86);
+    border: 1px solid var(--glass-edge);
+  }
+
+  .rack {
+    gap: 2px;
+    padding: 6px 6px 3px;
+    border-radius: 14px;
+  }
+
+  .rack__chip.is-selected {
+    transform: translateY(-3px);
+  }
+
+  .rack__chip.is-selected::after {
+    bottom: -3px;
+  }
+
+  .wager__value,
+  .settled__net,
+  .hand-info__total {
+    font-size: 24px;
+  }
+
+  .hand-info .eyebrow,
+  .wager .eyebrow {
+    display: none;
+  }
+
+  .btn--sm {
+    height: 38px;
+  }
+
+  .btn--lg {
+    height: 44px;
+  }
+
+  .actions {
+    gap: 5px;
+  }
+
+  .action {
+    width: auto;
+    min-width: 70px;
+    height: 48px;
+    padding: 0 6px;
+    gap: 2px;
+    border-radius: 12px;
+  }
+
+  .action__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .action__label {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  .action--wide {
+    min-width: 0;
+    height: 44px;
+    padding: 0 14px;
+  }
+
+  .book-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ba-book,
+  .coach-card {
+    padding: 5px 8px;
+    gap: 2px;
+  }
+
+  .ba-book__text {
+    font-size: 12px;
+  }
+
+  .ba-book .action__book {
+    display: none;
+  }
+
+  .mode-picker .segmented button {
+    height: 38px;
+  }
+
+  .waiting {
+    min-height: 44px;
+  }
+
+  /* -- Rails and drawers stop between the top bar and the dock -- */
+
+  .rail,
+  .drawer {
+    top: 54px;
+    right: 8px;
+    bottom: calc(66px + var(--dock-lift));
+  }
+
+  .rail {
+    width: min(280px, 46%);
+    padding: 10px;
+    gap: 8px;
+    border-radius: 16px;
+    /* Too short to hold its fixed parts and a list beside them: the whole
+       rail scrolls instead of the list alone. */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .rail__list {
+    flex: none;
+    overflow: visible;
+  }
+
+  .rail-tab {
+    top: 54px;
+    right: 8px;
+    padding: 6px 12px;
+    border-radius: 12px;
+  }
+
+  .drawer {
+    width: min(440px, calc(100% - 16px));
+    border-radius: 18px;
+  }
+
+  .drawer--wide {
+    width: min(620px, calc(100% - 16px));
+  }
+
+  .drawer__head {
+    padding: 10px 14px 8px;
+  }
+
+  .drawer__title {
+    font-size: 18px;
+    margin-top: 0;
+  }
+
+  .drawer__body {
+    padding: 12px 14px 16px;
+  }
+
+  /* -- The lobby, sideways: the sign shrinks, and the five tables sit in one
+        row that swipes, each card short enough to show whole -- */
+
+  .lobby {
+    justify-content: safe center;
+    gap: 10px;
+    padding: 8px 0 12px;
+  }
+
+  .lobby__corner {
+    top: 8px;
+    right: 12px;
+  }
+
+  .lobby__head {
+    padding-top: 4px;
+  }
+
+  .marquee {
+    padding: 18px 44px 10px;
+    border-radius: 16px;
+  }
+
+  .marquee__bulbs {
+    inset: 8px;
+  }
+
+  .marquee__crest {
+    width: 34px;
+    height: 34px;
+  }
+
+  .marquee__crest .monogram {
+    width: 24px;
+    height: 24px;
+  }
+
+  .lobby__title {
+    font-size: 28px;
+  }
+
+  .lobby__subtitle {
+    font-size: 13px;
+  }
+
+  .lobby__games {
+    flex: none;
+    flex-wrap: nowrap;
+    justify-content: safe center;
+    gap: 12px;
+    width: 100%;
+    max-width: none;
+    padding: 2px 16px 6px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .lobby__games::-webkit-scrollbar {
+    display: none;
+  }
+
+  .game-card {
+    flex: none;
+    width: 252px;
+    border-radius: 20px;
+    scroll-snap-align: start;
+  }
+
+  .game-card__art {
+    height: 96px;
+  }
+
+  .game-card__body {
+    padding: 8px 14px 12px;
+  }
+
+  .game-card__title {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+
+  .game-card__rules,
+  .game-card__stake-hint {
+    display: none;
+  }
+
+  .game-card__foot {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 8px;
+    padding-top: 8px;
+  }
+
+  .game-card__bankroll {
+    min-height: 0;
+  }
+
+  .game-card__stake {
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 3px;
+  }
+
+  .game-card__stake .money-input input {
+    height: 38px;
+    font-size: 18px;
+  }
+
+  .game-card__foot .btn {
+    height: 38px;
+  }
+}
+
+/* Narrower still: the dock drops what the top bar already offers (the book),
+   so the rack scrolls only at craps. */
+@media (max-width: 800px) {
+  .dock .ba-book,
+  .dock .uth-prices {
+    display: none;
+  }
+
+  .rack__chip svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .dock__row {
+    gap: 6px;
+  }
+
+  .btn--sm {
+    padding: 0 8px;
+    letter-spacing: 0.04em;
+  }
+
+  .btn--lg {
+    padding: 0 14px;
+  }
+
+  .mode-picker .segmented button {
+    padding: 0 6px;
+    font-size: 11px;
+  }
+
+  .roll-btn svg {
+    display: none;
+  }
+}
+
+/* ---- Held upright, a table asks to be turned -------------------------------- */
+
+.rotate-hint {
+  display: none;
+}
+
+@media (orientation: portrait) and (max-width: 600px) {
+  .rotate-hint {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: calc(24px + var(--safe-t)) calc(24px + var(--safe-r)) calc(24px + var(--safe-b)) calc(24px + var(--safe-l));
+    text-align: center;
+    background: radial-gradient(120% 80% at 50% 35%, #1c1410 0%, var(--ink-0) 70%);
+  }
+
+  .rotate-hint__phone {
+    width: 54px;
+    height: 92px;
+    margin-bottom: 18px;
+    border: 3px solid var(--gold-2);
+    border-radius: 12px;
+    animation: rotate-hint 2.4s var(--ease-spring) infinite;
+  }
+
+  .rotate-hint__text {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--gold-1);
+  }
+
+  .rotate-hint__sub {
+    max-width: 280px;
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  .rotate-hint .btn {
+    margin-top: 18px;
+  }
+
+  /* The table underneath sits still: nothing paints that no one can see. */
+  .app:has(.rotate-hint) .screen,
+  .app:has(.rotate-hint) .room {
+    visibility: hidden;
+  }
+}
+
+@keyframes rotate-hint {
+  0%,
+  25% {
+    rotate: 0deg;
+  }
+
+  55%,
+  100% {
+    rotate: -90deg;
+  }
+}
+
+/* ---- Touch screens ------------------------------------------------------------------------ */
+
+/* A finger needs bigger print and bigger targets than a mouse. No label reads
+   smaller than 12px, and every control takes a press 44px tall even where it
+   draws smaller: the press reaches past the edge it shows, so the compact
+   dock and top bar keep their size. The exceptions are the felt, whose
+   printing is the table's art and says nothing the rail and the hold-cards do
+   not, and the dense grids — strategy charts, bead roads — that are read as a
+   pattern rather than word by word. */
+@media (pointer: coarse) {
+  .eyebrow,
+  .bankroll__label,
+  .brand__game,
+  .rail-tab__label,
+  .edge-pill,
+  .dock__blocked,
+  .btn--sm,
+  .ba-book__text,
+  .uth-prices .ba-book__text,
+  .segmented button,
+  .mode-picker .segmented button,
+  .game-card__foot .btn,
+  .game-card__stake-hint,
+  .placard,
+  .bankroll__risk,
+  .rack-menu__hint,
+  .wager__hint,
+  .action__label,
+  .action__book,
+  .form-section__title,
+  .field__hint,
+  .toggle__hint,
+  .stat__label,
+  .chart__head span,
+  .chart__table th,
+  .chart__foot,
+  .history__time,
+  .history__who,
+  .history__outcome,
+  .history__mistakes,
+  .spot-tip__rows em,
+  .spot-tip__limit,
+  .spot-tip__mode,
+  .spot-tip__note,
+  .spot-tip__shoe,
+  .reference__blurb,
+  .reference__live,
+  .reference__detail,
+  .reference__detail em,
+  .action-tip__plays div > span:last-child,
+  .action-tip__plays em,
+  .count-hud__grid span,
+  .count-tip__ramp span,
+  .point-status__text span,
+  .bet-row__needs,
+  .bet-row__needs em,
+  .bet-row__foot,
+  .bet-row__off,
+  .bet-row__actions button,
+  .bet-row__locked,
+  .side-progress__row,
+  .side-progress__row em,
+  .ats-set span,
+  .next-roll__net,
+  .shoot__rolls,
+  .last-roll__title .eyebrow,
+  .last-roll__summary,
+  .last-roll__tag,
+  .last-roll__why,
+  .last-roll__quiet-head,
+  .last-roll__quiet .last-roll__name,
+  .last-roll__quiet .last-roll__why,
+  .ba-best,
+  .ba-shoe__cards,
+  .ba-shoe__tally,
+  .ba-odd em,
+  .ba-last__who,
+  .ba-last__steps,
+  .ba-last__label,
+  .ba-last__sum dt,
+  .ba-last__note,
+  .ro-prices__foot,
+  .ro-price__pays,
+  .ro-summary__grid,
+  .ro-summary__warn,
+  .ro-history__tally,
+  .ro-history__empty,
+  .ro-history__fair,
+  .ro-history__more,
+  .uth-action__amount,
+  .uth-coach__reason,
+  .uth-coach__evs,
+  .uth-rail__note,
+  .uth-score__list li,
+  .uth-score__list li em {
+    font-size: 12px;
+  }
+
+  .brand,
+  .icon-btn,
+  .segmented button,
+  .rail__fold,
+  .rack-reset__share {
+    position: relative;
+  }
+
+  .brand::before,
+  .icon-btn::before,
+  .btn--sm::before,
+  .segmented button::before,
+  .rail__fold::before,
+  .rack-reset__share::before {
+    content: '';
+    position: absolute;
+    inset: min(0px, (100% - 44px) / 2) -2px;
+  }
+
+  .rail__fold::before {
+    inset: -7px;
+  }
+
+  .game-card__stake .money-input input,
+  .game-card__foot .btn {
+    height: 44px;
+  }
+
+  .rack-reset {
+    padding-block: 4px;
+  }
+
+  .rack-reset .money-input input {
+    height: 40px;
+  }
+}

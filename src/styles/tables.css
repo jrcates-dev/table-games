@@ -1,0 +1,219 @@
+/* ---------------------------------------------------------------------------
+   The newer tables — baccarat, roulette, Ultimate Texas Hold'em.
+
+   Each is built from the pieces blackjack and craps already style: the tilted
+   plane, the cards and chip stacks, the rail and its bet rows, the dock. What
+   lives here is the frame every one of them shares, and the few pieces that
+   are new to all three.
+   --------------------------------------------------------------------------- */
+
+.tv {
+  position: absolute;
+  inset: 0 var(--safe-r) 0 var(--safe-l);
+}
+
+.tv > .topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.tv__stage {
+  position: absolute;
+  inset: 0 0 var(--dock-lift);
+}
+
+.d-table {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+
+/* A card that makes the hand: lifted out of the dimmed ones around it. */
+.bj-card__face.is-lit {
+  box-shadow:
+    0 0 0 2.5px rgba(245, 223, 160, 0.95),
+    0 0 22px rgba(245, 223, 160, 0.55);
+}
+
+/* The edge belongs to the player: a baccarat side bet, late in a shoe. */
+.edge-pill.is-yours {
+  background: rgba(79, 224, 160, 0.3);
+  color: #c9ffe6;
+  box-shadow: 0 0 0 1px rgba(79, 224, 160, 0.45);
+}
+
+.spot-tip__note {
+  display: block;
+  margin-left: auto;
+  font-size: 10.5px;
+  color: var(--text-4);
+}
+
+.spot-tip__edge {
+  flex-wrap: wrap;
+}
+
+/* The bet priced from what is left in the shoe: there to look at, not to lead with. */
+.spot-tip__shoe {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: 10.5px;
+  color: var(--text-4);
+}
+
+.spot-tip__shoe strong {
+  font-weight: 700;
+  color: var(--text-3);
+}
+
+.spot-tip__shoe strong.tone-win {
+  color: var(--win);
+}
+
+/* "Which bet?" — a tap that landed between spots (see components/pick.ts). */
+.spot-tip.bet-pick {
+  width: 248px;
+  padding: 10px;
+}
+
+.bet-pick__head {
+  padding: 2px 6px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.bet-pick__list {
+  display: grid;
+  gap: 4px;
+}
+
+.bet-pick__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 11px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-edge);
+  color: var(--text-1);
+}
+
+/* The spot the finger landed on first. */
+.bet-pick__option:first-child {
+  border-color: var(--gold-line);
+}
+
+.bet-pick__option:active {
+  background: rgba(227, 193, 112, 0.14);
+}
+
+.bet-pick__option strong {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+.bet-pick__option span {
+  flex: none;
+  font-weight: 800;
+  color: var(--gold-1);
+}
+
+.bet-pick__zoom {
+  width: 100%;
+  height: 40px;
+  margin-top: 8px;
+  gap: 8px;
+}
+
+.bet-pick__zoom svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* The reference cards' extra lines. */
+.reference__blurb {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.reference__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* The "Book" flag, outside the action buttons it was made for. */
+.ba-book,
+.coach-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 9px 12px 8px;
+  border-radius: 14px;
+  background: rgba(227, 193, 112, 0.07);
+  border: 1px solid var(--gold-line);
+  color: var(--text-1);
+  text-align: left;
+}
+
+.ba-book .action__book {
+  position: static;
+  transform: none;
+  align-self: flex-start;
+}
+
+.ba-book__text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .ba-book:hover {
+    border-color: var(--gold-line-strong);
+  }
+}
+
+.ba-next {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Inline tones for the two sides of a baccarat coup. */
+.tone-player {
+  color: #8fb8ff;
+}
+
+.tone-banker {
+  color: #ff8f96;
+}
+
+.tone-tie {
+  color: var(--win);
+}

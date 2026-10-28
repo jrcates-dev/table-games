@@ -1,0 +1,295 @@
+/* ---------------------------------------------------------------------------
+   Ultimate Texas Hold'em
+   --------------------------------------------------------------------------- */
+
+/* Seven cards on the felt, dealt a size down: the layer is scaled, the cards are not. */
+.uth-cards {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  transform-style: preserve-3d;
+}
+
+/* ---- The shuffler ------------------------------------------------------------- */
+
+.uth-shuffler .bj-shoe__shadow {
+  left: -72px;
+  top: -97px;
+  width: 144px;
+  height: 202px;
+}
+
+.uth-shuffler__top {
+  position: absolute;
+  inset: 6px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #17161c, #0a090d);
+  box-shadow: inset 0 0 0 1px rgba(227, 193, 112, 0.25);
+}
+
+.uth-shuffler__top::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, transparent 30%, transparent 70%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+.uth-shuffler__led {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 34px;
+  height: 7px;
+  margin-left: -17px;
+  border-radius: 4px;
+  background: #4fe0a0;
+  box-shadow:
+    0 0 8px rgba(79, 224, 160, 0.85),
+    0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+/* The hand waiting in the tray, under smoked glass. */
+.uth-shuffler__tray {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 32px;
+  bottom: 26px;
+  border-radius: 4px;
+  overflow: hidden;
+  opacity: 0.6;
+  filter: brightness(0.6);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+/* ---- Hand names --------------------------------------------------------------- */
+
+.uth-hand {
+  min-width: 128px;
+  align-items: flex-end;
+  transform-origin: 100% 100%;
+}
+
+.uth-hand strong {
+  font-size: 21px;
+  white-space: nowrap;
+}
+
+/* ---- The dock ----------------------------------------------------------------- */
+
+.dock--uth .hand-info__total {
+  font-size: 32px;
+  line-height: 1.2;
+  font-variant-numeric: lining-nums;
+}
+
+.uth-action {
+  --accent: var(--text-2);
+  gap: 3px;
+}
+
+.uth-action--check {
+  --accent: #9fc2ff;
+}
+
+.uth-action--bet4,
+.uth-action--bet3,
+.uth-action--bet2,
+.uth-action--bet1 {
+  --accent: var(--gold-1);
+}
+
+.uth-action--fold {
+  --accent: #ff9ca1;
+}
+
+/* A street with fewer choices keeps the seat, so the buttons beside it stay put. */
+.uth-action.is-vacant {
+  visibility: hidden;
+}
+
+.uth-action__amount {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.uth-coach {
+  /* One width whatever the advice runs to, so the dock doesn't resize under the buttons. */
+  width: 300px;
+  cursor: pointer;
+  transition: border-color 160ms ease;
+}
+
+@media (hover: hover) {
+  .uth-coach:hover {
+    border-color: var(--gold-line-strong);
+  }
+}
+
+.uth-coach__reason {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.uth-coach__evs {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* One width whatever the hands were, the longer names taking a second line,
+   so the result never nudges Rebet & deal. */
+.dock--uth.dock--over .settled {
+  width: 210px;
+}
+
+.dock--uth.dock--over .settled .eyebrow {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.uth-prices {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.uth-prices .ba-book__text {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+/* ---- The rail ----------------------------------------------------------------- */
+
+.ba-price.is-static {
+  cursor: default;
+}
+
+.uth-rail__note {
+  margin: 4px 2px 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+.uth-score {
+  margin-top: 8px;
+}
+
+.uth-score__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.uth-score__list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 1px 8px;
+  padding: 5px 9px 5px 11px;
+  border-radius: 9px;
+  border-left: 3px solid transparent;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 11.5px;
+}
+
+.uth-score__list li span {
+  color: var(--text-3);
+}
+
+.uth-score__list li strong {
+  color: var(--text-1);
+}
+
+.uth-score__list li em {
+  grid-column: 1 / -1;
+  font-style: normal;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.uth-score__list li.is-right {
+  border-left-color: var(--win);
+}
+
+.uth-score__list li.is-right em {
+  color: var(--win);
+}
+
+.uth-score__list li.is-wrong {
+  border-left-color: var(--lose);
+}
+
+.uth-score__list li.is-wrong em {
+  color: var(--lose);
+}
+
+/* ---- The book ----------------------------------------------------------------- */
+
+.uth-chart {
+  display: grid;
+  gap: 2px;
+  margin: 8px 0 4px;
+}
+
+.uth-chart__row {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 2px;
+}
+
+.uth-chart__cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1.25;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.uth-chart__cell.is-raise {
+  color: #2a1d06;
+  background: linear-gradient(180deg, #f2d690, #d1a752);
+}
+
+.uth-chart__cell.is-check {
+  color: var(--text-4);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.uth-rules {
+  margin: 6px 0 8px;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.reference__row.is-current {
+  border-color: var(--gold-line);
+  background: rgba(227, 193, 112, 0.05);
+}
+
+/* The result belongs over the circles, not over the board it describes. */
+.tv--uth .banner-anchor {
+  top: 61%;
+}

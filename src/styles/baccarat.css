@@ -1,0 +1,418 @@
+/* ---------------------------------------------------------------------------
+   Baccarat
+   --------------------------------------------------------------------------- */
+
+.ba-total--player .total-pill__who {
+  color: #9cc0ff;
+}
+
+.ba-total--banker .total-pill__who {
+  color: #ff9ea4;
+}
+
+/* ---- The rail's price list ---------------------------------------------------- */
+
+.ba-prices {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ba-price {
+  cursor: pointer;
+  padding: 5px 11px 4px 13px;
+  opacity: 0.74;
+  transition:
+    opacity 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+@media (hover: hover) {
+  .ba-price:hover {
+    opacity: 1;
+    border-color: var(--glass-edge-strong);
+  }
+}
+
+.ba-price.has-bet {
+  opacity: 1;
+  background: rgba(227, 193, 112, 0.06);
+  border-color: var(--gold-line);
+}
+
+.ba-price .bet-row__foot {
+  margin-top: 2px;
+}
+
+.ba-price.is-lose {
+  border-color: rgba(255, 107, 114, 0.35);
+}
+
+.ba-price.is-push {
+  border-color: rgba(185, 196, 216, 0.35);
+}
+
+.ba-best {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  vertical-align: 2px;
+  color: #2a1d06;
+  background: linear-gradient(180deg, #f7e2a6, #d6ae5c);
+}
+
+/* ---- The shoe and its scoreboard ---------------------------------------------- */
+
+.ba-shoe {
+  flex-shrink: 0;
+  padding: 8px 11px 9px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-edge);
+}
+
+.ba-shoe__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.ba-shoe__cards {
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+.ba-shoe__odds {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 4px 0 7px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 15px;
+  align-items: baseline;
+}
+
+.ba-odd em {
+  margin-right: 5px;
+  font-family: var(--font-ui);
+  font-style: normal;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ba-odd--player em {
+  color: #8fb8ff;
+}
+
+.ba-odd--banker em {
+  color: #ff8f96;
+}
+
+.ba-odd--tie em {
+  color: var(--win);
+}
+
+.ba-plate {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 3px;
+  padding: 6px;
+  border-radius: 10px;
+  background: #f4efe2;
+  aspect-ratio: 14 / 6;
+}
+
+.ba-bead {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+}
+
+.ba-bead.is-empty {
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.ba-bead--player {
+  background: #2457c5;
+}
+
+.ba-bead--banker {
+  background: #c8202e;
+}
+
+.ba-bead--tie {
+  background: #1d9a5b;
+}
+
+.ba-bead.is-natural {
+  box-shadow: 0 0 0 1.5px #e3a72a;
+}
+
+.ba-bead__pp,
+.ba-bead__bp {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+}
+
+.ba-bead__pp {
+  left: -1px;
+  bottom: -1px;
+  background: #2457c5;
+}
+
+.ba-bead__bp {
+  right: -1px;
+  top: -1px;
+  background: #c8202e;
+}
+
+.ba-shoe__tally {
+  display: flex;
+  gap: 8px;
+  margin-left: 10px;
+  margin-right: auto;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* ---- The book ----------------------------------------------------------------- */
+
+.ba-tableau caption {
+  caption-side: bottom;
+  padding-top: 8px;
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: left;
+}
+
+.ba-tableau__side-col {
+  width: 22px;
+}
+
+.ba-tableau__total-col {
+  width: 30px;
+}
+
+/* Wide enough for its "Stood" header on a phone, where the number columns run narrow. */
+.ba-tableau__stood-col {
+  width: 42px;
+}
+
+/* The two axis labels: the Banker's total down the side, the Player's third card across the top. */
+.chart__table.ba-tableau th.ba-tableau__axis {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-2);
+}
+
+.ba-tableau th.ba-tableau__axis--top {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--gold-line-strong);
+}
+
+.ba-tableau tbody th.ba-tableau__axis--side {
+  width: auto;
+  padding: 0;
+  text-align: center;
+  border-right: 1px solid var(--gold-line-strong);
+}
+
+.ba-tableau__axis--side span {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
+.ba-tableau__last {
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.ba-paytable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.ba-paytable th,
+.ba-paytable td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--glass-edge);
+  text-align: left;
+}
+
+.ba-paytable th {
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.ba-paytable td {
+  text-align: right;
+  font-weight: 800;
+  color: var(--gold-1);
+}
+
+.ba-outcome--player {
+  color: #8fb8ff;
+}
+
+.ba-outcome--banker {
+  color: #ff8f96;
+}
+
+.ba-outcome--tie {
+  color: var(--win);
+}
+
+/* The result belongs over the apron, not over the cards it describes. */
+.tv--baccarat .banner-anchor {
+  top: 63%;
+}
+
+/* ---- What happened last coup -------------------------------------------------- */
+
+/* The card itself is the craps table's last-roll card; these are the parts only a coup has. */
+.ba-last__bead {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  font-size: 11.5px;
+}
+
+.ba-last__hands {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.ba-last__line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ba-last__who {
+  flex: none;
+  width: 48px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ba-last__cards {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+}
+
+.ba-last__cards .card-chip {
+  min-width: 28px;
+  height: 20px;
+  font-size: 13px;
+}
+
+/* The tableau's third card, which the dealer lays sideways. */
+.ba-last__cards .card-chip.is-third {
+  box-shadow:
+    0 0 0 1.5px var(--gold-2),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.ba-last__points {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-1);
+}
+
+.ba-last__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding-left: 17px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.ba-last__steps li::marker {
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+.ba-last__label {
+  display: block;
+  margin: 10px 0 6px;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+}
+
+.ba-last__sum {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 10px 0 0;
+}
+
+.ba-last__sum > div {
+  padding: 5px 8px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ba-last__sum dt {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.ba-last__sum dd {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-1);
+}
+
+.ba-last__sum .is-win dd {
+  color: var(--win);
+}
+
+.ba-last__sum .is-lose dd {
+  color: #ff9ea4;
+}
+
+.ba-last__note {
+  margin: 6px 0 0;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--text-3);
+}
