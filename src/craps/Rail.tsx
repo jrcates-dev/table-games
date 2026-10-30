@@ -33,6 +33,7 @@ export function Rail() {
         <motion.aside
           key="open"
           className="rail"
+          data-covers-felt
           aria-label="Your bets"
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}

@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
@@ -8,6 +8,7 @@ import { useStageScale } from '../../components/stageScale'
 import { useEffectsLevel } from '../../lib/effects'
 import type { Roll } from '../../engine/craps/types'
 import { ROLL_DURATION, useCrapsStore } from '../../store/crapsStore'
+import { useCrapsUiStore } from '../../store/crapsUiStore'
 import { CAMERA, DICE, PLANE, STAGE } from '../layout'
 import { axisAngle, FACE_NORMAL, multiply, relabel, type Q4 } from './faces'
 import { fillPool, takeThrow } from './bank'
@@ -92,13 +93,87 @@ function restingWith(value: number, yaw: number): Q4 {
   return multiply(axisAngle([0, 1, 0], yaw), relabel(value, 1))
 }
 
-function idlePose(roll: Roll | null): Array<{ x: number; y: number; q: Q4 }> {
+function idlePose(roll: Roll | null, lane: number): Array<{ x: number; y: number; q: Q4 }> {
   const a = roll?.a ?? 5
   const b = roll?.b ?? 2
   return [
-    { x: 1330, y: 360, q: restingWith(a, 0.4) },
-    { x: 1398, y: 392, q: restingWith(b, -0.3) },
+    { x: 1330 - lane, y: 360, q: restingWith(a, 0.4) },
+    { x: 1398 - lane, y: 392, q: restingWith(b, -0.3) },
   ]
+}
+
+/** What can slide in over the felt: the bet rail, and the drawers. */
+const COVERS = '[data-covers-felt]'
+
+/**
+ * Where the canvas sits on screen with the table pulled back to whole — as it
+ * always is by the time the dice fly (see stageZoom), even if a finger has it
+ * zoomed in at the moment of the throw.
+ */
+function wholeTableRect(canvas: HTMLElement): DOMRect {
+  const rect = canvas.getBoundingClientRect()
+  const layer = canvas.closest<HTMLElement>('.stage__zoom')
+  const box = layer?.parentElement?.getBoundingClientRect()
+  const transform = layer ? getComputedStyle(layer).transform : 'none'
+  if (!box || transform === 'none') return rect
+  const zoom = new DOMMatrixReadOnly(transform)
+  return new DOMRect(
+    box.left + (rect.left - box.left - zoom.e) / zoom.a,
+    box.top + (rect.top - box.top - zoom.f) / zoom.d,
+    rect.width / zoom.a,
+    rect.height / zoom.d,
+  )
+}
+
+interface Box {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
+
+function overlap(a: Box, b: Box): number {
+  return Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+}
+
+/**
+ * The lane nearest the far end whose landing zone, give or take a die, is in
+ * plain view: inside the window and out from under the rail and any drawer.
+ * Where no lane is wholly clear, the one with the least of it hidden.
+ */
+function clearLane(canvas: HTMLElement, camera: THREE.Camera, space: THREE.Object3D): number {
+  const covers = [...document.querySelectorAll(COVERS)].map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0)
+  if (covers.length === 0) return 0
+  const frame = wholeTableRect(canvas)
+  const view = { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
+  camera.updateMatrixWorld()
+  space.updateWorldMatrix(true, false)
+  const z = DICE.zone
+  const v = new THREE.Vector3()
+  let best = 0
+  let leastHidden = Infinity
+  for (const lane of DICE.lanes) {
+    const box = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity }
+    for (const x of [z.x0 - lane - S, z.x1 - lane + S]) {
+      for (const y of [z.y0 - S, z.y1 + S]) {
+        space.localToWorld(v.set(x / S, 0.5, y / S)).project(camera)
+        const sx = frame.left + ((v.x + 1) / 2) * frame.width
+        const sy = frame.top + ((1 - v.y) / 2) * frame.height
+        box.left = Math.min(box.left, sx)
+        box.right = Math.max(box.right, sx)
+        box.top = Math.min(box.top, sy)
+        box.bottom = Math.max(box.bottom, sy)
+      }
+    }
+    const offScreen = (box.right - box.left) * (box.bottom - box.top) - overlap(box, view)
+    const hidden = offScreen + covers.reduce((sum, r) => sum + overlap(box, r), 0)
+    if (hidden < 1) return lane
+    if (hidden < leastHidden) {
+      best = lane
+      leastHidden = hidden
+    }
+  }
+  return best
 }
 
 function panFor(x: number): number {
@@ -111,6 +186,10 @@ function DiceScene({ quality }: { quality: Quality }) {
   const rolling = useCrapsStore((s) => s.game.phase === 'rolling')
   const speed = useCrapsStore((s) => s.profile.settings.rollSpeed)
   const invalidate = useThree((s) => s.invalidate)
+  const gl = useThree((s) => s.gl)
+  const camera = useThree((s) => s.camera)
+  const space = useRef<THREE.Group>(null)
+  const lane = useCallback(() => (space.current ? clearLane(gl.domElement, camera, space.current) : 0), [gl, camera])
   const dice = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)]
   const shadows = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)]
   const playback = useRef<Playback>({
@@ -119,8 +198,27 @@ function DiceScene({ quality }: { quality: Quality }) {
     windup: 0,
     speedup: 1,
     remap: [[0, 0, 0, 1], [0, 0, 0, 1]],
-    rest: idlePose(roll),
+    rest: idlePose(roll, 0),
   })
+
+  // The rail or a drawer came or went, or the window changed: have throws
+  // ready in whichever lane is clear now, before the shooter wants one.
+  useEffect(() => {
+    let timer = 0
+    const settle = () => {
+      window.clearTimeout(timer)
+      // Once a drawer has finished sliding in.
+      timer = window.setTimeout(() => fillPool(lane()), 500)
+    }
+    settle()
+    const unsubscribe = useCrapsUiStore.subscribe(settle)
+    window.addEventListener('resize', settle)
+    return () => {
+      window.clearTimeout(timer)
+      unsubscribe()
+      window.removeEventListener('resize', settle)
+    }
+  }, [lane])
 
   // A new throw each time the dice leave the shooter's hand.
   useEffect(() => {
@@ -128,6 +226,8 @@ function DiceScene({ quality }: { quality: Quality }) {
     const total = ROLL_DURATION[speed] / 1000
     const now = performance.now() / 1000
     let until = now + total + 0.3
+    // Thrown where the player can see them land, not under the rail or a drawer.
+    const shift = lane()
 
     if (speed === 'instant') {
       playback.current = {
@@ -137,15 +237,15 @@ function DiceScene({ quality }: { quality: Quality }) {
         speedup: 1,
         remap: [[0, 0, 0, 1], [0, 0, 0, 1]],
         rest: [
-          { x: 1300 + Math.random() * 60, y: 330 + Math.random() * 40, q: restingWith(roll.a, Math.random() * 6) },
-          { x: 1392 + Math.random() * 60, y: 360 + Math.random() * 60, q: restingWith(roll.b, Math.random() * 6) },
+          { x: 1300 - shift + Math.random() * 60, y: 330 + Math.random() * 40, q: restingWith(roll.a, Math.random() * 6) },
+          { x: 1392 - shift + Math.random() * 60, y: 360 + Math.random() * 60, q: restingWith(roll.b, Math.random() * 6) },
         ],
         drop: 0.16,
       }
       diceHit('felt', 0.6, 0.14)
       diceHit('die', 0.4, 0.17)
     } else {
-      const t = takeThrow()
+      const t = takeThrow(shift)
       const windup = Math.min(0.3, total * 0.14)
       // The last quarter second of a simulation is the dice sitting still.
       const moving = Math.max(0.5, t.duration - 0.25)
@@ -182,10 +282,10 @@ function DiceScene({ quality }: { quality: Quality }) {
   // Coming back to the table, or loading it: the dice show the last roll.
   useEffect(() => {
     if (!rolling && !playback.current.throw && !playback.current.drop) {
-      playback.current.rest = idlePose(roll)
+      playback.current.rest = idlePose(roll, lane())
       invalidate()
     }
-  }, [roll, rolling, invalidate])
+  }, [roll, rolling, invalidate, lane])
 
   const q = useMemo(() => new THREE.Quaternion(), [])
   const q1 = useMemo(() => new THREE.Quaternion(), [])
@@ -214,7 +314,7 @@ function DiceScene({ quality }: { quality: Quality }) {
     const elapsed = now - p.start
 
     if (!p.throw) {
-      const rest = p.rest ?? idlePose(roll)
+      const rest = p.rest ?? idlePose(roll, 0)
       rest.forEach((pose, k) => {
         const die = dice[k].current
         if (!die) return
@@ -302,7 +402,7 @@ function DiceScene({ quality }: { quality: Quality }) {
         </mesh>
 
         {/* Simulation space: one unit is one die, origin at the plane's corner. */}
-        <group position={[-PLANE.w / 2, 0, -PLANE.h / 2]} scale={S}>
+        <group ref={space} position={[-PLANE.w / 2, 0, -PLANE.h / 2]} scale={S}>
           <ContactShadow ref={shadows[0]} />
           <ContactShadow ref={shadows[1]} />
           <Die ref={dice[0]} sheen={quality.sheen} />
