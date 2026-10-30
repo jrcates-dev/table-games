@@ -54,7 +54,7 @@ export function AppearanceSettings() {
       </div>
       <Field
         label="Effects"
-        hint={`Lighter draws the dice more simply and stills the lobby's lights, for an older phone or a longer battery. Auto ${
+        hint={`Lighter keeps every picture but plays it simpler: a few sparkles for a win, quicker banners and screen changes, plainer dice and still lobby lights. For a phone, an older computer or a longer battery. Auto ${
           autoEffects() === 'reduced' ? 'picks Lighter on this device' : 'picks Full on this device'
         }.`}
       >

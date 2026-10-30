@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { FlatDie } from '../components/CssDie'
 import { burst } from '../components/celebrate'
 import type { RollLogEntry } from '../engine/craps/types'
+import { useEffectsLevel } from '../lib/effects'
 import { signedMoney } from '../lib/format'
 import { BIG_WIN_MINIMUMS, useCrapsStore } from '../store/crapsStore'
 import { stickmanCall, type Call } from './calls'
@@ -14,6 +15,22 @@ interface Shown extends Call {
   net: number
 }
 
+// Whole transforms, so the browser runs the move itself (see feltMotion).
+const CALLOUT_FULL = {
+  initial: { opacity: 0, transform: 'translateY(-12px) scale(0.92)' },
+  animate: { opacity: 1, transform: 'translateY(0px) scale(1)' },
+  exit: { opacity: 0, transform: 'translateY(-8px) scale(1)', transition: { duration: 0.25 } },
+  transition: { type: 'spring', stiffness: 380, damping: 24 },
+} as const
+
+/** Lighter effects: a short, plain drop and fade. */
+const CALLOUT_LIGHT = {
+  initial: { opacity: 0, transform: 'translateY(-6px)' },
+  animate: { opacity: 1, transform: 'translateY(0px)' },
+  exit: { opacity: 0, transition: { duration: 0.2 } },
+  transition: { duration: 0.2, ease: [0.2, 0.8, 0.3, 1] },
+} as const
+
 /**
  * The call, in lights, the moment the dice come to rest.
  */
@@ -23,6 +40,7 @@ export function Callout() {
   const [shown, setShown] = useState<Shown | null>(null)
   const seen = useRef(game.seq)
   const ref = useRef<HTMLDivElement>(null)
+  const light = useEffectsLevel() === 'reduced'
 
   useEffect(() => {
     if (game.phase !== 'betting' || !game.roll || lastNet === null || seen.current === game.seq) return
@@ -55,14 +73,7 @@ export function Callout() {
     <div className="callout-anchor" ref={ref}>
       <AnimatePresence>
         {shown && (
-          <motion.div
-            key={shown.key}
-            className={`callout callout--${shown.tone}`}
-            initial={{ opacity: 0, y: -12, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, transition: { duration: 0.25 } }}
-            transition={{ type: 'spring', stiffness: 380, damping: 24 }}
-          >
+          <motion.div key={shown.key} className={`callout callout--${shown.tone}`} {...(light ? CALLOUT_LIGHT : CALLOUT_FULL)}>
             <div className="callout__dice">
               <FlatDie value={shown.a} size={30} />
               <FlatDie value={shown.b} size={30} />

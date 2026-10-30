@@ -134,9 +134,10 @@ function dropPath(c: (typeof CRYSTALS)[number]): string {
  * The frame is drawn once. The drops that glint are drawn again in gold on
  * three layers over it, and each layer fades in and out in turn, so the
  * twinkle is the compositor changing three opacities, not the chandelier
- * repainted every frame.
+ * repainted every frame. It never changes, so the room moving between the
+ * lobby and a table does not rebuild it either.
  */
-function Chandelier({ className }: { className: string }) {
+const Chandelier = memo(function Chandelier({ className }: { className: string }) {
   return (
     <div className={className}>
       <svg viewBox="-130 -160 260 300" aria-hidden="true">
@@ -182,4 +183,4 @@ function Chandelier({ className }: { className: string }) {
       ))}
     </div>
   )
-}
+})

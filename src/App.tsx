@@ -72,7 +72,7 @@ export default function App() {
             key={screen}
             className="screen"
             custom={direction}
-            variants={SCREEN_MOTION}
+            variants={effects === 'reduced' ? SCREEN_MOTION_LIGHT : SCREEN_MOTION}
             initial="enter"
             animate="center"
             exit="exit"
@@ -94,10 +94,20 @@ export default function App() {
   )
 }
 
+// Whole transforms, so the browser runs the move itself: moved a property at a
+// time by script, the screen coming in is repainted at every frame. Each one
+// comes to rest written out in full, as motion reads `none` as all zeros.
 const SCREEN_MOTION: Variants = {
-  enter: (d: number) => ({ opacity: 0, y: d * 80, scale: 0.985 }),
-  center: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] } },
-  exit: (d: number) => ({ opacity: 0, y: d * -60, scale: 1.01, transition: { duration: 0.38, ease: [0.4, 0, 1, 1] } }),
+  enter: (d: number) => ({ opacity: 0, transform: `translateY(${d * 80}px) scale(0.985)` }),
+  center: { opacity: 1, transform: 'translateY(0px) scale(1)', transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] } },
+  exit: (d: number) => ({ opacity: 0, transform: `translateY(${d * -60}px) scale(1.01)`, transition: { duration: 0.38, ease: [0.4, 0, 1, 1] } }),
+}
+
+/** Lighter effects: the same move, shorter, smaller and over sooner. */
+const SCREEN_MOTION_LIGHT: Variants = {
+  enter: (d: number) => ({ opacity: 0, transform: `translateY(${d * 24}px)` }),
+  center: { opacity: 1, transform: 'translateY(0px)', transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+  exit: (d: number) => ({ opacity: 0, transform: `translateY(${d * -16}px)`, transition: { duration: 0.18, ease: [0.4, 0, 1, 1] } }),
 }
 
 /**

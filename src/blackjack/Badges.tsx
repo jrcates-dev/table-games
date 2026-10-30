@@ -50,8 +50,8 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
         <Billboard key={`${roundKey}:dealer`} x={lastDealer.x + CARD.w / 2 + 58} y={DEALER_ROW.y + 18}>
           <motion.div
             className={`total-pill total-pill--dealer${dealerBust ? ' is-bust' : ''}${dealerNatural ? ' is-natural' : ''}`}
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, transform: 'scale(0.7)' }}
+            animate={{ opacity: 1, transform: 'scale(1)' }}
             exit={{ opacity: 0 }}
           >
             <span className="total-pill__who">Dealer</span>
@@ -75,9 +75,9 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
             <Billboard key={`${roundKey}:${hand.id}:result`} x={centers[i]} y={PLAYER_ROW_Y - CARD.h / 2 - 6}>
               <motion.div
                 className={`result-tag result-tag--${o.tone}`}
-                initial={{ opacity: 0, y: 16, scale: 0.8 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, transform: 'translateY(16px) scale(0.8)' }}
+                animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
+                exit={{ opacity: 0, transform: 'translateY(-10px) scale(1)' }}
                 transition={{ type: 'spring', stiffness: 420, damping: 22, delay: 0.1 + i * 0.12 }}
               >
                 <span className="result-tag__label">{o.label}</span>
@@ -100,8 +100,8 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
           >
             <motion.div
               className={`total-pill${active ? ' is-active' : ''}${value.busted ? ' is-bust' : ''}${value.total === 21 ? ' is-21' : ''}${natural ? ' is-natural' : ''}`}
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, transform: 'scale(0.7)' }}
+              animate={{ opacity: 1, transform: 'scale(1)' }}
               exit={{ opacity: 0 }}
             >
               {split && <span className="total-pill__who">Hand {i + 1}</span>}

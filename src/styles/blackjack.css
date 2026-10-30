@@ -555,6 +555,23 @@
   display: none;
 }
 
+/* Lighter effects: the banner keeps its colours and drops its glows, each a
+   wide blur to paint the moment it appears, just as the chips are moving. */
+[data-effects='reduced'] .banner,
+[data-effects='reduced'] .banner--gold {
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 236, 190, 0.1);
+}
+
+[data-effects='reduced'] .banner__foil-text {
+  filter: none;
+}
+
+[data-effects='reduced'] .banner--win .banner__title {
+  text-shadow: none;
+}
+
 .banner--win .banner__title {
   color: var(--text-1);
   text-shadow: 0 0 30px rgba(79, 224, 160, 0.35);
