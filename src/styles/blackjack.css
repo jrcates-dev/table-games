@@ -62,10 +62,10 @@
 .bj-shoe__shadow,
 .bj-discard__shadow {
   position: absolute;
-  left: -78px;
-  top: -112px;
-  width: 156px;
-  height: 236px;
+  left: -94px;
+  top: -140px;
+  width: 188px;
+  height: 280px;
   border-radius: 14px;
   background: rgba(0, 0, 0, 0.55);
   filter: blur(14px);
@@ -73,10 +73,10 @@
 }
 
 .bj-discard__shadow {
-  left: -72px;
-  top: -94px;
-  width: 144px;
-  height: 188px;
+  left: -85px;
+  top: -113px;
+  width: 170px;
+  height: 226px;
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -153,10 +153,10 @@
 
 .bj-discard__floor {
   position: absolute;
-  left: -62px;
-  top: -82px;
-  width: 124px;
-  height: 164px;
+  left: -75px;
+  top: -100px;
+  width: 150px;
+  height: 200px;
   border-radius: 4px;
   background: linear-gradient(160deg, rgba(60, 56, 70, 0.55), rgba(10, 9, 13, 0.6));
   border: 1px solid rgba(227, 193, 112, 0.35);
@@ -201,10 +201,10 @@
 .bj-card__spin,
 .bj-card__shadow {
   position: absolute;
-  left: -60px;
-  top: -84px;
-  width: 120px;
-  height: 168px;
+  left: -75px;
+  top: -105px;
+  width: 150px;
+  height: 210px;
 }
 
 .bj-card__spin {
@@ -212,10 +212,10 @@
 }
 
 .bj-card__shadow {
-  border-radius: 12px;
+  border-radius: 14px;
   background: rgba(0, 0, 0, 0.55);
-  filter: blur(6px);
-  translate: 5px 9px;
+  filter: blur(7px);
+  translate: 6px 11px;
 }
 
 /* Lighter effects: the soft edge is painted once, as a box shadow, rather
@@ -235,7 +235,7 @@
 .bj-card__face {
   position: absolute;
   inset: 0;
-  border-radius: 8.5px;
+  border-radius: 10.5px;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   box-shadow:
@@ -246,7 +246,7 @@
 
 .bj-card__face svg {
   display: block;
-  border-radius: 8.5px;
+  border-radius: 10.5px;
 }
 
 .bj-card__face--back {
@@ -296,9 +296,9 @@
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  min-width: 58px;
-  padding: 5px 13px 6px;
-  border-radius: 14px;
+  min-width: 68px;
+  padding: 6px 15px 7px;
+  border-radius: 16px;
   background: linear-gradient(180deg, rgba(20, 18, 26, 0.92), rgba(8, 8, 11, 0.92));
   border: 1px solid rgba(255, 244, 214, 0.2);
   /* Tight shadows: these signs stand up off the felt, and a wide soft shadow
@@ -313,12 +313,12 @@
 .total-pill strong {
   font-family: var(--font-serif);
   font-weight: 700;
-  font-size: 30px;
+  font-size: 35px;
   letter-spacing: 0.01em;
 }
 
 .total-pill__who {
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -349,14 +349,14 @@
 
 .total-pill.is-bust strong {
   color: var(--lose);
-  font-size: 24px;
+  font-size: 28px;
 }
 
 .result-tag {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 18px 10px;
+  gap: 12px;
+  padding: 10px 21px 11px;
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(22, 20, 28, 0.94), rgba(8, 8, 11, 0.94));
   border: 1px solid rgba(255, 244, 214, 0.2);
@@ -367,7 +367,7 @@
 .result-tag__label {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 17px;
+  font-size: 20px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -375,14 +375,14 @@
 .result-tag__total {
   font-family: var(--font-serif);
   font-weight: 700;
-  font-size: 20px;
+  font-size: 23px;
   color: var(--text-3);
 }
 
 .result-tag__net {
   font-family: var(--font-serif);
   font-weight: 700;
-  font-size: 22px;
+  font-size: 26px;
 }
 
 .result-tag--gold {
@@ -427,9 +427,9 @@
   position: absolute;
   left: 0;
   top: 0;
-  width: 250px;
-  height: 36px;
-  margin: -18px 0 0 -125px;
+  width: 300px;
+  height: 42px;
+  margin: -21px 0 0 -150px;
   border-radius: 50%;
   /* No blend mode here: any blending inside the tilted plane makes Chrome
      flatten the whole plane, and the shoe and cards lose their depth. */

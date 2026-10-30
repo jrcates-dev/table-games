@@ -41,23 +41,35 @@ export const FELT = {
   ry: TABLE.ry - TABLE.rail,
 } as const
 
-export const CARD = { w: 120, h: 168 } as const
+/**
+ * A card, dealt large: the felt is there to hold the game, and a heads-up
+ * table has a lot of it, so the cards, chips and circle are sized to fill it
+ * rather than to leave room for six other players who are never coming.
+ */
+export const CARD = { w: 150, h: 210 } as const
 
-export const SHOE = { x: 1196, y: 176, angle: -20 } as const
-export const DISCARD = { x: 304, y: 176, angle: 20 } as const
-export const TRAY = { x: 750, y: 104, w: 470, h: 68 } as const
+/** The shoe and the discard rack, each sized to hold cards this big. */
+export const SHOE = { x: 1192, y: 192, angle: -20, w: 156, d: 240, h: 80 } as const
+export const DISCARD = { x: 306, y: 190, angle: 20 } as const
+export const TRAY = { x: 750, y: 100, w: 540, h: 66 } as const
 
-export const DEALER_ROW = { x: 750, y: 240 } as const
-export const PLAYER_ROW_Y = 572
-export const BET_Y = 714
-export const CIRCLE = { x: 750, y: BET_Y, r: 58 } as const
+export const DEALER_ROW = { x: 750, y: 237 } as const
+export const PLAYER_ROW_Y = 586
+export const BET_Y = 712
+export const CIRCLE = { x: 750, y: BET_Y, r: 60 } as const
 /** Where insurance is placed: on the insurance line, to the player's right. */
-export const INSURANCE_SPOT = { x: 1030, y: 410 } as const
+export const INSURANCE_SPOT = { x: 1040, y: 412 } as const
+
+/** A fan's widest spread and the step between its cards: the dealer's, and a box's (closer when three or four share the row). */
+export const DEALER_FAN = { width: 580, step: 108 } as const
+export function handFan(boxes: number): { width: number; step: number } {
+  return boxes > 2 ? { width: 246, step: 60 } : { width: 420, step: 104 }
+}
 
 /** Horizontal centres for 1–4 boxes, spreading as a split adds hands. */
 export function handCenters(count: number): number[] {
   if (count <= 1) return [TABLE.cx]
-  const gap = count === 2 ? 310 : count === 3 ? 280 : 250
+  const gap = count === 2 ? 350 : count === 3 ? 290 : 250
   const span = gap * (count - 1)
   return Array.from({ length: count }, (_, i) => TABLE.cx - span / 2 + i * gap)
 }
@@ -74,7 +86,7 @@ export interface CardSpot {
  * or two, so the corner index of every card stays readable and the spread
  * never looks printed. Long hands close up rather than run off the felt.
  */
-export function fan(count: number, cx: number, cy: number, maxWidth = 300, maxStep = 64): CardSpot[] {
+export function fan(count: number, cx: number, cy: number, maxWidth = 420, maxStep = 104): CardSpot[] {
   const step = count <= 1 ? 0 : Math.min(maxStep, (maxWidth - CARD.w) / (count - 1))
   const span = step * (count - 1)
   return Array.from({ length: count }, (_, i) => ({

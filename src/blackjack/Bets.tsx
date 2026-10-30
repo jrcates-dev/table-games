@@ -32,7 +32,7 @@ interface StackItem {
 }
 
 const PLAYER_SIDE = { y: 1010 }
-const SIZE = 62
+const SIZE = 76
 
 function deriveStacks(game: GameState): StackItem[] {
   const { round } = game
@@ -52,7 +52,7 @@ function deriveStacks(game: GameState): StackItem[] {
     const x = centers[i]
     const base = hand.doubled ? hand.bet / 2 : hand.bet
     const lost = over && (hand.outcome === 'lose' || hand.outcome === 'bust' || hand.outcome === 'dealerBlackjack')
-    const offset = hand.doubled ? -30 : 0
+    const offset = hand.doubled ? -36 : 0
     // The first box's wager is the one that was already in the circle.
     const from = i === 0 ? undefined : { x, y: PLAYER_SIDE.y }
 
@@ -67,9 +67,9 @@ function deriveStacks(game: GameState): StackItem[] {
       items.push({
         key: `dbl:${hand.id}`,
         amount: base,
-        x: x + 30,
+        x: x + 36,
         y: BET_Y + 6,
-        from: { x: x + 30, y: PLAYER_SIDE.y },
+        from: { x: x + 36, y: PLAYER_SIDE.y },
         swept: lost,
         delay: 0.6 + i * 0.12,
         seed: i + 20,
@@ -81,7 +81,7 @@ function deriveStacks(game: GameState): StackItem[] {
       items.push({
         key: `pay:${hand.id}`,
         amount: winnings,
-        x: x + (hand.doubled ? 92 : 74),
+        x: x + (hand.doubled ? 112 : 90),
         y: BET_Y - 4,
         from: { x: TRAY.x + (i - 1) * 40, y: TRAY.y + 20 },
         delay: 0.4 + i * 0.16,
@@ -106,7 +106,7 @@ function deriveStacks(game: GameState): StackItem[] {
       items.push({
         key: 'ins-pay',
         amount: round.insuranceBet * game.rules.insurancePayout,
-        x: INSURANCE_SPOT.x + 72,
+        x: INSURANCE_SPOT.x + 86,
         y: INSURANCE_SPOT.y,
         from: { x: TRAY.x + 120, y: TRAY.y + 20 },
         delay: 0.3,

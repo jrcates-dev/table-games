@@ -151,15 +151,15 @@ export function HandLabels() {
   return (
     <AnimatePresence>
       {show && (
-        <Billboard key={`d${game.seq}`} x={LABELS.dealer.x} y={LABELS.dealer.y} tilt={CAMERA.tilt} align="end">
-          <motion.div className={`total-pill uth-hand${result.outcome === 'lose' ? ' is-active' : ''}`} initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+        <Billboard key={`d${game.seq}`} x={LABELS.dealer.x} y={LABELS.dealer.y} tilt={CAMERA.tilt}>
+          <motion.div className={`total-pill uth-hand uth-hand--dealer${result.outcome === 'lose' ? ' is-active' : ''}`} initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
             <span className="total-pill__who">{result.dealerQualifies ? 'Dealer' : 'Dealer · does not open'}</span>
             <strong>{result.dealerName}</strong>
           </motion.div>
         </Billboard>
       )}
       {show && (
-        <Billboard key={`p${game.seq}`} x={LABELS.player.x} y={LABELS.player.y} tilt={CAMERA.tilt} align="end">
+        <Billboard key={`p${game.seq}`} x={LABELS.player.x} y={LABELS.player.y} tilt={CAMERA.tilt}>
           <motion.div className={`total-pill uth-hand${result.outcome === 'win' ? ' is-active' : ''}`} initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
             <span className="total-pill__who">{result.outcome === 'fold' ? 'You · folded' : 'You'}</span>
             <strong>{result.playerName}</strong>
@@ -180,7 +180,7 @@ interface StackItem {
   seed: number
 }
 
-const SIZE = 50
+const SIZE = 62
 const PLAYER_SIDE: [number, number] = [750, 1010]
 
 function stacksFor(game: UthState): StackItem[] {

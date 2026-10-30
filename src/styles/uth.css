@@ -70,13 +70,17 @@
 
 .uth-hand {
   min-width: 128px;
-  align-items: flex-end;
-  transform-origin: 100% 100%;
+  transform-origin: 50% 100%;
 }
 
 .uth-hand strong {
   font-size: 21px;
   white-space: nowrap;
+}
+
+/* Stands over the chip tray, so it is solid: the chips should not show through. */
+.uth-hand--dealer {
+  background: linear-gradient(180deg, rgb(20, 18, 26), rgb(8, 8, 11));
 }
 
 /* ---- The dock ----------------------------------------------------------------- */

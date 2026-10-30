@@ -2,6 +2,17 @@
    Baccarat
    --------------------------------------------------------------------------- */
 
+/* The coup is dealt a touch under blackjack's size: the layer is scaled, the cards are not. */
+.ba-cards {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  transform-style: preserve-3d;
+}
+
 .ba-total--player .total-pill__who {
   color: #9cc0ff;
 }

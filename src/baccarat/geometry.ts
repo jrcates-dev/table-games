@@ -12,20 +12,29 @@ import type { BaccaratBetKind } from '../engine/baccarat/types'
  * the middle, the pairs either side of it, the Dragon Bonus at each end.
  */
 
+/**
+ * The cards here are dealt a touch under blackjack's size: two of them side by
+ * side and a third turned sideways beneath have to fit in each box, and the
+ * apron's bets below.
+ */
+export const CARD_SCALE = 0.92
+const CARD_W = CARD.w * CARD_SCALE
+const CARD_H = CARD.h * CARD_SCALE
+
 export const HAND = {
-  player: { x: 575, y: 250 },
-  banker: { x: 925, y: 250 },
+  player: { x: 577, y: 244 },
+  banker: { x: 923, y: 244 },
 } as const
 
 /** Where a card sits: two side by side, and the tableau's third card sideways beneath them. */
 export function cardSpot(side: 'player' | 'banker', index: number): { x: number; y: number; spin: number } {
   const { x, y } = HAND[side]
-  if (index < 2) return { x: x + (index === 0 ? -64 : 64), y: y - index * 3, spin: index === 0 ? -1.5 : 1.5 }
-  return { x, y: y + CARD.h / 2 + 12 + CARD.w / 2, spin: 90 }
+  if (index < 2) return { x: x + (index === 0 ? -73 : 73), y: y - index * 3, spin: index === 0 ? -1.5 : 1.5 }
+  return { x, y: y + CARD_H / 2 + 10 + CARD_W / 2, spin: 90 }
 }
 
 /** The outline each hand is turned over inside. */
-export const BOX = { w: 290, top: 156, bottom: 478 } as const
+export const BOX = { w: 306, top: 135, bottom: 500 } as const
 
 /** Running totals stand beside each box. */
 export const TOTAL = {
@@ -46,16 +55,16 @@ export interface BetSpot {
   sub: string
 }
 
-const ROW_Y = 520
+const ROW_Y = 542
 
 export const SPOTS: BetSpot[] = [
-  { kind: 'player', shape: { type: 'band', r0: 905, r1: 975, spread: 14 }, label: 'PLAYER', sub: 'PAYS 1 TO 1' },
-  { kind: 'banker', shape: { type: 'band', r0: 820, r1: 890, spread: 15 }, label: 'BANKER', sub: 'PAYS 19 TO 20' },
-  { kind: 'tie', shape: { type: 'oval', cx: TABLE.cx, cy: ROW_Y, rx: 74, ry: 44 }, label: 'TIE', sub: '8 TO 1' },
-  { kind: 'playerPair', shape: { type: 'circle', cx: 590, cy: ROW_Y, r: 44 }, label: 'P PAIR', sub: '11 TO 1' },
-  { kind: 'bankerPair', shape: { type: 'circle', cx: 910, cy: ROW_Y, r: 44 }, label: 'B PAIR', sub: '11 TO 1' },
-  { kind: 'dragonPlayer', shape: { type: 'circle', cx: 450, cy: ROW_Y, r: 44 }, label: 'DRAGON', sub: 'PLAYER' },
-  { kind: 'dragonBanker', shape: { type: 'circle', cx: 1050, cy: ROW_Y, r: 44 }, label: 'DRAGON', sub: 'BANKER' },
+  { kind: 'player', shape: { type: 'band', r0: 908, r1: 972, spread: 14 }, label: 'PLAYER', sub: 'PAYS 1 TO 1' },
+  { kind: 'banker', shape: { type: 'band', r0: 836, r1: 900, spread: 15 }, label: 'BANKER', sub: 'PAYS 19 TO 20' },
+  { kind: 'tie', shape: { type: 'oval', cx: TABLE.cx, cy: ROW_Y, rx: 72, ry: 42 }, label: 'TIE', sub: '8 TO 1' },
+  { kind: 'playerPair', shape: { type: 'circle', cx: 594, cy: ROW_Y, r: 42 }, label: 'P PAIR', sub: '11 TO 1' },
+  { kind: 'bankerPair', shape: { type: 'circle', cx: 906, cy: ROW_Y, r: 42 }, label: 'B PAIR', sub: '11 TO 1' },
+  { kind: 'dragonPlayer', shape: { type: 'circle', cx: 452, cy: ROW_Y, r: 42 }, label: 'DRAGON', sub: 'PLAYER' },
+  { kind: 'dragonBanker', shape: { type: 'circle', cx: 1048, cy: ROW_Y, r: 42 }, label: 'DRAGON', sub: 'BANKER' },
 ]
 
 export function spotFor(kind: BaccaratBetKind): BetSpot {

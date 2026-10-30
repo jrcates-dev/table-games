@@ -27,7 +27,7 @@ import { Rail } from './Rail'
 import { BetLayer, CardLayer, SpotLayer, Totals } from './Table'
 
 /** Sideways on a phone: the two hands down to the bets, the discard rack to the shoe (see Stage's `fill`). */
-const PHONE_FILL = { left: 318, top: 248, right: 1315, bottom: 792 }
+const PHONE_FILL = { left: 318, top: 234, right: 1315, bottom: 792 }
 
 /**
  * The mini-baccarat table: the blackjack table's walnut and felt, an eight-deck

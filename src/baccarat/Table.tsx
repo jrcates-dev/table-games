@@ -13,10 +13,12 @@ import { handTotal } from '../engine/baccarat/tableau'
 import type { BaccaratBetKind, BaccaratState, CoupCard } from '../engine/baccarat/types'
 import { usePrefs } from '../prefs/prefsStore'
 import { cardAt, dealTiming, useBaccaratStore } from '../store/baccaratStore'
-import { anchorFor, cardSpot, shapePath, SPOTS, TOTAL } from './geometry'
+import { anchorFor, CARD_SCALE, cardSpot, shapePath, SPOTS, TOTAL } from './geometry'
 
-const SHOE_MOUTH = { x: SHOE.x - 30, y: SHOE.y + 60, angle: SHOE.angle }
-const TO_DISCARD = { x: DISCARD.x, y: DISCARD.y, angle: DISCARD.angle }
+// The card layer is scaled down to the baccarat card's size, so everything placed in it is in its units.
+const S = CARD_SCALE
+const SHOE_MOUTH = { x: (SHOE.x - 36) / S, y: (SHOE.y + 74) / S, angle: SHOE.angle }
+const TO_DISCARD = { x: DISCARD.x / S, y: DISCARD.y / S, angle: DISCARD.angle }
 
 /** The click targets: the printed shapes themselves. Left-click (a tap) bets the chip in hand; right-click (a held card's button) takes the bet back. */
 export function SpotLayer() {
@@ -64,28 +66,31 @@ export const CardLayer = memo(function CardLayer() {
   const cards = coup ? [...coup.player, ...coup.banker] : []
 
   return (
-    <AnimatePresence>
-      {cards.map((card) => {
-        const shown = settled ? { out: true, faceDown: false } : cardAt(card, step)
-        if (!shown.out) return null
-        const hand = card.side === 'player' ? coup!.player : coup!.banker
-        const index = hand.indexOf(card)
-        const lost = settled && coup!.winner !== 'tie' && coup!.winner !== card.side
-        return (
-          <FeltCard
-            key={`${seq}:${card.id}`}
-            card={{ ...card, faceDown: shown.faceDown }}
-            place={{ ...cardSpot(card.side, index), order: index }}
-            from={SHOE_MOUTH}
-            away={TO_DISCARD}
-            delay={card.seq < 4 ? card.seq * interval : 0}
-            flight={flight}
-            back={back}
-            dim={Boolean(lost)}
-          />
-        )
-      })}
-    </AnimatePresence>
+    <div className="ba-cards" style={{ transform: `scale(${S})` }}>
+      <AnimatePresence>
+        {cards.map((card) => {
+          const shown = settled ? { out: true, faceDown: false } : cardAt(card, step)
+          if (!shown.out) return null
+          const hand = card.side === 'player' ? coup!.player : coup!.banker
+          const index = hand.indexOf(card)
+          const lost = settled && coup!.winner !== 'tie' && coup!.winner !== card.side
+          const spot = cardSpot(card.side, index)
+          return (
+            <FeltCard
+              key={`${seq}:${card.id}`}
+              card={{ ...card, faceDown: shown.faceDown }}
+              place={{ x: spot.x / S, y: spot.y / S, spin: spot.spin, order: index }}
+              from={SHOE_MOUTH}
+              away={TO_DISCARD}
+              delay={card.seq < 4 ? card.seq * interval : 0}
+              flight={flight}
+              back={back}
+              dim={Boolean(lost)}
+            />
+          )
+        })}
+      </AnimatePresence>
+    </div>
   )
 })
 
@@ -154,7 +159,7 @@ interface StackItem {
 }
 
 const PLAYER_SIDE: [number, number] = [750, 1010]
-const SIZE = 52
+const SIZE = 58
 
 /**
  * Chips on the apron. Bets stand while the coup is out; once it settles the
