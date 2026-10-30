@@ -79,8 +79,8 @@ function wall(world: CANNON.World, material: CANNON.Material, position: CANNON.V
   world.addBody(body)
 }
 
-/** One candidate throw from a seed. */
-export function simulate(seed: number): Throw {
+/** One candidate throw from a seed, sent `lane` plane pixels nearer the shooter (see `DICE.lanes`). */
+export function simulate(seed: number, lane = 0): Throw {
   const rand = mulberry(seed)
   const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -GRAVITY, 0) })
   world.allowSleep = false
@@ -100,10 +100,10 @@ export function simulate(seed: number): Throw {
   wall(world, wallMat, new CANNON.Vec3(0, 0, W.z1), [0, Math.PI, 0], 'wall')
 
   const start = { x: DICE.release.x / S, y: DICE.release.h / S, z: DICE.release.y / S }
-  // Lofted at a point on the back wall behind the far end: most of the way in
-  // the air, a bounce or two on the felt, then off the rubber and back — the
-  // way a legal throw has to go.
-  const aimX = (DICE.aim.x0 + rand() * (DICE.aim.x1 - DICE.aim.x0)) / S
+  // Lofted at a point on the back wall behind the far end, or the lane's end:
+  // most of the way in the air, a bounce or two on the felt, then off the
+  // rubber and back — the way a legal throw has to go.
+  const aimX = (DICE.aim.x0 - lane + rand() * (DICE.aim.x1 - DICE.aim.x0)) / S
   const heading = Math.atan2(W.z0 - start.z, aimX - start.x)
   const speed = 29 + rand() * 6
   const bodies = [0, 1].map((i) => {
@@ -178,12 +178,12 @@ export function simulate(seed: number): Throw {
   }
 }
 
-/** How well a throw finished: in the landing zone, apart, flat, in good time. */
-function score(t: Throw): number {
+/** How well a throw finished: in its lane's landing zone, apart, flat, in good time. */
+function score(t: Throw, lane: number): number {
   const z = DICE.zone
   let s = 0
   for (const r of t.rest) {
-    const dx = Math.max(z.x0 - r.x, 0, r.x - z.x1)
+    const dx = Math.max(z.x0 - lane - r.x, 0, r.x - z.x1 + lane)
     const dy = Math.max(z.y0 - r.y, 0, r.y - z.y1)
     s += dx + dy
   }
@@ -199,12 +199,12 @@ function score(t: Throw): number {
 }
 
 /** Throw a few candidates and keep the best — or the first that is good enough. */
-export function bestThrow(seed: number, budget = 6): Throw {
+export function bestThrow(seed: number, budget = 6, lane = 0): Throw {
   let best: Throw | null = null
   let bestScore = Infinity
   for (let i = 0; i < budget; i++) {
-    const candidate = simulate((seed + i * 7919) >>> 0)
-    const s = score(candidate)
+    const candidate = simulate((seed + i * 7919) >>> 0, lane)
+    const s = score(candidate, lane)
     if (s < bestScore) {
       best = candidate
       bestScore = s

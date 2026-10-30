@@ -272,4 +272,11 @@ export const DICE = {
   zone: { x0: 1195, x1: 1470, y0: 130, y1: 600 },
   /** Walls the dice bounce off — the inside faces of the tub. */
   walls: { x0: FELT.x0, x1: FELT.x1, y0: FELT.y0, y1: FELT.y1 },
+  /**
+   * When the bet rail or a drawer covers the far end, the throw is sent nearer
+   * the shooter instead, so it is still seen whole: aimed at back wall that
+   * many plane pixels to the left, and finishing in a zone moved the same way.
+   * The first lane is the far end itself.
+   */
+  lanes: [0, 125, 250, 375, 500, 625, 750, 875, 1000],
 } as const

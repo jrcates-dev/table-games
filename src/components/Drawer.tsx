@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, useRef, type ReactNode } from 'react'
+import { AnimatePresence, motion, useIsPresent } from 'motion/react'
+import { useEffect, useRef, type ReactNode, type Ref } from 'react'
 import { play } from '../audio'
 import { IconClose } from './icons'
 
@@ -90,29 +90,57 @@ export function Drawer({
   return (
     <AnimatePresence>
       {open && (
-        <motion.aside
-          ref={ref}
-          key={title}
-          className={`drawer${wide ? ' drawer--wide' : ''}`}
-          role="dialog"
-          aria-label={title}
-          initial={{ x: 40, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 40, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 380, damping: 36 }}
-        >
-          <header className="drawer__head">
-            <div>
-              {eyebrow && <span className="eyebrow">{eyebrow}</span>}
-              <h2 className="drawer__title">{title}</h2>
-            </div>
-            <button type="button" className="icon-btn" onClick={onClose} aria-label="Close">
-              <IconClose />
-            </button>
-          </header>
-          <div className="drawer__body">{children}</div>
-        </motion.aside>
+        <Sheet ref={ref} key={title} title={title} eyebrow={eyebrow} wide={wide} onClose={onClose}>
+          {children}
+        </Sheet>
       )}
     </AnimatePresence>
+  )
+}
+
+/**
+ * The drawer itself. It covers the felt (see the craps dice) only while it is
+ * staying: one sliding out — closed by the very press that throws the dice —
+ * is already out of the way.
+ */
+function Sheet({
+  ref,
+  title,
+  eyebrow,
+  wide,
+  onClose,
+  children,
+}: {
+  ref: Ref<HTMLElement>
+  title: string
+  eyebrow?: string
+  wide: boolean
+  onClose(): void
+  children: ReactNode
+}) {
+  const present = useIsPresent()
+  return (
+    <motion.aside
+      ref={ref}
+      className={`drawer${wide ? ' drawer--wide' : ''}`}
+      data-covers-felt={present || undefined}
+      role="dialog"
+      aria-label={title}
+      initial={{ x: 40, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: 40, opacity: 0 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 36 }}
+    >
+      <header className="drawer__head">
+        <div>
+          {eyebrow && <span className="eyebrow">{eyebrow}</span>}
+          <h2 className="drawer__title">{title}</h2>
+        </div>
+        <button type="button" className="icon-btn" onClick={onClose} aria-label="Close">
+          <IconClose />
+        </button>
+      </header>
+      <div className="drawer__body">{children}</div>
+    </motion.aside>
   )
 }
