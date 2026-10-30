@@ -16,7 +16,7 @@ export const BaccaratFelt = memo(function BaccaratFelt() {
       defs={
         <>
           {SPOTS.filter((s) => s.shape.type === 'band').map((s) => (
-            <path key={s.kind} id={`ba-arc-${s.kind}`} d={bandTextArc(s.shape as Extract<BetSpot['shape'], { type: 'band' }>, 9)} />
+            <path key={s.kind} id={`ba-arc-${s.kind}`} d={bandTextArc(s.shape as Extract<BetSpot['shape'], { type: 'band' }>, 7)} />
           ))}
           <path id="ba-arc-rule" d={arcPath(992, 992, 13)} />
         </>
@@ -33,7 +33,7 @@ export const BaccaratFelt = memo(function BaccaratFelt() {
             BANKER PAYS 5% COMMISSION
           </textPath>
         </text>
-        <g transform={`translate(${750 - 20} ${398}) scale(0.63)`} opacity="0.22">
+        <g transform={`translate(${750 - 20} ${380}) scale(0.63)`} opacity="0.22">
           <Monogram size={64} />
         </g>
       </g>

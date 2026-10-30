@@ -43,6 +43,7 @@ export const DTable = memo(function DTable({
   id,
   className,
   defs,
+  trayWidth,
   children,
 }: {
   /** Prefix for the SVG ids, so two tables never share a gradient. */
@@ -50,6 +51,8 @@ export const DTable = memo(function DTable({
   className?: string
   /** Extra `<defs>` the printing needs — text arcs, mostly. */
   defs?: ReactNode
+  /** A narrower tray, where printing flanks it. */
+  trayWidth?: number
   /** The printing: drawn on the felt, under the tray. */
   children?: ReactNode
 }) {
@@ -144,7 +147,7 @@ export const DTable = memo(function DTable({
 
       {children}
 
-      <ChipTray />
+      <ChipTray w={trayWidth} />
     </svg>
   )
 })
@@ -153,7 +156,7 @@ export const DTable = memo(function DTable({
 export function ChipTray({ x = TRAY.x, y = TRAY.y, w = TRAY.w, h = TRAY.h }: { x?: number; y?: number; w?: number; h?: number }) {
   const x0 = x - w / 2
   const y0 = y - h / 2
-  const colW = 38
+  const colW = Math.max(38, Math.round(w * 0.08))
   const gap = (w - 18 - TRAY_COLUMNS.length * colW) / (TRAY_COLUMNS.length - 1)
   return (
     <g>

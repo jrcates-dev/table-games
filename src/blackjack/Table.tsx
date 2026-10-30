@@ -14,8 +14,12 @@ import { dealerRuleText, payoutWords } from './rulesText'
 
 const { cx, edgeY } = TABLE
 
-/** An arc of the printing, concentric-ish with the rail but flatter. */
-const ARC_CY = -230
+/**
+ * An arc of the printing, concentric-ish with the rail but flatter: a band
+ * between the dealer's cards and yours, set a little lower and tighter than
+ * the other tables' so the larger cards clear it both ways.
+ */
+const ARC_CY = -212
 function arcPath(rx: number, ry: number, spread = 52): string {
   const a = (spread * Math.PI) / 180
   const x0 = cx - rx * Math.sin(a)
@@ -106,8 +110,8 @@ export const BlackjackTable = memo(function BlackjackTable({ rules }: { rules: R
           <feGaussianBlur stdDeviation="30" />
         </filter>
         <path id="bj-arc-payout" d={arcPath(820, 606, 36)} />
-        <path id="bj-arc-rule" d={arcPath(856, 642, 34)} />
-        <path id="bj-arc-ins" d={arcPath(876, 676, 28)} />
+        <path id="bj-arc-rule" d={arcPath(848, 634, 34)} />
+        <path id="bj-arc-ins" d={arcPath(862, 658, 28)} />
       </defs>
 
       {/* The table itself, which a phone leaves out: there the felt runs to
@@ -155,8 +159,8 @@ export const BlackjackTable = memo(function BlackjackTable({ rules }: { rules: R
             {dealerRuleText(rules).toUpperCase()}
           </textPath>
         </text>
-        <path d={arcPath(892, 694, 29)} fill="none" stroke="#e3c170" strokeOpacity="0.55" strokeWidth="1.6" />
-        <path d={arcPath(862, 660, 29)} fill="none" stroke="#e3c170" strokeOpacity="0.55" strokeWidth="1.6" />
+        <path d={arcPath(876, 674, 29)} fill="none" stroke="#e3c170" strokeOpacity="0.55" strokeWidth="1.6" />
+        <path d={arcPath(850, 646, 29)} fill="none" stroke="#e3c170" strokeOpacity="0.55" strokeWidth="1.6" />
         <text fontFamily="Cinzel, serif" fontWeight="700" fontSize="17" letterSpacing="7" fill="var(--felt-print)" opacity="0.8" dy="6">
           <textPath href="#bj-arc-ins" startOffset="50%" textAnchor="middle">
             INSURANCE PAYS 2 TO 1
@@ -169,7 +173,7 @@ export const BlackjackTable = memo(function BlackjackTable({ rules }: { rules: R
         <circle cx={CIRCLE.x} cy={CIRCLE.y} r={CIRCLE.r + 10} fill="#000" opacity="0.12" />
         <circle cx={CIRCLE.x} cy={CIRCLE.y} r={CIRCLE.r} fill="none" stroke="url(#gold-foil)" strokeWidth="3" />
         <circle cx={CIRCLE.x} cy={CIRCLE.y} r={CIRCLE.r - 8} fill="none" stroke="#e3c170" strokeOpacity="0.45" strokeWidth="1" strokeDasharray="2 5" />
-        <g transform={`translate(${CIRCLE.x - 22} ${CIRCLE.y - 22}) scale(0.69)`} opacity="0.28">
+        <g transform={`translate(${CIRCLE.x - 24} ${CIRCLE.y - 24}) scale(0.75)`} opacity="0.28">
           <Monogram size={64} />
         </g>
       </g>
@@ -182,7 +186,7 @@ export const BlackjackTable = memo(function BlackjackTable({ rules }: { rules: R
 function DealerTray() {
   const x0 = TRAY.x - TRAY.w / 2
   const y0 = TRAY.y - TRAY.h / 2
-  const colW = 38
+  const colW = Math.max(38, Math.round(TRAY.w * 0.08))
   const gap = (TRAY.w - 18 - TRAY_COLUMNS.length * colW) / (TRAY_COLUMNS.length - 1)
   return (
     <g className="bj-tray">
@@ -219,9 +223,9 @@ export const Shoe = memo(function Shoe({ back, onShuffle }: { back: CardBack; on
     >
       <div className="bj-shoe__shadow" />
       <Box3D
-        w={124}
-        d={196}
-        h={70}
+        w={SHOE.w}
+        d={SHOE.d}
+        h={SHOE.h}
         faceClassName="bj-shoe__face"
         faces={{
           top: (
@@ -245,7 +249,7 @@ export const Shoe = memo(function Shoe({ back, onShuffle }: { back: CardBack; on
  * the only honest penetration meter a real table has.
  */
 export function DiscardRack({ fraction, back }: { fraction: number; back: CardBack }) {
-  const height = Math.max(0, Math.min(1, fraction)) * 46
+  const height = Math.max(0, Math.min(1, fraction)) * 56
   return (
     <div className="bj-discard" style={{ left: DISCARD.x, top: DISCARD.y, transform: `rotateZ(${DISCARD.angle}deg)` }}>
       <div className="bj-discard__shadow" />
@@ -271,7 +275,7 @@ export function DiscardRack({ fraction, back }: { fraction: number; back: CardBa
       <Box3D
         w={CARD.w * 0.86 + 20}
         d={CARD.h * 0.86 + 20}
-        h={56}
+        h={68}
         faceClassName="bj-discard__glass"
         faces={{ front: <div />, left: <div />, right: <div />, back: <div /> }}
       />

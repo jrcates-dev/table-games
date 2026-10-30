@@ -3,7 +3,7 @@ import { memo, type ReactNode } from 'react'
 import { evaluate, formatTotal, isNatural } from '../engine/hand'
 import type { Outcome, RoundState } from '../engine/types'
 import { signedMoney } from '../lib/format'
-import { CAMERA, CARD, DEALER_ROW, fan, handCenters, PLAYER_ROW_Y } from './geometry'
+import { CAMERA, CARD, DEALER_FAN, DEALER_ROW, fan, handCenters, handFan, PLAYER_ROW_Y } from './geometry'
 
 /**
  * Labels that stand up off the felt: running totals beside each hand while it
@@ -36,12 +36,13 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
   const centers = handCenters(round.hands.length)
   const roundKey = round.hands[0]?.id ?? 'none'
 
-  const dealerFan = fan(round.dealer.length, DEALER_ROW.x, DEALER_ROW.y, 440, 76)
+  const dealerFan = fan(round.dealer.length, DEALER_ROW.x, DEALER_ROW.y, DEALER_FAN.width, DEALER_FAN.step)
   const hidden = round.dealer.some((c) => c.faceDown)
   const dealerValue = evaluate(round.dealer.filter((c) => !c.faceDown))
   const dealerBust = !hidden && evaluate(round.dealer).busted
   const dealerNatural = !hidden && round.dealer.length === 2 && evaluate(round.dealer).total === 21
   const lastDealer = dealerFan[dealerFan.length - 1]
+  const box = handFan(round.hands.length)
 
   return (
     <AnimatePresence>
@@ -61,7 +62,7 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
 
       {round.hands.map((hand, i) => {
         if (hand.cards.length === 0) return null
-        const spots = fan(hand.cards.length, centers[i], PLAYER_ROW_Y, round.hands.length > 2 ? 232 : 300)
+        const spots = fan(hand.cards.length, centers[i], PLAYER_ROW_Y, box.width, box.step)
         const last = spots[spots.length - 1]
         const value = evaluate(hand.cards)
         const active = round.phase === 'playerTurn' && i === round.activeHandIndex
@@ -88,15 +89,22 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
         }
 
         if (!showTotals || round.phase === 'dealing') return null
+        // Beside a lone hand; over each box once it is split, where a total
+        // beside one hand would stand on the next box's cards.
+        const split = round.hands.length > 1
         return (
-          <Billboard key={`${roundKey}:${hand.id}:total`} x={last.x + CARD.w / 2 + 46} y={PLAYER_ROW_Y + 12}>
+          <Billboard
+            key={`${roundKey}:${hand.id}:total`}
+            x={split ? centers[i] : last.x + CARD.w / 2 + 46}
+            y={split ? PLAYER_ROW_Y - CARD.h / 2 - 6 : PLAYER_ROW_Y + 12}
+          >
             <motion.div
               className={`total-pill${active ? ' is-active' : ''}${value.busted ? ' is-bust' : ''}${value.total === 21 ? ' is-21' : ''}${natural ? ' is-natural' : ''}`}
               initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
             >
-              {round.hands.length > 1 && <span className="total-pill__who">Hand {i + 1}</span>}
+              {split && <span className="total-pill__who">Hand {i + 1}</span>}
               <strong className="num">{natural ? 'BJ' : value.busted ? `${value.total} · Bust` : formatTotal(hand.cards)}</strong>
             </motion.div>
           </Billboard>

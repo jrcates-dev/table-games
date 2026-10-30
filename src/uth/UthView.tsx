@@ -26,7 +26,7 @@ import { Rail } from './Rail'
 import { BetLayer, CardLayer, HandLabels, Shuffler, SpotLayer } from './Table'
 
 /** Sideways on a phone: the dealer's cards down to your circles, the pay tables to the shuffler (see Stage's `fill`). */
-const PHONE_FILL = { left: 314, top: 236, right: 1301, bottom: 792 }
+const PHONE_FILL = { left: 300, top: 228, right: 1310, bottom: 750 }
 
 /**
  * The Ultimate Texas Hold'em table: the D table again, a shuffler where the
@@ -86,7 +86,7 @@ export default function UthView() {
       </TopBar>
 
       <div className="tv__stage">
-        <Stage width={STAGE.w} height={STAGE.h} safeBottom={792} reserve={compact ? COMPACT_RESERVE : 134}
+        <Stage width={STAGE.w} height={STAGE.h} safeBottom={750} reserve={compact ? COMPACT_RESERVE : 134}
           reserveTop={compact ? COMPACT_TOPBAR : TOPBAR}
           fill={compact ? PHONE_FILL : undefined}
           zoom={{ focus: '[data-spot]', playing: game.phase !== 'betting' && game.phase !== 'showdown', betting: game.phase === 'betting' }}

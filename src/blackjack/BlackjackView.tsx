@@ -36,7 +36,7 @@ import { BlackjackTable, DiscardRack, Shoe } from './Table'
  * shoe. The table is drawn as large as that allows (see Stage's `fill`), the
  * dealer's tray and the top of the shoe going under the top bar.
  */
-const PHONE_FILL = { left: 318, top: 240, right: 1315, bottom: 772 }
+const PHONE_FILL = { left: 318, top: 226, right: 1315, bottom: 772 }
 
 /**
  * The blackjack table.

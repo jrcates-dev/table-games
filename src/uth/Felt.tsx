@@ -3,12 +3,12 @@ import { CARD } from '../blackjack/geometry'
 import { DTable, FeltText } from '../components/DTable'
 import { CATEGORY_LABEL, type Category } from '../engine/uth/poker'
 import { BLIND_PAYS, TRIPS_TABLES, type TripsTableId } from '../engine/uth/rules'
-import { boardSpot, CARD_SCALE, dealerSpot, SPOT_ORDER, SPOTS } from './geometry'
+import { boardSpot, CARD_SCALE, dealerSpot, PAY_TABLES, playerSpot, SPOT_ORDER, SPOTS, TRAY_WIDTH } from './geometry'
 
 /**
  * The printing on an Ultimate Texas Hold'em felt: outlines for the dealer's
- * cards and the board, your four circles, and both pay tables — the Blind's on
- * the left, Trips on the right, as the layouts on the Strip print them.
+ * cards, the board and yours, your four circles, and both pay tables — the
+ * Blind's on the left, Trips on the right, as the layouts on the Strip print them.
  */
 
 const ORDER: Category[] = ['royal', 'straightFlush', 'quads', 'fullHouse', 'flush', 'straight', 'trips']
@@ -19,7 +19,7 @@ export const UthFelt = memo(function UthFelt({ tripsTable }: { tripsTable: Trips
   const w = CARD.w * CARD_SCALE
   const h = CARD.h * CARD_SCALE
   return (
-    <DTable id="uth">
+    <DTable id="uth" trayWidth={TRAY_WIDTH}>
       <g className="uth-print">
         {[0, 1].map((i) => {
           const [x, y] = dealerSpot(i)
@@ -29,11 +29,13 @@ export const UthFelt = memo(function UthFelt({ tripsTable }: { tripsTable: Trips
           const [x, y] = boardSpot(i)
           return <rect key={`b${i}`} x={x - w / 2} y={y - h / 2} width={w} height={h} rx="9" fill="#000" fillOpacity="0.08" stroke="#e3c170" strokeOpacity="0.4" strokeWidth="1.4" />
         })}
+        {[0, 1].map((i) => {
+          const [x, y] = playerSpot(i)
+          return <rect key={`p${i}`} x={x - w / 2} y={y - h / 2} width={w} height={h} rx="9" fill="none" stroke="#e3c170" strokeOpacity="0.32" strokeWidth="1.4" strokeDasharray="3 5" />
+        })}
 
         <PayTable
-          x0={232}
-          x1={442}
-          y={262}
+          {...PAY_TABLES.blind}
           title="BLIND PAYS"
           rows={[
             ...ORDER.filter((c) => BLIND_PAYS[c] !== undefined).map((c) => [CATEGORY_LABEL[c].toUpperCase(), pays(BLIND_PAYS[c]!)] as [string, string]),
@@ -42,9 +44,7 @@ export const UthFelt = memo(function UthFelt({ tripsTable }: { tripsTable: Trips
           foot={['DEALER OPENS', 'WITH A PAIR OR BETTER']}
         />
         <PayTable
-          x0={1034}
-          x1={1228}
-          y={318}
+          {...PAY_TABLES.trips}
           title="TRIPS PAYS"
           rows={ORDER.map((c) => [CATEGORY_LABEL[c].toUpperCase(), pays(TRIPS_TABLES[tripsTable].pays[c]!)] as [string, string])}
           foot={['PAID WIN, LOSE OR FOLD']}
@@ -56,14 +56,15 @@ export const UthFelt = memo(function UthFelt({ tripsTable }: { tripsTable: Trips
             <g key={kind}>
               <circle cx={s.x} cy={s.y} r={s.r} fill="#000" fillOpacity="0.1" stroke="url(#gold-foil)" strokeWidth="2.6" />
               <circle cx={s.x} cy={s.y} r={s.r - 7} fill="none" stroke="#e3c170" strokeOpacity="0.32" strokeWidth="1" strokeDasharray="2 4" />
-              <FeltText x={s.x} y={s.y + 6} size={kind === 'trips' ? 14 : 15} spacing={3} opacity={0.8}>
+              <FeltText x={s.x} y={s.y + 6} size={kind === 'trips' ? 15 : 16} spacing={3} opacity={0.8}>
                 {s.label}
               </FeltText>
             </g>
           )
         })}
-        <FeltText x={(SPOTS.ante.x + SPOTS.blind.x) / 2} y={SPOTS.ante.y + 10} size={30} spacing={0} opacity={0.75} gold>
-          =
+        {/* Your cards sit between the Ante and the Blind, so the rule that ties them is printed under the cards. */}
+        <FeltText x={(SPOTS.ante.x + SPOTS.blind.x) / 2} y={SPOTS.ante.y + 54} size={14} spacing={4} opacity={0.7} gold>
+          ANTE = BLIND
         </FeltText>
       </g>
     </DTable>

@@ -5,7 +5,7 @@ import { angleBetween, cardAt, cardLift, cardTurn, shadowAt } from '../component
 import { CardBackFace, CardFace } from '../components/PlayingCard'
 import type { DealtCard, RoundState } from '../engine/types'
 import type { CardBack } from '../prefs/prefsStore'
-import { DEALER_ROW, DISCARD, fan, handCenters, PLAYER_ROW_Y, SHOE } from './geometry'
+import { DEALER_FAN, DEALER_ROW, DISCARD, fan, handCenters, handFan, PLAYER_ROW_Y, SHOE } from './geometry'
 
 /**
  * Every card on the felt.
@@ -32,7 +32,7 @@ interface Placed {
 
 function layoutCards(round: RoundState, dealerPeek: boolean): Placed[] {
   const placed: Placed[] = []
-  const dealerFan = fan(round.dealer.length, DEALER_ROW.x, DEALER_ROW.y, 440, 76)
+  const dealerFan = fan(round.dealer.length, DEALER_ROW.x, DEALER_ROW.y, DEALER_FAN.width, DEALER_FAN.step)
   const up = round.dealer[0]?.rank
   // An ace or a ten showing: the dealer checks underneath before anyone acts.
   // After any insurance decision, as a real dealer does.
@@ -47,8 +47,9 @@ function layoutCards(round: RoundState, dealerPeek: boolean): Placed[] {
 
   const centers = handCenters(round.hands.length)
   const acting = round.phase === 'playerTurn' && round.hands.length > 1
+  const box = handFan(round.hands.length)
   round.hands.forEach((hand, h) => {
-    const spots = fan(hand.cards.length, centers[h], PLAYER_ROW_Y, round.hands.length > 2 ? 232 : 300)
+    const spots = fan(hand.cards.length, centers[h], PLAYER_ROW_Y, box.width, box.step)
     hand.cards.forEach((card, i) =>
       placed.push({ card, ...spots[i], order: i, dim: acting && h !== round.activeHandIndex }),
     )
