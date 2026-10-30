@@ -640,6 +640,13 @@
   inset: 0;
 }
 
+/* Lighter effects: a picture scrolled off the side of a phone's screen is not
+   laid out or painted until it comes into view, so the lobby is quicker to
+   draw on the way back from a table. */
+[data-effects='reduced'] .game-card__art {
+  content-visibility: auto;
+}
+
 /*
  * The picture leans toward the pointer by depth: --px and --py run from -1 to
  * 1 across the card (set in Lobby.tsx), and each layer moves by its --depth in

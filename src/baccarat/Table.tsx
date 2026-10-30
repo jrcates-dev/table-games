@@ -134,8 +134,8 @@ export function Totals() {
           <Billboard key={`${seq}:${side}`} x={TOTAL[side].x} y={TOTAL[side].y}>
             <motion.div
               className={`total-pill ba-total ba-total--${side}${won ? ' is-active' : ''}${natural ? ' is-natural' : ''}`}
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, transform: 'scale(0.7)' }}
+              animate={{ opacity: 1, transform: 'scale(1)' }}
               exit={{ opacity: 0 }}
             >
               <span className="total-pill__who">{natural ? 'Natural' : label}</span>

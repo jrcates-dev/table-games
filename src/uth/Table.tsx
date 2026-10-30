@@ -152,7 +152,7 @@ export function HandLabels() {
     <AnimatePresence>
       {show && (
         <Billboard key={`d${game.seq}`} x={LABELS.dealer.x} y={LABELS.dealer.y} tilt={CAMERA.tilt}>
-          <motion.div className={`total-pill uth-hand uth-hand--dealer${result.outcome === 'lose' ? ' is-active' : ''}`} initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+          <motion.div className={`total-pill uth-hand uth-hand--dealer${result.outcome === 'lose' ? ' is-active' : ''}`} initial={{ opacity: 0, transform: 'scale(0.7)' }} animate={{ opacity: 1, transform: 'scale(1)' }} exit={{ opacity: 0 }}>
             <span className="total-pill__who">{result.dealerQualifies ? 'Dealer' : 'Dealer · does not open'}</span>
             <strong>{result.dealerName}</strong>
           </motion.div>
@@ -160,7 +160,7 @@ export function HandLabels() {
       )}
       {show && (
         <Billboard key={`p${game.seq}`} x={LABELS.player.x} y={LABELS.player.y} tilt={CAMERA.tilt}>
-          <motion.div className={`total-pill uth-hand${result.outcome === 'win' ? ' is-active' : ''}`} initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+          <motion.div className={`total-pill uth-hand${result.outcome === 'win' ? ' is-active' : ''}`} initial={{ opacity: 0, transform: 'scale(0.7)' }} animate={{ opacity: 1, transform: 'scale(1)' }} exit={{ opacity: 0 }}>
             <span className="total-pill__who">{result.outcome === 'fold' ? 'You · folded' : 'You'}</span>
             <strong>{result.playerName}</strong>
           </motion.div>

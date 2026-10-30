@@ -4,10 +4,14 @@ import { usePrefs, type EffectsPref } from '../prefs/prefsStore'
  * How much of the show this device gets.
  *
  * Full is everything: the dice in soft-shadowed, clear-coated acetate, the
- * foil sweeping across the sign, the chandeliers glinting. Reduced keeps every
- * picture but draws the dice more cheaply and lets the lobby's ambient lights
- * sit still, so a phone's battery and an older GPU are spared work no one is
- * looking at. Left on auto, a phone, a tablet or a modest machine gets reduced.
+ * foil sweeping across the sign, the chandeliers glinting, a shower of sparks
+ * over the whole screen for a win, banners that spring up. Reduced keeps every
+ * picture but draws the dice and the felt more cheaply, lets the lobby's
+ * ambient lights sit still, throws a handful of pieces for a win, and brings
+ * banners and screens in with shorter, plainer moves and no glow, so a phone
+ * keeps up with the game and its battery and an older GPU are spared work no
+ * one is looking at. Left on auto, a phone, a tablet or a modest machine gets
+ * reduced.
  */
 export type EffectsLevel = 'full' | 'reduced'
 

@@ -1,12 +1,23 @@
 import { useEffect, useRef } from 'react'
-import { registerEmitter, type Particle } from './celebrate'
+import { useEffectsLevel } from '../lib/effects'
+import { advance, fade, flightPath, registerEmitter, type FxKind, type Particle } from './celebrate'
 
 /**
- * The canvas every celebration is drawn on: one full-screen layer above
- * everything, idle until something fires and asleep again the moment the last
- * particle fades — no animation loop runs while nobody is winning.
+ * Where every celebration is drawn: one full-screen layer above everything.
+ *
+ * With full effects it is a canvas, idle until something fires and asleep
+ * again the moment the last particle fades — no animation loop runs while
+ * nobody is winning. A full-screen canvas redrawn every frame is a lot for a
+ * phone to hand over, though, all of it again at every frame, just as the
+ * banner and the chips are moving too. With lighter effects a burst is a
+ * handful of small pieces instead, each flight worked out the moment it is
+ * fired and handed to the browser to run, so nothing is drawn by script at all.
  */
 export function FxLayer() {
+  return useEffectsLevel() === 'reduced' ? <LightFx /> : <CanvasFx />
+}
+
+function CanvasFx() {
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -29,15 +40,8 @@ export function FxLayer() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       particles = particles.filter((p) => p.life < p.max)
       for (const p of particles) {
-        p.life++
-        const drag = p.kind === 'confetti' ? 0.965 : 0.975
-        p.vx *= drag
-        p.vy = p.vy * drag + (p.kind === 'sparks' ? 0.08 : 0.26)
-        p.x += p.vx
-        p.y += p.vy
-        p.angle += p.spin
-        const t = p.life / p.max
-        ctx.globalAlpha = Math.max(0, t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3)
+        advance(p)
+        ctx.globalAlpha = fade(p)
         if (p.kind === 'sparks') {
           ctx.globalCompositeOperation = 'lighter'
           const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4)
@@ -86,4 +90,54 @@ export function FxLayer() {
   }, [])
 
   return <canvas ref={ref} className="fx-layer" aria-hidden="true" />
+}
+
+/** The most pieces a lighter burst throws, whatever was asked for. */
+const LIGHT_PIECES: Record<FxKind, number> = { sparks: 14, confetti: 24, coins: 20 }
+
+/** Moments along each flight the browser is given; it runs straight between them. */
+const SAMPLES = 16
+
+/** A frame of the canvas's flight, in milliseconds. */
+const FRAME_MS = 1000 / 60
+
+function LightFx() {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const layer = ref.current
+    if (!layer) return
+    registerEmitter((added) => {
+      const kind = added[0]?.kind
+      if (!kind) return
+      for (const p of added.slice(0, LIGHT_PIECES[kind])) fly(layer, p)
+    })
+    return () => {
+      registerEmitter(null)
+      layer.replaceChildren()
+    }
+  }, [])
+
+  return <div ref={ref} className="fx-layer fx-layer--light" aria-hidden="true" />
+}
+
+/** One piece, launched on its way: moved and faded by the compositor alone, and gone when it lands. */
+function fly(layer: HTMLElement, p: Particle) {
+  const piece = document.createElement('span')
+  piece.className = `fx-piece fx-piece--${p.kind}`
+  // The same sizes the canvas draws: a spark's glow, a coin's face, a strip of confetti.
+  const width = p.kind === 'sparks' ? p.size * 8 : p.kind === 'coins' ? p.size * 2 : p.size
+  const height = p.kind === 'confetti' ? width / 2 : width
+  piece.style.width = `${width}px`
+  piece.style.height = `${height}px`
+  piece.style.setProperty('--fx-color', p.color)
+  layer.append(piece)
+  // A coin turns about its own width as it tumbles.
+  const squash = (angle: number) => (p.kind === 'coins' ? 0.25 + 0.75 * Math.abs(Math.cos(angle * 3)) : 1)
+  const keyframes = flightPath(p, SAMPLES).map((at) => ({
+    transform: `translate(${at.x - width / 2}px, ${at.y - height / 2}px) rotate(${at.angle}rad) scaleY(${squash(at.angle)})`,
+    opacity: at.alpha,
+  }))
+  const flight = piece.animate(keyframes, { duration: p.max * FRAME_MS, easing: 'linear', fill: 'forwards' })
+  flight.onfinish = flight.oncancel = () => piece.remove()
 }

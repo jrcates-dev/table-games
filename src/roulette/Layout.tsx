@@ -90,9 +90,9 @@ export function Dolly() {
         <Billboard key={seq} x={x} y={y} tilt={CAMERA.tilt}>
           <motion.div
             className={`ro-dolly ro-dolly--${pocketColor(result!)}`}
-            initial={{ y: -60, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -40, opacity: 0, transition: { duration: 0.25 } }}
+            initial={{ transform: 'translateY(-60px)', opacity: 0 }}
+            animate={{ transform: 'translateY(0px)', opacity: 1 }}
+            exit={{ transform: 'translateY(-40px)', opacity: 0, transition: { duration: 0.25 } }}
             transition={{ type: 'spring', stiffness: 420, damping: 22 }}
           >
             <span className="ro-dolly__crown">{pocketLabel(result!)}</span>

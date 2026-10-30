@@ -1,7 +1,7 @@
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { burstAt } from '../components/celebrate'
-import { BannerLine } from '../components/TableBanner'
+import { BannerCard } from '../components/TableBanner'
 import { evaluate } from '../engine/hand'
 import { signedMoney } from '../lib/format'
 import { isBigWin, useGameStore } from '../store/gameStore'
@@ -61,21 +61,7 @@ export function ResultBanner() {
   return (
     <div className="banner-anchor" ref={ref}>
       <AnimatePresence>
-        {headline && (
-          <motion.div
-            key={headline.title}
-            className={`banner banner--${headline.tone}`}
-            initial={{ opacity: 0, transform: 'translateY(10px) scale(0.7)' }}
-            animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
-            exit={{ opacity: 0, transform: 'translateY(-8px) scale(1.06)' }}
-            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-          >
-            <span className="banner__rule" />
-            <BannerLine className="banner__title" text={headline.title} gold={headline.tone === 'gold'} />
-            {headline.sub && <BannerLine className="banner__sub num" text={headline.sub} gold={headline.tone === 'gold'} />}
-            <span className="banner__rule" />
-          </motion.div>
-        )}
+        {headline && <BannerCard key={headline.title} headline={headline} />}
       </AnimatePresence>
     </div>
   )

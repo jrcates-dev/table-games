@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
+import { useEffectsLevel } from '../lib/effects'
 import { burstAt, type FxKind } from './celebrate'
 
 export interface Headline {
@@ -41,23 +42,40 @@ export function TableBanner({ headline }: { headline: Headline | null }) {
   return (
     <div className="banner-anchor" ref={ref}>
       <AnimatePresence>
-        {shown && (
-          <motion.div
-            key={shown.key}
-            className={`banner banner--${shown.tone}`}
-            initial={{ opacity: 0, transform: 'translateY(10px) scale(0.7)' }}
-            animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
-            exit={{ opacity: 0, transform: 'translateY(-8px) scale(1.06)' }}
-            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-          >
-            <span className="banner__rule" />
-            <BannerLine className="banner__title" text={shown.title} gold={shown.tone === 'gold'} />
-            {shown.sub && <BannerLine className="banner__sub num" text={shown.sub} gold={shown.tone === 'gold'} />}
-            <span className="banner__rule" />
-          </motion.div>
-        )}
+        {shown && <BannerCard key={shown.key} headline={shown} />}
       </AnimatePresence>
     </div>
+  )
+}
+
+const BANNER_FULL = {
+  initial: { opacity: 0, transform: 'translateY(10px) scale(0.7)' },
+  animate: { opacity: 1, transform: 'translateY(0px) scale(1)' },
+  exit: { opacity: 0, transform: 'translateY(-8px) scale(1.06)' },
+  transition: { type: 'spring', stiffness: 360, damping: 22 },
+} as const
+
+const BANNER_LIGHT = {
+  initial: { opacity: 0, transform: 'translateY(8px) scale(0.96)' },
+  animate: { opacity: 1, transform: 'translateY(0px) scale(1)' },
+  exit: { opacity: 0, transform: 'translateY(-6px) scale(1)' },
+  transition: { duration: 0.2, ease: [0.2, 0.8, 0.3, 1] },
+} as const
+
+/**
+ * The headline itself, between two gold rules. It pops up on a spring, or
+ * with lighter effects makes a short, plain rise and fade.
+ */
+export function BannerCard({ headline }: { headline: Pick<Headline, 'title' | 'sub' | 'tone'> }) {
+  const light = useEffectsLevel() === 'reduced'
+  const gold = headline.tone === 'gold'
+  return (
+    <motion.div className={`banner banner--${headline.tone}`} {...(light ? BANNER_LIGHT : BANNER_FULL)}>
+      <span className="banner__rule" />
+      <BannerLine className="banner__title" text={headline.title} gold={gold} />
+      {headline.sub && <BannerLine className="banner__sub num" text={headline.sub} gold={gold} />}
+      <span className="banner__rule" />
+    </motion.div>
   )
 }
 

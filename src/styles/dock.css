@@ -492,3 +492,25 @@
   z-index: 80;
   pointer-events: none;
 }
+
+/* Lighter effects: a burst is a few small pieces the compositor flies (see Fx.tsx). */
+.fx-layer--light {
+  overflow: hidden;
+}
+
+.fx-piece {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: var(--fx-color);
+}
+
+.fx-piece--sparks {
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side, var(--fx-color), rgba(255, 220, 150, 0));
+}
+
+.fx-piece--coins {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(120, 80, 20, 0.6);
+}
