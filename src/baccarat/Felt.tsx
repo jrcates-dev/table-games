@@ -2,7 +2,10 @@ import { memo } from 'react'
 import { DTable, FeltText } from '../components/DTable'
 import { arcPath } from '../components/tableArc'
 import { Monogram } from '../components/TopBar'
-import { BOX, HAND, SPOTS, bandTextArc, shapePath, type BetSpot } from './geometry'
+import { BOX, HAND, SPOTS, bandLetters, bandTextArc, shapePath, type BetSpot } from './geometry'
+
+/** How far below the middle of each band its printing runs. */
+const BAND_TEXT_INSET = 7
 
 /**
  * The printing on a mini-baccarat felt: the two card boxes on the dealer's
@@ -16,7 +19,7 @@ export const BaccaratFelt = memo(function BaccaratFelt() {
       defs={
         <>
           {SPOTS.filter((s) => s.shape.type === 'band').map((s) => (
-            <path key={s.kind} id={`ba-arc-${s.kind}`} d={bandTextArc(s.shape as Extract<BetSpot['shape'], { type: 'band' }>, 7)} />
+            <path key={s.kind} id={`ba-arc-${s.kind}`} d={bandTextArc(s.shape as Extract<BetSpot['shape'], { type: 'band' }>, BAND_TEXT_INSET)} />
           ))}
           <path id="ba-arc-rule" d={arcPath(992, 992, 13)} />
         </>
@@ -60,14 +63,25 @@ function Spot({ spot }: { spot: BetSpot }) {
   const { shape } = spot
   const d = shapePath(shape)
   if (shape.type === 'band') {
+    // The name is stood on the arc letter by letter rather than set along a
+    // textPath: spaced this wide, a phone browser ran it past the end of its
+    // path and dropped the last letter.
+    const letters = bandLetters(shape, BAND_TEXT_INSET, spot.label.length, 30)
     return (
       <g>
         <path d={d} fill="#000" opacity={spot.kind === 'banker' ? 0.14 : 0.1} />
         <path d={d} fill="none" stroke="url(#gold-foil)" strokeWidth="2.6" />
-        <text fontFamily="Cinzel, serif" fontWeight="700" fontSize="27" letterSpacing="12" fill="url(#gold-foil)">
-          <textPath href={`#ba-arc-${spot.kind}`} startOffset="50%" textAnchor="middle">
-            {spot.label}
-          </textPath>
+        <text
+          fontFamily="Cinzel, serif"
+          fontWeight="700"
+          fontSize="27"
+          textAnchor="middle"
+          fill="url(#gold-foil)"
+          x={letters.map((l) => l.x.toFixed(1)).join(' ')}
+          y={letters.map((l) => l.y.toFixed(1)).join(' ')}
+          rotate={letters.map((l) => l.angle.toFixed(2)).join(' ')}
+        >
+          {spot.label}
         </text>
         <text fontFamily="Cinzel, serif" fontWeight="600" fontSize="12" letterSpacing="3.5" fill="var(--felt-print)" opacity="0.72" dy="20">
           <textPath href={`#ba-arc-${spot.kind}`} startOffset="50%" textAnchor="middle">

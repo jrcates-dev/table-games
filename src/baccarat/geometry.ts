@@ -107,3 +107,16 @@ export function bandTextArc(shape: Extract<SpotShape, { type: 'band' }>, inset =
   const [bx, by] = polar(r, shape.spread)
   return `M ${ax} ${ay} A ${r} ${r} 0 0 0 ${bx} ${by}`
 }
+
+/**
+ * Where each of `count` letters stands on a band's arc: `step` apart along it,
+ * centred on the band, and the angle that turns each one to the curve.
+ */
+export function bandLetters(shape: Extract<SpotShape, { type: 'band' }>, inset: number, count: number, step: number): { x: number; y: number; angle: number }[] {
+  const r = (shape.r0 + shape.r1) / 2 + inset
+  return Array.from({ length: count }, (_, i) => {
+    const deg = ((i - (count - 1) / 2) * step * 180) / (Math.PI * r)
+    const [x, y] = polar(r, deg)
+    return { x, y, angle: -deg }
+  })
+}
