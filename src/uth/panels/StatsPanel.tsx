@@ -15,7 +15,7 @@ export function UthStatsPanel() {
   return (
     <div className="stats">
       <div className="stats__hero">
-        <Stat big label="Net result" value={signedMoney(stats.netResult, true)} tone={stats.netResult >= 0 ? 'good' : 'bad'} />
+        <Stat big label="Net result" value={signedMoney(stats.netResult, true)} tone={stats.netResult > 0 ? 'good' : stats.netResult < 0 ? 'bad' : undefined} />
         <Stat big label="By the book" value={percent(book, 1)} tone={book >= 0.95 ? 'good' : 'bad'} hint={`${stats.bookDecisions} of ${stats.decisions} decisions matched the coach`} />
       </div>
       <div className="stats__grid">
@@ -71,7 +71,7 @@ function HandRow({ entry }: { entry: HandRecord }) {
           {OUTCOME[entry.outcome]}
           {entry.raise > 0 ? ` · ${entry.raise}x` : ''}
         </span>
-        <span className={`history__net num ${entry.net > 0 ? 'tone-win' : entry.net < 0 ? 'tone-lose' : ''}`}>{entry.net === 0 ? '—' : signedMoney(entry.net, true)}</span>
+        <span className={`history__net num ${entry.net > 0 ? 'tone-win' : entry.net < 0 ? 'tone-lose' : 'tone-push'}`}>{entry.net === 0 ? '—' : signedMoney(entry.net, true)}</span>
       </div>
       <div className="history__line">
         <span className="history__who">You</span>

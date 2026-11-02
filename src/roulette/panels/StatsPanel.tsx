@@ -17,7 +17,7 @@ export function RouletteStatsPanel() {
   return (
     <div className="stats">
       <div className="stats__hero">
-        <Stat big label="Net result" value={signedMoney(stats.netResult)} tone={stats.netResult >= 0 ? 'good' : 'bad'} />
+        <Stat big label="Net result" value={signedMoney(stats.netResult)} tone={stats.netResult > 0 ? 'good' : stats.netResult < 0 ? 'bad' : undefined} />
         <Stat
           big
           label="Realised edge"
@@ -59,7 +59,7 @@ function SpinRow({ entry }: { entry: SpinRecord }) {
       <div className="history__head">
         <span className="history__time">{relativeTime(entry.timestamp)}</span>
         <span className={`ro-num ro-num--${pocketColor(entry.result)}`}>{pocketLabel(entry.result)}</span>
-        <span className={`history__net num ${entry.net > 0 ? 'tone-win' : entry.net < 0 ? 'tone-lose' : ''}`}>{entry.net === 0 ? '—' : signedMoney(entry.net)}</span>
+        <span className={`history__net num ${entry.net > 0 ? 'tone-win' : entry.net < 0 ? 'tone-lose' : 'tone-push'}`}>{entry.net === 0 ? '—' : signedMoney(entry.net)}</span>
       </div>
       {bets && (
         <div className="history__mistakes">

@@ -815,6 +815,10 @@
   background: rgba(79, 224, 160, 0.07);
 }
 
+.bet-row.is-push {
+  border-color: rgba(185, 196, 216, 0.35);
+}
+
 .bet-row__top {
   display: flex;
   justify-content: space-between;
@@ -854,6 +858,18 @@
 
 .bet-row__pays strong {
   color: var(--text-1);
+}
+
+/* A settled bet's result keeps its colour over the line's plain figures:
+   won green, push grey, lost red. */
+.bet-row__pays strong.tone-win {
+  color: var(--win);
+}
+.bet-row__pays strong.tone-push {
+  color: var(--push);
+}
+.bet-row__pays strong.tone-lose {
+  color: var(--lose);
 }
 
 .bet-row__off {
@@ -1341,7 +1357,10 @@
   --tone: var(--lose);
 }
 
-.last-roll__item.is-push,
+.last-roll__item.is-push {
+  --tone: var(--push);
+}
+
 .last-roll__item.is-point,
 .last-roll__item.is-moved {
   --tone: var(--gold-2);

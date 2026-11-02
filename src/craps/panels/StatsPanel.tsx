@@ -14,7 +14,7 @@ export function CrapsStatsPanel() {
   return (
     <div className="stats">
       <div className="stats__hero">
-        <Stat big label="Net result" value={signedMoney(stats.netResult)} tone={stats.netResult >= 0 ? 'good' : 'bad'} />
+        <Stat big label="Net result" value={signedMoney(stats.netResult)} tone={stats.netResult > 0 ? 'good' : stats.netResult < 0 ? 'bad' : undefined} />
         <Stat big label="Longest roll" value={`${stats.longestRoll}`} hint="Most throws held in one shoot — the real craps brag" />
       </div>
       <div className="stats__grid">
@@ -72,7 +72,7 @@ function ShootHistory() {
                 {shoot.rolls.length} roll{shoot.rolls.length === 1 ? '' : 's'}
                 {shoot.pointsMade.length > 0 && ` · ${shoot.pointsMade.length} point${shoot.pointsMade.length === 1 ? '' : 's'}`}
               </span>
-              <span className={`history__net num ${shoot.net > 0 ? 'tone-win' : shoot.net < 0 ? 'tone-lose' : ''}`}>{signedMoney(shoot.net)}</span>
+              <span className={`history__net num ${shoot.net > 0 ? 'tone-win' : shoot.net < 0 ? 'tone-lose' : 'tone-push'}`}>{signedMoney(shoot.net)}</span>
             </button>
             {expanded && (
               <ol className="shoot__rolls">
@@ -83,7 +83,7 @@ function ShootHistory() {
                     </span>
                     <strong className="num">{entry.total}</strong>
                     <span>{NOTE_TEXT[entry.note ?? ''] ?? (entry.point ? `point ${entry.point}` : '')}</span>
-                    <span className={`num ${entry.net > 0 ? 'tone-win' : entry.net < 0 ? 'tone-lose' : ''}`}>{entry.net === 0 ? '—' : signedMoney(entry.net)}</span>
+                    <span className={`num ${entry.net > 0 ? 'tone-win' : entry.net < 0 ? 'tone-lose' : 'tone-push'}`}>{entry.net === 0 ? '—' : signedMoney(entry.net)}</span>
                   </li>
                 ))}
               </ol>

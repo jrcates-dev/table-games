@@ -365,6 +365,7 @@
 
 .history__outcome.is-lose,
 .history__outcome.is-bust,
+.history__outcome.is-surrender,
 .history__outcome.is-dealerBlackjack {
   color: var(--lose);
 }

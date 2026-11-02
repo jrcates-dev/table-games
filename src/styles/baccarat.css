@@ -56,6 +56,11 @@
   margin-top: 2px;
 }
 
+/* Settled: the gold of a bet down gives way to how it came out. */
+.ba-price.is-win {
+  border-color: rgba(79, 224, 160, 0.5);
+}
+
 .ba-price.is-lose {
   border-color: rgba(255, 107, 114, 0.35);
 }
@@ -419,6 +424,10 @@
 
 .ba-last__sum .is-lose dd {
   color: #ff9ea4;
+}
+
+.ba-last__sum .is-flat dd {
+  color: var(--push);
 }
 
 .ba-last__note {

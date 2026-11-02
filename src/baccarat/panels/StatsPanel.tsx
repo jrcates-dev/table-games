@@ -15,7 +15,7 @@ export function BaccaratStatsPanel() {
   return (
     <div className="stats">
       <div className="stats__hero">
-        <Stat big label="Net result" value={signedMoney(stats.netResult, true)} tone={stats.netResult >= 0 ? 'good' : 'bad'} />
+        <Stat big label="Net result" value={signedMoney(stats.netResult, true)} tone={stats.netResult > 0 ? 'good' : stats.netResult < 0 ? 'bad' : undefined} />
         <Stat
           big
           label="Realised edge"
@@ -72,7 +72,7 @@ function CoupRow({ entry }: { entry: CoupRecord }) {
       <div className="history__head">
         <span className="history__time">{relativeTime(entry.timestamp)}</span>
         <span className={`history__outcome ba-outcome--${entry.winner}`}>{entry.winner === 'tie' ? 'Tie' : entry.winner === 'banker' ? 'Banker' : 'Player'}</span>
-        <span className={`history__net num ${entry.net > 0 ? 'tone-win' : entry.net < 0 ? 'tone-lose' : ''}`}>{entry.net === 0 ? '—' : signedMoney(entry.net, true)}</span>
+        <span className={`history__net num ${entry.net > 0 ? 'tone-win' : entry.net < 0 ? 'tone-lose' : 'tone-push'}`}>{entry.net === 0 ? '—' : signedMoney(entry.net, true)}</span>
       </div>
       <div className="history__line">
         <span className="history__who">Player {entry.playerTotal}</span>

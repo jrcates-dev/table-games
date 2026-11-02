@@ -39,7 +39,7 @@ export function StatsPanel() {
   return (
     <div className="stats">
       <div className="stats__hero">
-        <Stat big label="Net result" value={signedMoney(stats.netResult)} tone={stats.netResult >= 0 ? 'good' : 'bad'} />
+        <Stat big label="Net result" value={signedMoney(stats.netResult)} tone={stats.netResult > 0 ? 'good' : stats.netResult < 0 ? 'bad' : undefined} />
         <Stat
           big
           label="Strategy accuracy"
@@ -122,7 +122,7 @@ function History() {
         <li key={record.id} className="history__row">
           <div className="history__head">
             <span className="history__time">{relativeTime(record.timestamp)}</span>
-            <span className={`history__net num ${record.net > 0 ? 'tone-win' : record.net < 0 ? 'tone-lose' : ''}`}>
+            <span className={`history__net num ${record.net > 0 ? 'tone-win' : record.net < 0 ? 'tone-lose' : 'tone-push'}`}>
               {record.net === 0 ? 'Push' : signedMoney(record.net)}
             </span>
           </div>

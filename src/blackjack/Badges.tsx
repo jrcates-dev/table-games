@@ -27,7 +27,7 @@ const OUTCOME: Record<Outcome, { label: string; tone: 'gold' | 'win' | 'push' | 
   push: { label: 'Push', tone: 'push' },
   lose: { label: 'Lose', tone: 'lose' },
   bust: { label: 'Bust', tone: 'lose' },
-  surrender: { label: 'Surrendered', tone: 'push' },
+  surrender: { label: 'Surrendered', tone: 'lose' },
   dealerBlackjack: { label: 'Dealer blackjack', tone: 'lose' },
 }
 
