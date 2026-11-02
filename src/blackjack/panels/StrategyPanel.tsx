@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useBookFocus } from '../../components/bookFocus'
 import { availableActions } from '../../engine/blackjack'
 import { formatTotal, isNatural } from '../../engine/hand'
 import { DEFAULT_RULE_PRESET, RULE_PRESETS } from '../../engine/rules'
@@ -72,10 +73,14 @@ export function StrategyPanel() {
   const chart = useMemo(() => strategyChart(game.rules), [game.rules])
   // Only the codes this card actually uses go in its key.
   const used = new Set(chart.flatMap((section) => section.rows.flatMap((row) => row.cells)))
+  // A pair, or a soft hand, is a long way down the card: open the book on it.
+  const liveCell = useBookFocus(
+    live ? `${live.position.section}:${live.position.key}:${live.position.column}` : null,
+  )
 
   return (
     <div className={`chart${live ? ' is-focused' : ''}`}>
-      <div className={`chart__live${live ? ' is-on' : ''}`}>
+      <div className={`chart__live${live ? ' is-on' : ''}`} data-pinned="">
         {live ? (
           <>
             <span className="eyebrow">{live.insurance ? 'Your hand · after insurance' : 'Your hand'}</span>
@@ -117,6 +122,7 @@ export function StrategyPanel() {
                       return (
                         <td
                           key={col}
+                          ref={isLive ? liveCell : undefined}
                           className={`cell cell--${cell}${isLive ? ' is-live' : ''}`}
                           title={`${row.label} vs ${CHART_COLUMNS[col]}: ${CELL_LEGEND.find((l) => l.cell === cell)?.name ?? cell}`}
                         >

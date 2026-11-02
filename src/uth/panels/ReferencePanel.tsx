@@ -1,9 +1,10 @@
+import { useBookFocus } from '../../components/bookFocus'
 import { EdgeBar, EdgePill } from '../../components/EdgePill'
 import { CATEGORY_LABEL, type Category } from '../../engine/uth/poker'
 import { BLIND_PAYS, TRIPS_TABLES, tripsEdge, UTH_ELEMENT_OF_RISK, UTH_HOUSE_EDGE, UTH_SIMPLE_STRATEGY_EDGE, type TripsTableId } from '../../engine/uth/rules'
 import { preflopChart } from '../../engine/uth/strategy'
 import { percent } from '../../lib/format'
-import { useUthStore } from '../../store/uthStore'
+import { holeName, useUthStore } from '../../store/uthStore'
 
 const CHART = preflopChart()
 const ORDER: Category[] = ['royal', 'straightFlush', 'quads', 'fullHouse', 'flush', 'straight', 'trips']
@@ -17,6 +18,12 @@ const pays = (n: number) => (n === 1.5 ? '3 to 2' : `${n} to 1`)
 export function UthReferencePanel() {
   const showEdges = useUthStore((s) => s.profile.settings.showEdges)
   const tripsTable = useUthStore((s) => s.game.tripsTable)
+  // The street waiting on you, if one is, and before the flop the two cards you hold.
+  const street = useUthStore((s) => (s.game.phase === 'preflop' || s.game.phase === 'flop' || s.game.phase === 'river' ? s.game.phase : null))
+  const hole = useUthStore((s) => (s.game.player.length === 2 ? holeName(s.game.player) : null))
+  const hand = street === 'preflop' ? hole : null
+  // Open the book on your square of the chart, or on the rule for the street you are on.
+  const focus = useBookFocus(street === 'preflop' ? (hand ? `preflop:${hand}` : null) : street)
 
   return (
     <div className="reference">
@@ -42,27 +49,52 @@ export function UthReferencePanel() {
         </ol>
       </section>
 
-      <section className="reference__group">
-        <h3 className="form-section__title">Before the flop: raise 4x or check</h3>
+      <section className={`reference__group${street === 'preflop' ? ' is-live' : ''}`}>
+        <h3 className="form-section__title">
+          Before the flop: raise 4x or check
+          {street === 'preflop' && (
+            <span className="reference__here">
+              {hand ? (
+                <>
+                  Your hand · <span className="reference__hand">{hand}</span>
+                </>
+              ) : (
+                'Your decision'
+              )}
+            </span>
+          )}
+        </h3>
         <p className="reference__note">
           Never 3x: a hand worth raising is worth raising the most. (Short of 4x in the rack, the coach says when 3x is still worth it.) Suited hands above the diagonal, offsuit below.
         </p>
-        <div className="uth-chart" role="table" aria-label="Pre-flop raising chart">
+        <div className={`uth-chart${hand ? ' is-focused' : ''}`} role="table" aria-label="Pre-flop raising chart">
           {CHART.map((row, i) => (
             <div key={i} className="uth-chart__row" role="row">
-              {row.map((cell) => (
-                <span key={cell.label} role="cell" className={`uth-chart__cell is-${cell.decision === 'bet4' ? 'raise' : 'check'}`} title={`${cell.label}: ${cell.decision === 'bet4' ? 'raise 4x' : 'check'}`}>
-                  {cell.label}
-                </span>
-              ))}
+              {row.map((cell) => {
+                const isLive = cell.label === hand
+                return (
+                  <span
+                    key={cell.label}
+                    ref={isLive ? focus : undefined}
+                    role="cell"
+                    className={`uth-chart__cell is-${cell.decision === 'bet4' ? 'raise' : 'check'}${isLive ? ' is-live' : ''}`}
+                    title={`${cell.label}: ${cell.decision === 'bet4' ? 'raise 4x' : 'check'}`}
+                  >
+                    {cell.label}
+                  </span>
+                )
+              })}
             </div>
           ))}
         </div>
         <p className="chart__foot">Gold raises 4x; the rest check. Any ace, any pair but deuces, K2s+, K5o+, Q6s+, Q8o+, J8s+, JTo.</p>
       </section>
 
-      <section className="reference__group">
-        <h3 className="form-section__title">On the flop: bet 2x or check</h3>
+      <section ref={street === 'flop' ? focus : undefined} className={`reference__group${street === 'flop' ? ' is-live' : ''}`}>
+        <h3 className="form-section__title">
+          On the flop: bet 2x or check
+          {street === 'flop' && <span className="reference__here">Your decision</span>}
+        </h3>
         <ul className="uth-rules">
           <li>Two pair or better that uses your cards — but deuces with a pair on the board check</li>
           <li>Any pocket pair but deuces</li>
@@ -75,8 +107,11 @@ export function UthReferencePanel() {
         </p>
       </section>
 
-      <section className="reference__group">
-        <h3 className="form-section__title">On the river: bet 1x or fold</h3>
+      <section ref={street === 'river' ? focus : undefined} className={`reference__group${street === 'river' ? ' is-live' : ''}`}>
+        <h3 className="form-section__title">
+          On the river: bet 1x or fold
+          {street === 'river' && <span className="reference__here">Your decision</span>}
+        </h3>
         <p className="reference__note">
           Count the cards you cannot see that would beat you if the dealer held one — the dealer’s outs. Bet with fewer than 21, fold with 21 or more. The Wizard also bets any hidden pair; counted exactly, the outs
           alone do a touch better, so the book leaves that out. The coach goes one better and scores all 990 hands the dealer could hold, so its call on the river is exact.

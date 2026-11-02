@@ -1,6 +1,9 @@
+import { useBookFocus } from '../../components/bookFocus'
 import { EdgeBar, EdgePill } from '../../components/EdgePill'
 import { bankerDraws, tableauSquare, type TableauSquare } from '../../engine/baccarat/tableau'
 import { BACCARAT_BETS, BACCARAT_ORDER, DRAGON_MARGIN_PAYS } from '../../engine/baccarat/rules'
+import type { Coup } from '../../engine/baccarat/types'
+import { money } from '../../lib/format'
 import { useBaccaratStore, useLiveOdds } from '../../store/baccaratStore'
 
 /**
@@ -13,6 +16,15 @@ export function BaccaratReferencePanel() {
   const showEdges = useBaccaratStore((s) => s.profile.settings.showEdges)
   const live = useLiveOdds()
   const rows = [...BACCARAT_ORDER].sort((a, b) => BACCARAT_BETS[a].edge - BACCARAT_BETS[b].edge)
+  // Once a coup is settled its square of the tableau is lit, so the chart never
+  // gets ahead of the cards on the felt; until then, the bets you have down are.
+  const coup = useBaccaratStore((s) => (s.game.phase === 'settled' ? s.game.coup : null))
+  const square = coup ? tableauSquare(coup) : null
+  const bets = useBaccaratStore((s) => (s.game.phase === 'settled' ? null : s.game.bets))
+  const stake = (kind: (typeof rows)[number]) => bets?.[kind] ?? 0
+  const first = rows.find((kind) => stake(kind) > 0) ?? null
+  // Open the book on the coup just played, or on the first of your bets.
+  const focus = useBookFocus(coup ? `coup:${square ? `${square.total}:${square.playerThird}` : 'natural'}` : first && `bet:${first}`)
 
   return (
     <div className="reference">
@@ -40,7 +52,7 @@ export function BaccaratReferencePanel() {
       <section className="reference__group">
         <h3 className="form-section__title">The Banker’s third card</h3>
         <p className="reference__note">When the Player stands, the Banker draws on 0–5 and stands on 6–7, as in the last column. When the Player draws, the Banker’s total and the Player’s third card decide it:</p>
-        <Tableau />
+        <Tableau coup={coup} square={square} focus={focus} />
       </section>
 
       <section className="reference__group">
@@ -51,10 +63,14 @@ export function BaccaratReferencePanel() {
         <div className="reference__rows">
           {rows.map((kind) => {
             const spec = BACCARAT_BETS[kind]
+            const yours = stake(kind)
             return (
-              <div key={kind} className="reference__row">
+              <div key={kind} ref={!coup && kind === first ? focus : undefined} className={`reference__row${yours > 0 ? ' is-live' : ''}`}>
                 <div className="reference__main">
-                  <strong>{spec.title}</strong>
+                  <strong>
+                    {spec.title}
+                    {yours > 0 && <span className="reference__here">Yours · {money(yours, true)}</span>}
+                  </strong>
                   <span className="reference__pays">{spec.pays}</span>
                 </div>
                 <div className="reference__detail">
@@ -119,16 +135,17 @@ const COLUMNS: Array<number | null> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, null]
 
 /**
  * The Banker's chart, with the square the last coup was decided on lit the way
- * the blackjack book lights the player's own — once the coup is settled, so the
- * chart never gets ahead of the cards on the felt.
+ * the blackjack book lights the player's own. `focus` goes on that square, or,
+ * after a natural that never reached the chart, on the line that says so.
  */
-function Tableau() {
-  const coup = useBaccaratStore((s) => (s.game.phase === 'settled' ? s.game.coup : null))
-  const square = coup ? tableauSquare(coup) : null
-
+function Tableau({ coup, square, focus }: { coup: Coup | null; square: TableauSquare | null; focus: (node: HTMLElement | null) => void }) {
   return (
     <div className={`chart${square ? ' is-focused' : ''}`}>
-      {coup && <p className="ba-tableau__last">{lastCoup(square)}</p>}
+      {coup && (
+        <p ref={square ? undefined : focus} className="ba-tableau__last">
+          {lastCoup(square)}
+        </p>
+      )}
       <table className="chart__table ba-tableau">
         <colgroup>
           <col className="ba-tableau__side-col" />
@@ -170,6 +187,7 @@ function Tableau() {
                   return (
                     <td
                       key={v ?? 'stood'}
+                      ref={isLive ? focus : undefined}
                       className={`cell cell--${draws ? 'H' : 'S'}${isLive ? ' is-live' : ''}`}
                       title={`Banker ${total}, ${v === null ? 'Player stood' : `Player’s third card ${v}`}: ${draws ? 'draws' : 'stands'}`}
                     >

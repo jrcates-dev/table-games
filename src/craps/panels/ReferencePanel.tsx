@@ -1,5 +1,8 @@
+import { useMemo } from 'react'
+import { useBookFocus } from '../../components/bookFocus'
 import { payoutText, spec } from '../../engine/craps/bets'
-import type { BetKind } from '../../engine/craps/types'
+import type { Bet, BetKind } from '../../engine/craps/types'
+import { money } from '../../lib/format'
 import { useCrapsStore } from '../../store/crapsStore'
 import { BAND_LABEL, describeBet, loseCondition, totalsText, winCondition } from '../betInfo'
 
@@ -75,6 +78,39 @@ const GROUPS: Array<{ title: string; note: string; rows: Row[] }> = [
   },
 ]
 
+const rowKey = (kind: BetKind, number?: number) => `${kind}-${number ?? ''}`
+
+/** The number a card row is printed under: the 6 stands for the 6 or 8, and so on. */
+const PAIRED: Record<number, number> = { 8: 6, 9: 5, 10: 4 }
+
+/**
+ * The card row a bet on the felt is priced under. A come bet that has travelled
+ * is still a come bet, and odds are odds whether behind the line or a come bet.
+ */
+function rowFor(bet: Bet, point: number | null): string {
+  const number = bet.number ?? (bet.kind === 'passOdds' || bet.kind === 'dontPassOdds' ? point ?? undefined : undefined)
+  const paired = number === undefined ? undefined : (PAIRED[number] ?? number)
+  switch (bet.kind) {
+    case 'comePoint':
+      return rowKey('come')
+    case 'dontComePoint':
+      return rowKey('dontCome')
+    case 'passOdds':
+    case 'comeOdds':
+      return rowKey('passOdds', paired)
+    case 'dontPassOdds':
+    case 'dontComeOdds':
+      return rowKey('dontPassOdds', paired)
+    case 'place':
+    case 'buy':
+    case 'lay':
+    case 'hard':
+      return rowKey(bet.kind, paired)
+    default:
+      return rowKey(bet.kind)
+  }
+}
+
 function conditionFor(kind: BetKind): string {
   switch (kind) {
     case 'small':
@@ -93,6 +129,33 @@ function conditionFor(kind: BetKind): string {
 export function ReferencePanel() {
   const showEdges = useCrapsStore((s) => s.profile.settings.showEdges)
   const point = useCrapsStore((s) => s.game.point)
+  const bets = useCrapsStore((s) => s.game.bets)
+
+  // What you have on the felt, by the card row it is priced under.
+  const yours = useMemo(() => {
+    const onFelt = new Map<string, number>()
+    for (const bet of Object.values(bets)) {
+      if (bet.amount <= 0) continue
+      const key = rowFor(bet, point)
+      onFelt.set(key, (onFelt.get(key) ?? 0) + bet.amount)
+    }
+    return onFelt
+  }, [bets, point])
+
+  const groups = useMemo(
+    () =>
+      GROUPS.map((group) => ({
+        ...group,
+        rows: group.rows
+          .map((row) => ({ row, key: rowKey(row.kind, row.number), info: describeBet(row.kind, row.number, point) }))
+          .sort((a, b) => a.info.edge - b.info.edge),
+      })),
+    [point],
+  )
+
+  // Open the book on the first of your bets, in the order the card prints them.
+  const first = groups.flatMap((group) => group.rows).find(({ key }) => yours.has(key))?.key ?? null
+  const focus = useBookFocus(first)
 
   return (
     <div className="reference">
@@ -117,18 +180,20 @@ export function ReferencePanel() {
         </p>
       </section>
 
-      {GROUPS.map((group) => (
+      {groups.map((group) => (
         <section key={group.title} className="reference__group">
           <h3 className="form-section__title">{group.title}</h3>
           <p className="reference__note">{group.note}</p>
           <div className="reference__rows">
-            {group.rows
-              .map((row) => ({ row, info: describeBet(row.kind, row.number, point) }))
-              .sort((a, b) => a.info.edge - b.info.edge)
-              .map(({ row, info }) => (
-                <div key={`${row.kind}-${row.number ?? ''}`} className="reference__row">
+            {group.rows.map(({ row, key, info }) => {
+              const stake = yours.get(key)
+              return (
+                <div key={key} ref={key === first ? focus : undefined} className={`reference__row${stake ? ' is-live' : ''}`}>
                   <div className="reference__main">
-                    <strong>{row.label ?? info.title}</strong>
+                    <strong>
+                      {row.label ?? info.title}
+                      {stake ? <span className="reference__here">Yours · {money(stake)}</span> : null}
+                    </strong>
                     <span className="reference__pays">{payoutText(row.kind, row.number)}</span>
                   </div>
                   <div className="reference__detail">
@@ -150,7 +215,8 @@ export function ReferencePanel() {
                     </div>
                   )}
                 </div>
-              ))}
+              )
+            })}
           </div>
         </section>
       ))}

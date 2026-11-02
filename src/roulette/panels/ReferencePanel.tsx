@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+import { useBookFocus } from '../../components/bookFocus'
 import { EdgeBar, EdgePill } from '../../components/EdgePill'
 import { houseEdge, payText, winProbability, type RouletteBetKind } from '../../engine/roulette/bets'
 import { ROULETTE_LIMITS, WHEEL_NAME, WHEEL_ROOM } from '../../engine/roulette/rules'
@@ -12,6 +14,10 @@ interface Row {
   where: string
   numbers: { double: number[]; single: number[] }
 }
+
+/** The even-money bets share one line of the card. */
+const EVEN_MONEY: ReadonlySet<RouletteBetKind> = new Set(['red', 'black', 'odd', 'even', 'low', 'high'])
+const rowFor = (kind: RouletteBetKind): RouletteBetKind => (EVEN_MONEY.has(kind) ? 'red' : kind)
 
 const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => from + i)
 
@@ -38,6 +44,21 @@ export function RouletteReferencePanel() {
   const wheel = useRouletteStore((s) => s.game.wheel)
   const showEdges = useRouletteStore((s) => s.profile.settings.showEdges)
   const other: WheelType = wheel === 'double' ? 'single' : 'double'
+  // What is on the layout for the spin to come or the one in the air — once it
+  // is settled the layout has been swept and paid.
+  const bets = useRouletteStore((s) => (s.game.phase === 'settled' ? null : s.game.bets))
+  const yours = useMemo(() => {
+    const onLayout = new Map<RouletteBetKind, number>()
+    for (const bet of Object.values(bets ?? {})) {
+      if (bet.amount <= 0) continue
+      const row = rowFor(bet.kind)
+      onLayout.set(row, (onLayout.get(row) ?? 0) + bet.amount)
+    }
+    return onLayout
+  }, [bets])
+  // Open the book on the first of your bets, in the order the card prints them.
+  const first = ROWS.find((row) => yours.has(row.kind))?.kind ?? null
+  const focus = useBookFocus(first)
 
   return (
     <div className="reference">
@@ -88,10 +109,18 @@ export function RouletteReferencePanel() {
             const def = { kind: row.kind, numbers: row.numbers[wheel] }
             const edge = houseEdge(def, wheel)
             const otherEdge = houseEdge({ kind: row.kind, numbers: row.numbers[other] }, other)
+            const stake = yours.get(row.kind)
             return (
-              <div key={row.kind} className={`reference__row${row.kind === 'basket' && wheel === 'double' ? ' is-warning' : ''}`}>
+              <div
+                key={row.kind}
+                ref={row.kind === first ? focus : undefined}
+                className={`reference__row${row.kind === 'basket' && wheel === 'double' ? ' is-warning' : ''}${stake ? ' is-live' : ''}`}
+              >
                 <div className="reference__main">
-                  <strong>{row.title}</strong>
+                  <strong>
+                    {row.title}
+                    {stake ? <span className="reference__here">Yours · {money(stake)}</span> : null}
+                  </strong>
                   <span className="reference__pays">{payText(def)}</span>
                 </div>
                 <div className="reference__detail">

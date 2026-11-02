@@ -163,6 +163,55 @@
   color: var(--text-3);
 }
 
+/* Your own entries in a book: the bets you have down, the street you are on. */
+.reference__row.is-live {
+  border-color: var(--gold-line-strong);
+  background: rgba(227, 193, 112, 0.07);
+  box-shadow: 0 0 0 1px rgba(245, 223, 160, 0.18), 0 0 18px rgba(245, 223, 160, 0.12);
+}
+
+.reference__group.is-live {
+  position: relative;
+}
+
+.reference__group.is-live::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -10px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--gold-2);
+  box-shadow: 0 0 10px rgba(245, 223, 160, 0.5);
+}
+
+.reference__here {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  vertical-align: 1px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #2a1d06;
+  background: linear-gradient(180deg, var(--gold-1), var(--gold-3));
+}
+
+/* A hand's name keeps its case: 72o is offsuit, 72O is nothing. */
+.reference__hand {
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+.form-section__title .reference__here {
+  margin-left: 0;
+  letter-spacing: 0.1em;
+}
+
 /* The "Book" flag, outside the action buttons it was made for. */
 .ba-book,
 .coach-card {
