@@ -2,7 +2,9 @@ import { AnimatePresence } from 'motion/react'
 import { useCallback, useState, type ReactNode } from 'react'
 import { play } from '../audio'
 import { usePrefs } from '../prefs/prefsStore'
-import { useAppStore } from '../store/appStore'
+import { useAppStore, type GameId } from '../store/appStore'
+import { sessionTotal, useSessionNets } from '../store/sessionNets'
+import { useSharedBankroll } from '../store/sharedBankroll'
 import { IconBack, IconMute, IconVolume } from './icons'
 import { Money } from './Money'
 import { RackMenu, type RackControl } from './RackMenu'
@@ -12,6 +14,7 @@ import { RackMenu, type RackControl } from './RackMenu'
  * the sign over the table, the rack, and the handful of panels.
  */
 export function TopBar({
+  id,
   game,
   placard,
   bankroll,
@@ -21,20 +24,26 @@ export function TopBar({
   rack,
   children,
 }: {
+  /** Which table this is, for its share of the session while the bankroll is shared. */
+  id: GameId
   game: string
   placard: ReactNode
   bankroll: number
   /** The table pays in cents, so the rack is counted in them. */
   cents?: boolean
-  /** Net since this session began. */
+  /** Net since this session began, while this table keeps its own rack. */
   session?: number
-  /** A second line under the bankroll, e.g. chips on the felt. */
+  /**
+   * A second line under the bankroll, e.g. chips on the felt. With the bankroll
+   * shared the session's results take its place; the rail still shows the felt.
+   */
   extra?: ReactNode
   /** Given, the bankroll opens a menu to reset or top up the rack. */
   rack?: RackControl
   children?: ReactNode
 }) {
   const go = useAppStore((s) => s.go)
+  const shared = useSharedBankroll((s) => s.shared)
   const [rackOpen, setRackOpen] = useState(false)
   const closeRack = useCallback(() => setRackOpen(false), [])
 
@@ -42,12 +51,16 @@ export function TopBar({
     <>
       <span className="bankroll__label">Bankroll</span>
       <Money value={bankroll} className="bankroll__value" cents={cents} />
-      {extra ??
-        (session !== undefined && session !== 0 && (
-          <span className={`bankroll__session ${session > 0 ? 'tone-win' : 'tone-lose'}`}>
-            <Money value={session} signed flash={false} cents={cents} /> this session
-          </span>
-        ))}
+      {shared ? (
+        <SharedSession id={id} />
+      ) : (
+        (extra ??
+          (session !== undefined && session !== 0 && (
+            <span className={`bankroll__session ${session > 0 ? 'tone-win' : 'tone-lose'}`}>
+              <Money value={session} signed flash={false} cents={cents} /> this session
+            </span>
+          )))
+      )}
     </>
   )
 
@@ -90,7 +103,7 @@ export function TopBar({
               {figures}
             </button>
             <AnimatePresence>
-              {rackOpen && <RackMenu game={game} bankroll={bankroll} rack={rack} onClose={closeRack} />}
+              {rackOpen && <RackMenu id={id} game={game} bankroll={bankroll} rack={rack} onClose={closeRack} />}
             </AnimatePresence>
           </div>
         ) : (
@@ -102,6 +115,38 @@ export function TopBar({
         </div>
       </div>
     </header>
+  )
+}
+
+/**
+ * With one bankroll carried between the tables, the rack alone cannot say how
+ * this table is going: it moves with every other table's play too. So the top
+ * bar says both — what this table has won or lost this session, and what every
+ * table has, taken together. Neither counts a buy-back or a top-up.
+ *
+ * One line, hung under the rack without taking room of its own, so the top bar
+ * stays the height the rails and drawers below it are placed against.
+ */
+function SharedSession({ id }: { id: GameId }) {
+  const here = useSessionNets((s) => s[id])
+  const total = useSessionNets(sessionTotal)
+  return (
+    <span className="bankroll__results">
+      <span className="bankroll__results-line" title="Won or lost since you came in: at this table, and at every table together">
+        <SessionNet label="This table" value={here} />{' '}
+        <span className="bankroll__results-sep" aria-hidden="true" />{' '}
+        <SessionNet label="Session" value={total} />
+      </span>
+    </span>
+  )
+}
+
+function SessionNet({ label, value }: { label: string; value: number }) {
+  const tone = value > 0 ? 'tone-win' : value < 0 ? 'tone-lose' : 'tone-push'
+  return (
+    <span className="bankroll__result">
+      {label} <Money value={value} signed flash={false} cents className={tone} />
+    </span>
   )
 }
 

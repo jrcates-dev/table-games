@@ -58,6 +58,7 @@ export default function BaccaratView() {
   return (
     <div className="tv tv--baccarat" onContextMenu={(event) => event.preventDefault()}>
       <TopBar
+        id="baccarat"
         game="Baccarat"
         bankroll={bankroll}
         rack={{ onFelt: atRisk, canChange: canChangeRack, hasRun, reset: resetRack }}

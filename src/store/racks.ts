@@ -1,8 +1,10 @@
+import { cents } from '../engine/edge'
 import { useAppStore, type GameId } from './appStore'
 import { useBaccaratStore } from './baccaratStore'
 import { useCrapsStore } from './crapsStore'
 import { useGameStore } from './gameStore'
 import { useRouletteStore } from './rouletteStore'
+import { useSessionNets } from './sessionNets'
 import { useSharedBankroll } from './sharedBankroll'
 import { clampStartingBankroll } from './stake'
 import { useUthStore } from './uthStore'
@@ -22,6 +24,11 @@ import { useUthStore } from './uthStore'
 interface Table {
   ready: boolean
   game: { bankroll: number }
+  profile: {
+    /** Everything the table has settled, won or lost, since its profile began. */
+    stats: { netResult: number }
+    runStartedAt: number
+  }
   resetRack(amount: number): void
   matchRack(amount: number, save?: boolean): void
 }
@@ -84,8 +91,31 @@ export function setSharedBankroll(on: boolean): void {
   }
 }
 
+/** What each table had settled when the floor last looked, and in which run. */
+const seen: Partial<Record<GameId, { net: number; run: number }>> = {}
+
+/**
+ * Carry what one table has just settled into its figure in `sessionNets.ts`.
+ *
+ * Only a result counts. A table's results as it loads are where its session
+ * starts, not part of it; and a new run — a buy-back, a reset or top-up, or
+ * erasing the table's history, which takes its results back to nothing — is a
+ * fresh starting point rather than a win or a loss.
+ */
+function tally(id: GameId, table: Table) {
+  if (!table.ready) return
+  const net = table.profile.stats.netResult
+  const run = table.profile.runStartedAt
+  const last = seen[id]
+  seen[id] = { net, run }
+  if (!last || last.run !== run || last.net === net) return
+  useSessionNets.setState((nets) => ({ [id]: cents(nets[id] + net - last.net) }))
+}
+
 for (const id of IDS) {
+  tally(id, TABLES[id].getState())
   TABLES[id].subscribe((state, prev) => {
+    tally(id, state)
     if (moving || !state.ready || !useSharedBankroll.getState().shared) return
     if (!prev.ready) {
       // Fresh from storage, with whatever figure the table last saved; the

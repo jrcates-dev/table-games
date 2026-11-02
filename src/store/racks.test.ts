@@ -33,6 +33,7 @@ async function freshFloor(local = storage()) {
   const { useAppStore } = await import('./appStore')
   const { resetAllRacks, setSharedBankroll } = await import('./racks')
   const { useSharedBankroll } = await import('./sharedBankroll')
+  const { useSessionNets, sessionTotal } = await import('./sessionNets')
   await Promise.all([
     useGameStore.getState().init(),
     useCrapsStore.getState().init(),
@@ -49,10 +50,42 @@ async function freshFloor(local = storage()) {
     useUthStore,
     useAppStore,
     useSharedBankroll,
+    useSessionNets,
+    sessionTotal,
     setSharedBankroll,
     resetAllRacks,
     stores,
   }
+}
+
+type Floor = Awaited<ReturnType<typeof freshFloor>>
+
+/** Roll the dice with a pass line bet up until a roll settles something; returns what craps has settled in all. */
+function rollUntilSettled({ useCrapsStore }: Floor): number {
+  const before = useCrapsStore.getState().profile.stats.netResult
+  for (let i = 0; i < 200 && useCrapsStore.getState().profile.stats.netResult === before; i++) {
+    if (!useCrapsStore.getState().game.bets.passLine) useCrapsStore.getState().placeAt('passLine')
+    useCrapsStore.getState().roll()
+    vi.runAllTimers()
+  }
+  const after = useCrapsStore.getState().profile.stats.netResult
+  expect(after).not.toBe(before)
+  return after
+}
+
+/** Deal a blackjack hand at the minimum and stand on it; returns what it paid. */
+function playBlackjackHand({ useGameStore }: Floor): number {
+  const bet = useGameStore.getState().table().minBet
+  useGameStore.getState().addChip(bet)
+  useGameStore.getState().dealRound()
+  for (let i = 0; i < 20 && useGameStore.getState().game.round.phase !== 'roundOver'; i++) {
+    const { phase } = useGameStore.getState().game.round
+    if (phase === 'insurance') useGameStore.getState().act('declineInsurance')
+    if (phase === 'playerTurn') useGameStore.getState().act('stand', true)
+    vi.runAllTimers()
+  }
+  expect(useGameStore.getState().game.round.phase).toBe('roundOver')
+  return useGameStore.getState().profile.history[0].net
 }
 
 describe('resetting every rack from the lobby', () => {
@@ -271,5 +304,89 @@ describe('one bankroll for every table', () => {
     expect(profile.stats.netResult).toBe(net)
     expect(game.bankroll).toBe(1_000 - elsewhere + net)
     expect(useCrapsStore.getState().game.bankroll).toBe(game.bankroll)
+  })
+})
+
+describe('what each table has won or lost this session', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
+
+  it('starts every table at nothing, whatever it settled on earlier visits', async () => {
+    vi.useFakeTimers()
+    const local = storage()
+    const first = await freshFloor(local)
+    const settled = rollUntilSettled(first)
+    expect(first.useSessionNets.getState().craps).toBe(settled)
+
+    const { useSessionNets, useCrapsStore } = await freshFloor(local)
+    expect(useCrapsStore.getState().profile.stats.netResult).toBe(settled)
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0 })
+  })
+
+  it('counts each table only for what it settles, while every rack moves together', async () => {
+    vi.useFakeTimers()
+    const floor = await freshFloor()
+    const { setSharedBankroll, useSessionNets, sessionTotal, useGameStore, useCrapsStore } = floor
+    setSharedBankroll(true)
+
+    const dice = rollUntilSettled(floor)
+    expect(useSessionNets.getState().craps).toBe(dice)
+    // The blackjack rack has moved with the dice, but blackjack has won and lost nothing.
+    expect(useGameStore.getState().game.bankroll).toBe(useCrapsStore.getState().game.bankroll)
+    expect(useSessionNets.getState().blackjack).toBe(0)
+
+    const cards = playBlackjackHand(floor)
+    expect(useSessionNets.getState().blackjack).toBe(cards)
+    expect(useSessionNets.getState().craps).toBe(dice)
+    expect(sessionTotal(useSessionNets.getState())).toBe(dice + cards)
+  })
+
+  it('leaves the figures alone for a top-up, a reset or a buy-back', async () => {
+    vi.useFakeTimers()
+    const floor = await freshFloor()
+    const { setSharedBankroll, useSessionNets, useCrapsStore, useRouletteStore, resetAllRacks } = floor
+    setSharedBankroll(true)
+    const dice = rollUntilSettled(floor)
+    // Settle anything still working on the felt, so the rack can be changed.
+    useCrapsStore.getState().clearBets()
+
+    useRouletteStore.getState().resetRack(5_000)
+    useCrapsStore.getState().resetRack(2_000)
+    resetAllRacks(3_000)
+    useCrapsStore.getState().rebuy()
+
+    expect(useCrapsStore.getState().game.bankroll).toBe(3_000)
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: dice, baccarat: 0, roulette: 0, uth: 0 })
+  })
+
+  it('keeps what a table won this session when its history is erased, and counts on from there', async () => {
+    vi.useFakeTimers()
+    const floor = await freshFloor()
+    const { useSessionNets, useCrapsStore } = floor
+    const first = rollUntilSettled(floor)
+    // A new run is stamped with the time it starts; make sure the erased one reads as new.
+    vi.advanceTimersByTime(5)
+    useCrapsStore.getState().resetEverything()
+    expect(useCrapsStore.getState().profile.stats.netResult).toBe(0)
+    expect(useSessionNets.getState().craps).toBe(first)
+
+    const second = rollUntilSettled(floor)
+    expect(useSessionNets.getState().craps).toBe(first + second)
+  })
+
+  it('adds up in cents without drifting', async () => {
+    const { setSharedBankroll, useSessionNets, sessionTotal, useBaccaratStore } = await freshFloor()
+    setSharedBankroll(true)
+    const settle = (net: number) => {
+      const { profile } = useBaccaratStore.getState()
+      useBaccaratStore.setState({ profile: { ...profile, stats: { ...profile.stats, netResult: profile.stats.netResult + net } } })
+    }
+    settle(23.75)
+    settle(0.1)
+    settle(0.2)
+    expect(useSessionNets.getState().baccarat).toBe(24.05)
+    expect(sessionTotal(useSessionNets.getState())).toBe(24.05)
   })
 })

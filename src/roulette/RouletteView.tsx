@@ -59,6 +59,7 @@ export default function RouletteView() {
   return (
     <div className="tv tv--roulette" onContextMenu={(event) => event.preventDefault()}>
       <TopBar
+        id="roulette"
         game="Roulette"
         bankroll={bankroll}
         rack={{ onFelt: atRisk, canChange: canChangeRack, hasRun, reset: resetRack }}

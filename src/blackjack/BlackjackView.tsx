@@ -76,6 +76,7 @@ export default function BlackjackView() {
   return (
     <div className="bj">
       <TopBar
+        id="blackjack"
         game="Blackjack"
         bankroll={bankroll}
         session={session}

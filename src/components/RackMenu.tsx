@@ -3,9 +3,12 @@ import { useEffect, useRef, useState } from 'react'
 import { play } from '../audio'
 import { STARTING_BANKROLL } from '../engine/rules'
 import { money } from '../lib/format'
+import type { GameId } from '../store/appStore'
+import { sessionTotal, useSessionNets } from '../store/sessionNets'
 import { useSharedBankroll } from '../store/sharedBankroll'
 import { clampStartingBankroll, MAX_STARTING_BANKROLL, MIN_STARTING_BANKROLL } from '../store/stake'
 import { MoneyInput } from './controls'
+import { Money } from './Money'
 
 /** What a table hands the top bar so the bankroll can be reset or topped up. */
 export interface RackControl {
@@ -25,14 +28,17 @@ export interface RackControl {
  * Both are the lobby's reset underneath — a topped-up rack is a new run at the
  * higher figure, filed like a buy-back, so a run's peak still only ever counts
  * what the cards and dice paid. Neither is offered mid-hand. With the bankroll
- * shared, the new figure is every table's, and the menu says so.
+ * shared, the new figure is every table's, and the menu says so — and it opens
+ * on how the session is going, which a phone has no room for in the top bar.
  */
 export function RackMenu({
+  id,
   game,
   bankroll,
   rack,
   onClose,
 }: {
+  id: GameId
   game: string
   bankroll: number
   rack: RackControl
@@ -79,6 +85,7 @@ export function RackMenu({
       exit={{ opacity: 0, y: -4, scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 420, damping: 32 }}
     >
+      {shared && <SessionResults id={id} />}
       <AnimatePresence mode="wait" initial={false}>
         {asking ? (
           <motion.div key="ask" className="rack-menu__ask" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -149,5 +156,24 @@ export function RackMenu({
         )}
       </AnimatePresence>
     </motion.div>
+  )
+}
+
+/** This table's result and every table's, since you came in. Buy-backs and top-ups are neither. */
+function SessionResults({ id }: { id: GameId }) {
+  const here = useSessionNets((s) => s[id])
+  const total = useSessionNets(sessionTotal)
+  const row = (label: string, value: number) => (
+    <div className="rack-menu__result">
+      <span>{label}</span>
+      <Money value={value} signed flash={false} cents className={value > 0 ? 'tone-win' : value < 0 ? 'tone-lose' : 'tone-push'} />
+    </div>
+  )
+  return (
+    <div className="rack-menu__results">
+      <span className="eyebrow">Won or lost this session</span>
+      {row('At this table', here)}
+      {row('At every table', total)}
+    </div>
   )
 }

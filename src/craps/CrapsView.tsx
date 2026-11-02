@@ -111,6 +111,7 @@ export default function CrapsView() {
       </div>
 
       <TopBar
+        id="craps"
         game="Craps"
         bankroll={bankroll}
         session={session}

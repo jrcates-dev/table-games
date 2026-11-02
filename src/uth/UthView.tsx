@@ -54,6 +54,7 @@ export default function UthView() {
   return (
     <div className="tv tv--uth" onContextMenu={(event) => event.preventDefault()}>
       <TopBar
+        id="uth"
         game="Ultimate Texas Hold'em"
         bankroll={bankroll}
         rack={{ onFelt: atRisk, canChange: canChangeRack, hasRun, reset: resetRack }}

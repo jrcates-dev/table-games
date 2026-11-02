@@ -471,7 +471,10 @@
     font-size: 20px;
   }
 
-  .bankroll__session {
+  /* No room on a phone for the line under the rack: with the bankroll shared,
+     the rack's menu shows this table's result and the session's instead. */
+  .bankroll__session,
+  .bankroll__results {
     display: none;
   }
 

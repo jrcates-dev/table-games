@@ -576,6 +576,38 @@
   letter-spacing: 0.04em;
 }
 
+/* With the bankroll shared: this table's result and the whole session's, on
+   one line hung under the rack. It takes no room in the top bar, so the bar
+   keeps its height, and it reaches out to the left as far as it needs. */
+.bankroll__results {
+  align-self: flex-end;
+  display: flex;
+  justify-content: flex-end;
+  width: 0;
+  height: 0;
+}
+
+.bankroll__results-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-top: 2px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+
+.bankroll__results-sep {
+  width: 3px;
+  height: 3px;
+  align-self: center;
+  transform: rotate(45deg);
+  background: var(--gold-3);
+  opacity: 0.7;
+}
+
 .bankroll__risk {
   font-size: 11px;
   font-weight: 700;
@@ -639,6 +671,33 @@
     var(--shadow-3),
     0 0 40px rgba(227, 193, 112, 0.12);
   transform-origin: top right;
+}
+
+/* With the bankroll shared, the session so far, above the reset and top-up. */
+.rack-menu__results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--gold-line);
+}
+
+.rack-menu__results .eyebrow {
+  margin-bottom: 2px;
+  color: var(--gold-3);
+}
+
+.rack-menu__result {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.rack-menu__result .money {
+  font-weight: 700;
 }
 
 .rack-menu__pick,
