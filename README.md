@@ -8,6 +8,9 @@ art, the dice are thrown by a physics engine, and every sound, from a clay chip
 landing to the ball dropping into a pocket, is synthesised. There are no image
 or audio assets at all.
 
+Play it at **https://jrcates-dev.github.io/table-games/**, or install it there as
+an app ([below](#as-an-app)).
+
 ## Running locally
 
 You need **Node.js 20.19+ or 22.12+** (Vite 8's minimum) and npm.
@@ -32,7 +35,30 @@ games run as a guest against browser local storage. Supabase is optional; see
 | `npm run test:watch` | Tests in watch mode |
 | `npm run lint` | Lint with oxlint |
 | `npm run build` | Type-check and build a production bundle into `dist/` |
-| `npm run preview` | Serve the production build locally |
+| `npm run preview` | Serve the production build at http://localhost:4747 |
+| `npm run app` | Build, serve and open it, ready to install as an app |
+
+### As an app
+
+Every push to `main` is tested, built and published to
+**https://jrcates-dev.github.io/table-games/** by
+[`deploy.yml`](.github/workflows/deploy.yml). Open it in Edge or Chrome and
+install it from the address bar: in Edge, the **App available** icon (or
+**⋯ → Apps → Install this site as an app**), which also offers to pin it to the
+taskbar and Start and to make a desktop shortcut; in Chrome, the install icon at
+the right of the address bar. On a phone, add it to the home screen. It opens in
+a window of its own, straight to the lobby, offline too, and a second click
+brings the open window forward rather than dealing a second copy.
+
+Updates need nothing from you. Whenever the app opens online it checks for a new
+build, fetches it in the background, and opens on it from the next launch; a
+table in play is never swapped out mid-hand.
+
+To install a build that is not pushed yet, `npm run app` builds it, serves it at
+http://localhost:4747 and opens it, ready to install the same way. That copy
+also works offline, but only updates when `npm run app` runs again. Each address
+keeps its own bankroll, so the published app, a local install and `npm run dev`
+never share one. Uninstall from the app's **⋯** menu or Windows Settings → Apps.
 
 The tables keep entirely separate bankrolls, statistics and histories. Walk
 between them from the lobby, or with the **←** in the top-left of any table; a
