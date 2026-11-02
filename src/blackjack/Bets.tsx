@@ -4,7 +4,7 @@ import { play } from '../audio'
 import { ChipStack } from '../components/ChipStack'
 import { stackAt, stackMove } from '../components/feltMotion'
 import type { GameState } from '../engine/types'
-import { BET_Y, CAMERA, CIRCLE, handCenters, INSURANCE_SPOT, TRAY } from './geometry'
+import { BET_Y, CAMERA, CIRCLE, handCenters, INSURANCE_SPOT, PAYOUT_Y, STACK_SIZE, TRAY } from './geometry'
 
 /**
  * The money on the felt, moving the way a dealer moves it.
@@ -32,7 +32,7 @@ interface StackItem {
 }
 
 const PLAYER_SIDE = { y: 1010 }
-const SIZE = 76
+const SIZE = STACK_SIZE
 
 function deriveStacks(game: GameState): StackItem[] {
   const { round } = game
@@ -82,7 +82,7 @@ function deriveStacks(game: GameState): StackItem[] {
         key: `pay:${hand.id}`,
         amount: winnings,
         x: x + (hand.doubled ? 112 : 90),
-        y: BET_Y - 4,
+        y: PAYOUT_Y,
         from: { x: TRAY.x + (i - 1) * 40, y: TRAY.y + 20 },
         delay: 0.4 + i * 0.16,
         seed: i + 40,

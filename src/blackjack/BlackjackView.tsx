@@ -22,6 +22,7 @@ import { BetLayer } from './Bets'
 import { CardLayer } from './Cards'
 import { Dock } from './Dock'
 import { CAMERA, PLANE, STAGE } from './geometry'
+import { playerRowY } from './handRow'
 import { useBlackjackKeys } from './hooks'
 import { CoachChallenge, CountHud, ShuffleConfirm, ShuffleNotice } from './Overlays'
 import { SettingsPanel } from './panels/SettingsPanel'
@@ -70,6 +71,7 @@ export default function BlackjackView() {
   const interval = DEAL_INTERVAL[settings.dealSpeed] / 1000
   const flight = CARD_FLIGHT[settings.dealSpeed] * 1.15
   const discarded = game.shoe.pos / Math.max(1, game.shoe.cutIndex)
+  const rowY = playerRowY(game.round, rules.blackjackPayout)
 
   return (
     <div className="bj">
@@ -133,10 +135,10 @@ export default function BlackjackView() {
               <BlackjackTable rules={rules} />
               <DiscardRack fraction={discarded} back={back} />
               <Shoe back={back} onShuffle={canShuffle ? askShuffle : undefined} />
-              <ActiveHandGlow round={game.round} />
+              <ActiveHandGlow round={game.round} rowY={rowY} />
               <BetLayer game={game} />
-              <CardLayer round={game.round} dealerPeek={rules.dealerPeek} interval={interval} flight={flight} back={back} />
-              <Badges round={game.round} showTotals={settings.showTotals} />
+              <CardLayer round={game.round} rowY={rowY} dealerPeek={rules.dealerPeek} interval={interval} flight={flight} back={back} />
+              <Badges round={game.round} rowY={rowY} showTotals={settings.showTotals} />
             </div>
           </div>
         </Stage>

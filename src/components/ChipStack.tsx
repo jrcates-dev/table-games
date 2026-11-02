@@ -45,7 +45,7 @@ interface Props {
  * Chip thickness over diameter. A real clay chip is about 0.085; a touch over
  * that keeps a single chip's edge legible without it passing for two.
  */
-const THICKNESS = 0.1
+export const THICKNESS = 0.1
 
 function hash(n: number): number {
   const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453
@@ -66,6 +66,9 @@ function columnsOf<T>(items: T[], per: number): T[][] {
  * its spot.
  */
 const STEP = 0.6
+
+/** The tallest column a dealer builds unless told otherwise; the rest start a new one. */
+export const PER_COLUMN = 12
 
 function stackGeometry(count: number, size: number, tilt: number, columns = 1, reach = 0): StackGeometry {
   const t = (tilt * Math.PI) / 180
@@ -178,7 +181,7 @@ export const ChipStack = memo(function ChipStack({
   size = 58,
   tilt = 32,
   seed = 1,
-  perColumn = 12,
+  perColumn = PER_COLUMN,
   className,
   style,
   billboard = true,

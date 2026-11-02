@@ -3,7 +3,7 @@ import { memo, type ReactNode } from 'react'
 import { evaluate, formatTotal, isNatural } from '../engine/hand'
 import type { Outcome, RoundState } from '../engine/types'
 import { signedMoney } from '../lib/format'
-import { CAMERA, CARD, DEALER_FAN, DEALER_ROW, fan, handCenters, handFan, PLAYER_ROW_Y } from './geometry'
+import { CAMERA, DEALER_FAN, DEALER_ROW, DEALT, fan, handCenters, handFan } from './geometry'
 
 /**
  * Labels that stand up off the felt: running totals beside each hand while it
@@ -31,7 +31,7 @@ const OUTCOME: Record<Outcome, { label: string; tone: 'gold' | 'win' | 'push' | 
   dealerBlackjack: { label: 'Dealer blackjack', tone: 'lose' },
 }
 
-export const Badges = memo(function Badges({ round, showTotals }: { round: RoundState; showTotals: boolean }) {
+export const Badges = memo(function Badges({ round, rowY, showTotals }: { round: RoundState; rowY: number; showTotals: boolean }) {
   const over = round.phase === 'roundOver'
   const centers = handCenters(round.hands.length)
   const roundKey = round.hands[0]?.id ?? 'none'
@@ -47,7 +47,7 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
   return (
     <AnimatePresence>
       {showTotals && round.dealer.length > 0 && round.phase !== 'dealing' && lastDealer && (
-        <Billboard key={`${roundKey}:dealer`} x={lastDealer.x + CARD.w / 2 + 58} y={DEALER_ROW.y + 18}>
+        <Billboard key={`${roundKey}:dealer`} x={lastDealer.x + DEALT.w / 2 + 58} y={DEALER_ROW.y + 18}>
           <motion.div
             className={`total-pill total-pill--dealer${dealerBust ? ' is-bust' : ''}${dealerNatural ? ' is-natural' : ''}`}
             initial={{ opacity: 0, transform: 'scale(0.7)' }}
@@ -62,7 +62,7 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
 
       {round.hands.map((hand, i) => {
         if (hand.cards.length === 0) return null
-        const spots = fan(hand.cards.length, centers[i], PLAYER_ROW_Y, box.width, box.step)
+        const spots = fan(hand.cards.length, centers[i], rowY, box.width, box.step)
         const last = spots[spots.length - 1]
         const value = evaluate(hand.cards)
         const active = round.phase === 'playerTurn' && i === round.activeHandIndex
@@ -72,7 +72,7 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
           const o = OUTCOME[hand.outcome]
           const net = (hand.payout ?? 0) - hand.bet
           return (
-            <Billboard key={`${roundKey}:${hand.id}:result`} x={centers[i]} y={PLAYER_ROW_Y - CARD.h / 2 - 6}>
+            <Billboard key={`${roundKey}:${hand.id}:result`} x={centers[i]} y={rowY - DEALT.h / 2 - 6}>
               <motion.div
                 className={`result-tag result-tag--${o.tone}`}
                 initial={{ opacity: 0, transform: 'translateY(16px) scale(0.8)' }}
@@ -95,8 +95,8 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
         return (
           <Billboard
             key={`${roundKey}:${hand.id}:total`}
-            x={split ? centers[i] : last.x + CARD.w / 2 + 46}
-            y={split ? PLAYER_ROW_Y - CARD.h / 2 - 6 : PLAYER_ROW_Y + 12}
+            x={split ? centers[i] : last.x + DEALT.w / 2 + 46}
+            y={split ? rowY - DEALT.h / 2 - 6 : rowY + 12}
           >
             <motion.div
               className={`total-pill${active ? ' is-active' : ''}${value.busted ? ' is-bust' : ''}${value.total === 21 ? ' is-21' : ''}${natural ? ' is-natural' : ''}`}
@@ -115,7 +115,7 @@ export const Badges = memo(function Badges({ round, showTotals }: { round: Round
 })
 
 /** A soft glow under the hand being played, when there is more than one. */
-export function ActiveHandGlow({ round }: { round: RoundState }) {
+export function ActiveHandGlow({ round, rowY }: { round: RoundState; rowY: number }) {
   if (round.phase !== 'playerTurn' || round.hands.length < 2) return null
   const centers = handCenters(round.hands.length)
   const x = centers[round.activeHandIndex]
@@ -123,7 +123,7 @@ export function ActiveHandGlow({ round }: { round: RoundState }) {
     <motion.div
       className="bj-active-glow"
       initial={false}
-      animate={{ x, y: PLAYER_ROW_Y + CARD.h / 2 + 30 }}
+      animate={{ x, y: rowY + DEALT.h / 2 + 30 }}
       transition={{ type: 'spring', stiffness: 260, damping: 28 }}
     />
   )

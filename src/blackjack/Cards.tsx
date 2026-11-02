@@ -5,7 +5,7 @@ import { angleBetween, cardAt, cardLift, cardTurn, shadowAt } from '../component
 import { CardBackFace, CardFace } from '../components/PlayingCard'
 import type { DealtCard, RoundState } from '../engine/types'
 import type { CardBack } from '../prefs/prefsStore'
-import { DEALER_FAN, DEALER_ROW, DISCARD, fan, handCenters, handFan, PLAYER_ROW_Y, SHOE } from './geometry'
+import { CARD_SCALE, DEALER_FAN, DEALER_ROW, DISCARD, fan, handCenters, handFan, SHOE } from './geometry'
 
 /**
  * Every card on the felt.
@@ -16,7 +16,17 @@ import { DEALER_FAN, DEALER_ROW, DISCARD, fan, handCenters, handFan, PLAYER_ROW_
  * down, arcs up toward the viewer and turns over as it lands, exactly as a
  * dealer pitches it; the hole card waits face down until the reveal, which
  * lifts it off the felt so it can turn without passing through the table.
+ *
+ * The layer is scaled down to blackjack's card size (see CARD_SCALE), so
+ * everything placed in it is in its units; the layout itself is worked out in
+ * plane pixels like the rest of the felt.
  */
+
+const S = CARD_SCALE
+/** A card on the felt at a point in plane pixels. */
+const placeAt = (x: number, y: number) => cardAt(x / S, y / S)
+/** Shrunk on its way into the discard rack, which is built for full-size cards (see DiscardRack). */
+const RACKED = 0.86 / S
 
 interface Placed {
   card: DealtCard
@@ -30,7 +40,7 @@ interface Placed {
   peek?: boolean
 }
 
-function layoutCards(round: RoundState, dealerPeek: boolean): Placed[] {
+function layoutCards(round: RoundState, dealerPeek: boolean, rowY: number): Placed[] {
   const placed: Placed[] = []
   const dealerFan = fan(round.dealer.length, DEALER_ROW.x, DEALER_ROW.y, DEALER_FAN.width, DEALER_FAN.step)
   const up = round.dealer[0]?.rank
@@ -49,7 +59,7 @@ function layoutCards(round: RoundState, dealerPeek: boolean): Placed[] {
   const acting = round.phase === 'playerTurn' && round.hands.length > 1
   const box = handFan(round.hands.length)
   round.hands.forEach((hand, h) => {
-    const spots = fan(hand.cards.length, centers[h], PLAYER_ROW_Y, box.width, box.step)
+    const spots = fan(hand.cards.length, centers[h], rowY, box.width, box.step)
     hand.cards.forEach((card, i) =>
       placed.push({ card, ...spots[i], order: i, dim: acting && h !== round.activeHandIndex }),
     )
@@ -59,12 +69,15 @@ function layoutCards(round: RoundState, dealerPeek: boolean): Placed[] {
 
 export const CardLayer = memo(function CardLayer({
   round,
+  rowY,
   dealerPeek,
   interval,
   flight,
   back,
 }: {
   round: RoundState
+  /** The depth of the player's cards: see playerRowY. */
+  rowY: number
   dealerPeek: boolean
   /** Seconds between cards in the opening deal. */
   interval: number
@@ -73,21 +86,23 @@ export const CardLayer = memo(function CardLayer({
   back: CardBack
 }) {
   const roundKey = round.hands[0]?.id ?? 'none'
-  const placed = layoutCards(round, dealerPeek)
+  const placed = layoutCards(round, dealerPeek, rowY)
   const staggering = round.phase === 'dealing'
 
   return (
-    <AnimatePresence>
-      {placed.map((p) => (
-        <TableCard
-          key={`${roundKey}:${p.card.id}`}
-          placed={p}
-          delay={staggering ? p.card.seq * interval : 0}
-          flight={flight}
-          back={back}
-        />
-      ))}
-    </AnimatePresence>
+    <div className="bj-cards" style={{ transform: `scale(${S})` }}>
+      <AnimatePresence>
+        {placed.map((p) => (
+          <TableCard
+            key={`${roundKey}:${p.card.id}`}
+            placed={p}
+            delay={staggering ? p.card.seq * interval : 0}
+            flight={flight}
+            back={back}
+          />
+        ))}
+      </AnimatePresence>
+    </div>
   )
 })
 
@@ -146,10 +161,10 @@ function TableCard({ placed, delay, flight, back }: { placed: Placed; delay: num
   return (
     <motion.div
       className="bj-card"
-      initial={{ transform: cardAt(SHOE.x, SHOE.y - 20) }}
-      animate={{ transform: cardAt(x, y) }}
+      initial={{ transform: placeAt(SHOE.x, SHOE.y - 20) }}
+      animate={{ transform: placeAt(x, y) }}
       exit={{
-        transform: cardAt(DISCARD.x, DISCARD.y),
+        transform: placeAt(DISCARD.x, DISCARD.y),
         transition: { duration: 0.55, delay: order * 0.03, ease: [0.5, 0, 0.3, 1] },
       }}
       transition={move}
@@ -169,7 +184,7 @@ function TableCard({ placed, delay, flight, back }: { placed: Placed; delay: num
         initial={{ transform: cardLift(60, SHOE.angle) }}
         animate={{ transform: landed ? cardLift(rest, spin) : [cardLift(60, SHOE.angle), cardLift(118, angleBetween(SHOE.angle, spin)), cardLift(rest, spin)] }}
         exit={{
-          transform: [cardLift(rest, spin), cardLift(26, angleBetween(spin, DISCARD.angle), 0.93), cardLift(4, DISCARD.angle, 0.86)],
+          transform: [cardLift(rest, spin), cardLift(26, angleBetween(spin, DISCARD.angle), (1 + RACKED) / 2), cardLift(4, DISCARD.angle, RACKED)],
           transition: { duration: 0.55, delay: order * 0.03 },
         }}
         transition={landed ? { duration: 0.42 } : { duration: flight, delay: entryDelay, times: [0, 0.42, 1], ease: ['easeOut', EASE_PITCH] }}
