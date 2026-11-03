@@ -9,7 +9,9 @@ import type { GameId } from './appStore'
  * and spin it settles — rather than from its rack. With the bankroll shared
  * every rack moves with every other table's play, so a rack cannot say what
  * its own table did; and a buy-back or a top-up moves a rack without anyone
- * having won or lost a thing. Results only move when a bet is settled.
+ * having won or lost a thing. Results only move when a bet is settled, and
+ * the count starts again when you reset a bankroll — at a table, or from the
+ * lobby — since that is a fresh start rather than a top-up.
  *
  * Only the figures live here, so the table chrome can read them without
  * loading every table's store. Keeping them is the floor's job, in `racks.ts`.
@@ -18,13 +20,14 @@ import type { GameId } from './appStore'
  */
 export type SessionNets = Record<GameId, number>
 
-export const useSessionNets = create<SessionNets>(() => ({
-  blackjack: 0,
-  craps: 0,
-  baccarat: 0,
-  roulette: 0,
-  uth: 0,
-}))
+const NOTHING: SessionNets = { blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0 }
+
+export const useSessionNets = create<SessionNets>(() => ({ ...NOTHING }))
+
+/** Start the count again at one table, or at every table, as its bankroll is reset. */
+export function clearSessionNets(id?: GameId): void {
+  useSessionNets.setState(id ? { [id]: 0 } : { ...NOTHING })
+}
 
 /** Every table's result this session, taken together. */
 export function sessionTotal(nets: SessionNets): number {

@@ -18,6 +18,7 @@ import { selectCanChooseCrapsBankroll, selectCrapsBankrollHasRun, useCrapsStore 
 import { selectBankrollHasRun, selectCanChooseBankroll, useGameStore } from '../store/gameStore'
 import { resetAllRacks, setSharedBankroll } from '../store/racks'
 import { selectCanChooseRouletteBankroll, selectRouletteHasRun, useRouletteStore } from '../store/rouletteStore'
+import { clearSessionNets } from '../store/sessionNets'
 import { useSharedBankroll } from '../store/sharedBankroll'
 import { clampStartingBankroll, MAX_STARTING_BANKROLL, MIN_STARTING_BANKROLL } from '../store/stake'
 import { selectCanChooseUthBankroll, selectUthHasRun, useUthStore } from '../store/uthStore'
@@ -95,7 +96,15 @@ export function Lobby() {
   // While the bankroll is shared every card shows the one rack, and it is set
   // from the reset under the tables rather than card by card.
   const rack = (ready: boolean, own: number) => (ready ? (shared ? sharedBankroll : own) : null)
-  const choose = (can: boolean, fn: (amount: number) => void) => (can && !shared ? fn : undefined)
+  // A new figure on a card resets that table's rack, and so its count for the
+  // session; the same figure handed back is no change at all.
+  const choose = (id: GameId, can: boolean, own: number, fn: (amount: number) => void) =>
+    can && !shared
+      ? (amount: number) => {
+          if (amount !== own) clearSessionNets(id)
+          fn(amount)
+        }
+      : undefined
 
   const sit = (id: GameId) => {
     play('chipStack', { count: 3 })
@@ -144,7 +153,7 @@ export function Lobby() {
           tagline={preset.name.split('·')[0].trim()}
           lines={bjRules.slice(0, 5)}
           bankroll={rack(bjReady, bjBankroll)}
-          onChooseBankroll={choose(bjChoosing, chooseBj)}
+          onChooseBankroll={choose('blackjack', bjChoosing, bjBankroll, chooseBj)}
           shared={shared}
           hasRun={bjHasRun}
           featured={lastGame === 'blackjack'}
@@ -160,7 +169,7 @@ export function Lobby() {
           tagline="Aria Main Pit"
           lines={['3-4-5x odds', 'Field pays double on 2, triple on 12', 'All · Tall · Small', 'Fire Bet', 'Buy the 4 & 10 for 5%']}
           bankroll={rack(crapsReady, crapsBankroll)}
-          onChooseBankroll={choose(crapsChoosing, chooseCraps)}
+          onChooseBankroll={choose('craps', crapsChoosing, crapsBankroll, chooseCraps)}
           shared={shared}
           hasRun={crapsHasRun}
           featured={lastGame === 'craps'}
@@ -176,7 +185,7 @@ export function Lobby() {
           tagline="Aria Mini-Baccarat"
           lines={['Eight-deck shoe', 'Banker pays 5% commission', 'Tie pays 8 to 1', 'Pairs 11 to 1 · Dragon Bonus', 'Bead plate & live shoe odds']}
           bankroll={rack(baReady, baBankroll)}
-          onChooseBankroll={choose(baChoosing, chooseBa)}
+          onChooseBankroll={choose('baccarat', baChoosing, baBankroll, chooseBa)}
           shared={shared}
           hasRun={baHasRun}
           featured={lastGame === 'baccarat'}
@@ -198,7 +207,7 @@ export function Lobby() {
             'Tote board of the last spins',
           ]}
           bankroll={rack(roReady, roBankroll)}
-          onChooseBankroll={choose(roChoosing, chooseRo)}
+          onChooseBankroll={choose('roulette', roChoosing, roBankroll, chooseRo)}
           shared={shared}
           hasRun={roHasRun}
           featured={lastGame === 'roulette'}
@@ -214,7 +223,7 @@ export function Lobby() {
           tagline="Ultimate Texas"
           lines={['Ante · Blind · Play · Trips', 'Raise 4x, 2x, then 1x', 'Dealer opens with a pair', `Trips ${TRIPS_TABLES[uthTrips].name}`, 'A coach for every decision']}
           bankroll={rack(uthReady, uthBankroll)}
-          onChooseBankroll={choose(uthChoosing, chooseUth)}
+          onChooseBankroll={choose('uth', uthChoosing, uthBankroll, chooseUth)}
           shared={shared}
           hasRun={uthHasRun}
           featured={lastGame === 'uth'}
@@ -343,6 +352,7 @@ function RackReset({ ready, played, entrance }: { ready: boolean; played: string
                 {played.length > 0 &&
                   `${LIST.format(played)} ${played.length === 1 ? 'closes its run' : 'close their runs'}, saved to your history like a buy-back. `}
                 Chips on the felt and any hand in play are cleared.
+                {shared && " This session's wins and losses start again from $0."}
               </p>
               <div className="rack-reset__buttons">
                 <button

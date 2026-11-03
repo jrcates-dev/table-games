@@ -122,7 +122,8 @@ export function TopBar({
  * With one bankroll carried between the tables, the rack alone cannot say how
  * this table is going: it moves with every other table's play too. So the top
  * bar says both — what this table has won or lost this session, and what every
- * table has, taken together. Neither counts a buy-back or a top-up.
+ * table has, taken together. Neither counts a buy-back or a top-up, and a
+ * reset starts both again.
  *
  * One line, hung under the rack without taking room of its own, so the top bar
  * stays the height the rails and drawers below it are placed against.

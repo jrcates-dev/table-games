@@ -4,7 +4,7 @@ import { play } from '../audio'
 import { STARTING_BANKROLL } from '../engine/rules'
 import { money } from '../lib/format'
 import type { GameId } from '../store/appStore'
-import { sessionTotal, useSessionNets } from '../store/sessionNets'
+import { clearSessionNets, sessionTotal, useSessionNets } from '../store/sessionNets'
 import { useSharedBankroll } from '../store/sharedBankroll'
 import { clampStartingBankroll, MAX_STARTING_BANKROLL, MIN_STARTING_BANKROLL } from '../store/stake'
 import { MoneyInput } from './controls'
@@ -102,7 +102,8 @@ export function RackMenu({
               {rack.hasRun
                 ? `${shared ? `Your ${game}` : 'This'} run is saved to your history like a buy-back, and a new one starts. `
                 : ''}
-              {rack.onFelt > 0 && (asking === 'topUp' ? 'Chips on the felt come back to the rack first.' : 'Chips on the felt are cleared.')}
+              {rack.onFelt > 0 && (asking === 'topUp' ? 'Chips on the felt come back to the rack first.' : 'Chips on the felt are cleared. ')}
+              {shared && asking === 'reset' && "This session's wins and losses start again from $0."}
             </p>
             <div className="rack-menu__buttons">
               <button
@@ -110,6 +111,10 @@ export function RackMenu({
                 className="btn btn--gold btn--sm"
                 onClick={() => {
                   rack.reset(target)
+                  // A reset starts the session's count again — every table's,
+                  // when they share the one bankroll. A top-up is more chips,
+                  // not a fresh start, so the count carries on.
+                  if (asking === 'reset') clearSessionNets(shared ? undefined : id)
                   play('chipStack', { count: 4 })
                   onClose()
                 }}
@@ -159,7 +164,7 @@ export function RackMenu({
   )
 }
 
-/** This table's result and every table's, since you came in. Buy-backs and top-ups are neither. */
+/** This table's result and every table's, since you came in or last reset. Buy-backs and top-ups are neither. */
 function SessionResults({ id }: { id: GameId }) {
   const here = useSessionNets((s) => s[id])
   const total = useSessionNets(sessionTotal)

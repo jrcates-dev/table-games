@@ -4,7 +4,7 @@ import { useBaccaratStore } from './baccaratStore'
 import { useCrapsStore } from './crapsStore'
 import { useGameStore } from './gameStore'
 import { useRouletteStore } from './rouletteStore'
-import { useSessionNets } from './sessionNets'
+import { clearSessionNets, useSessionNets } from './sessionNets'
 import { useSharedBankroll } from './sharedBankroll'
 import { clampStartingBankroll } from './stake'
 import { useUthStore } from './uthStore'
@@ -100,7 +100,8 @@ const seen: Partial<Record<GameId, { net: number; run: number }>> = {}
  * Only a result counts. A table's results as it loads are where its session
  * starts, not part of it; and a new run — a buy-back, a reset or top-up, or
  * erasing the table's history, which takes its results back to nothing — is a
- * fresh starting point rather than a win or a loss.
+ * fresh starting point rather than a win or a loss. (A reset also clears the
+ * figures, but that is the reset's doing: see `clearSessionNets`.)
  */
 function tally(id: GameId, table: Table) {
   if (!table.ready) return
@@ -141,4 +142,6 @@ export function resetAllRacks(amount: number): void {
     for (const id of IDS) TABLES[id].getState().resetRack(amount)
   })
   if (useSharedBankroll.getState().shared) useSharedBankroll.setState({ bankroll: clampStartingBankroll(amount) })
+  // A fresh start for every rack is a fresh start for the session's results too.
+  clearSessionNets()
 }

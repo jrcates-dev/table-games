@@ -343,22 +343,52 @@ describe('what each table has won or lost this session', () => {
     expect(sessionTotal(useSessionNets.getState())).toBe(dice + cards)
   })
 
-  it('leaves the figures alone for a top-up, a reset or a buy-back', async () => {
+  it('keeps counting through a top-up or a buy-back', async () => {
     vi.useFakeTimers()
     const floor = await freshFloor()
-    const { setSharedBankroll, useSessionNets, useCrapsStore, useRouletteStore, resetAllRacks } = floor
+    const { setSharedBankroll, useSessionNets, useCrapsStore } = floor
     setSharedBankroll(true)
     const dice = rollUntilSettled(floor)
-    // Settle anything still working on the felt, so the rack can be changed.
     useCrapsStore.getState().clearBets()
 
-    useRouletteStore.getState().resetRack(5_000)
-    useCrapsStore.getState().resetRack(2_000)
-    resetAllRacks(3_000)
+    // A top-up is the table's own reset underneath, at the higher figure.
+    useCrapsStore.getState().resetRack(useCrapsStore.getState().game.bankroll + 1_000)
     useCrapsStore.getState().rebuy()
 
-    expect(useCrapsStore.getState().game.bankroll).toBe(3_000)
     expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: dice, baccarat: 0, roulette: 0, uth: 0 })
+  })
+
+  it('starts the count again when the bankroll is reset from the lobby', async () => {
+    vi.useFakeTimers()
+    const floor = await freshFloor()
+    const { setSharedBankroll, useSessionNets, sessionTotal, resetAllRacks } = floor
+    setSharedBankroll(true)
+    rollUntilSettled(floor)
+    playBlackjackHand(floor)
+
+    resetAllRacks(3_000)
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0 })
+
+    // And counts on from the new figure.
+    const before = floor.useCrapsStore.getState().profile.stats.netResult
+    const after = rollUntilSettled(floor)
+    expect(useSessionNets.getState().craps).toBe(after - before)
+    expect(sessionTotal(useSessionNets.getState())).toBe(after - before)
+  })
+
+  it('starts one table again, or every table, when a reset at a table asks', async () => {
+    vi.useFakeTimers()
+    const floor = await freshFloor()
+    const { useSessionNets } = floor
+    const { clearSessionNets } = await import('./sessionNets')
+    const dice = rollUntilSettled(floor)
+    playBlackjackHand(floor)
+
+    clearSessionNets('blackjack')
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: dice, baccarat: 0, roulette: 0, uth: 0 })
+
+    clearSessionNets()
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0 })
   })
 
   it('keeps what a table won this session when its history is erased, and counts on from there', async () => {
