@@ -3,7 +3,8 @@ import { play } from '../audio'
 import { ChipRack } from '../components/ChipRack'
 import { DealerNotice } from '../components/DealerNotice'
 import { EdgePill } from '../components/EdgePill'
-import { IconBook, IconClear } from '../components/icons'
+import { ArtBet, ArtCheck, ArtClear, ArtDeal, ArtFold, ArtRebet } from '../components/gameIcons'
+import { IconBook } from '../components/icons'
 import { Money } from '../components/Money'
 import { OutOfChips } from '../components/OutOfChips'
 import { TRIPS_TABLES, tripsEdge, UTH_HOUSE_EDGE } from '../engine/uth/rules'
@@ -88,13 +89,13 @@ function Betting() {
         )}
         <div className="dock__buttons">
           <button type="button" className="btn btn--ghost btn--sm" onClick={clear} disabled={staked === 0} title="Take everything back · C">
-            <IconClear width={15} height={15} /> Clear
+            <ArtClear /> Clear
           </button>
           <button type="button" className="btn btn--ghost btn--sm" onClick={rebet} disabled={!hasLast || staked > 0} title="The last hand's bets again · R">
-            Rebet
+            <ArtRebet /> Rebet
           </button>
           <button type="button" className="btn btn--gold btn--lg deal-btn" onClick={deal} disabled={!check.ok} title={check.reason}>
-            Deal <kbd>Space</kbd>
+            <ArtDeal /> Deal <kbd>Space</kbd>
           </button>
         </div>
       </div>
@@ -150,6 +151,7 @@ function Decide() {
               title={!enabled && m ? 'Not enough in the rack' : undefined}
             >
               {recommended && <span className="action__book">Book</span>}
+              <span className="action__icon">{m ? <ArtBet multiple={m} /> : d === 'fold' ? <ArtFold /> : <ArtCheck />}</span>
               <span className="action__label">{DECISION_LABEL[d]}</span>
               <span className="uth-action__amount">{m ? money(game.bets.ante * m) : d === 'fold' ? `lose ${money(game.bets.ante * 2)}` : 'free'}</span>
               <kbd>{KEYS[d]}</kbd>
@@ -245,10 +247,10 @@ function Settled() {
         <>
           <span className="ba-next">Click a circle for new bets</span>
           <button type="button" className="btn btn--ghost" onClick={clear} title="Clear the circles for new bets · C">
-            <IconClear width={15} height={15} /> Clear bets <kbd>C</kbd>
+            <ArtClear /> Clear bets <kbd>C</kbd>
           </button>
           <button type="button" className="btn btn--gold btn--lg deal-btn" onClick={rebetAndDeal} disabled={!canAgain}>
-            Rebet {money(again)} &amp; deal <kbd>Space</kbd>
+            <ArtRebet /> Rebet {money(again)} &amp; deal <kbd>Space</kbd>
           </button>
         </>
       )}

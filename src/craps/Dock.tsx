@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { play } from '../audio'
 import { RackChip } from '../components/ChipStack'
 import { crapsDenominations } from '../components/chips'
-import { IconClear, IconDice, IconSpark, IconUndo } from '../components/icons'
+import { ArtBuyIn, ArtClear, ArtOdds, ArtRoll, ArtUndo } from '../components/gameIcons'
 import * as craps from '../engine/craps/craps'
 import { money } from '../lib/format'
 import { useCrapsStore, type NumberMode } from '../store/crapsStore'
@@ -46,7 +46,7 @@ export function CrapsDock() {
               <p>The rack is empty. This run is filed with its peak — sit back down with a fresh stake.</p>
             </div>
             <button type="button" className="btn btn--gold btn--lg" onClick={rebuy}>
-              Buy back in
+              <ArtBuyIn /> Buy back in
             </button>
           </div>
         ) : (
@@ -80,10 +80,10 @@ export function CrapsDock() {
                 disabled={!canUndo || rolling}
                 title={canUndo ? 'Step back one bet · Ctrl+Z' : 'Nothing to undo — the dice clear this every roll'}
               >
-                <IconUndo width={15} height={15} /> Undo
+                <ArtUndo /> Undo
               </button>
               <button type="button" className="btn btn--ghost btn--sm" onClick={clearBets} disabled={atRisk === 0 || rolling} title="Take down everything that can come down">
-                <IconClear width={15} height={15} /> Clear
+                <ArtClear /> Clear
               </button>
               <button
                 type="button"
@@ -92,7 +92,7 @@ export function CrapsDock() {
                 disabled={!oddsAvailable || rolling}
                 title="Back every flat bet with the maximum free odds — the only bet with no house edge · O"
               >
-                <IconSpark width={15} height={15} /> Max odds
+                <ArtOdds /> Max odds
               </button>
               <button
                 type="button"
@@ -101,7 +101,7 @@ export function CrapsDock() {
                 disabled={!check.ok}
                 title={check.reason}
               >
-                <IconDice width={20} height={20} />
+                <ArtRoll />
                 {/* Both words hold their place, so the button keeps one width through a roll. */}
                 <span className="roll-btn__label">
                   <span aria-hidden={rolling}>Roll</span>

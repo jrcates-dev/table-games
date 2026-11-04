@@ -3,7 +3,8 @@ import { ChipRack } from '../components/ChipRack'
 import { DealerNotice } from '../components/DealerNotice'
 import { OutOfChips } from '../components/OutOfChips'
 import { EdgePill } from '../components/EdgePill'
-import { IconBook, IconClear } from '../components/icons'
+import { ArtClear, ArtDeal, ArtRebet } from '../components/gameIcons'
+import { IconBook } from '../components/icons'
 import { Money } from '../components/Money'
 import * as bac from '../engine/baccarat/baccarat'
 import { bestBet } from '../engine/baccarat/odds'
@@ -78,13 +79,13 @@ function Betting() {
         <BookHint />
         <div className="dock__buttons">
           <button type="button" className="btn btn--ghost btn--sm" onClick={clear} disabled={staked === 0} title="Take everything back · C">
-            <IconClear width={15} height={15} /> Clear
+            <ArtClear /> Clear
           </button>
           <button type="button" className="btn btn--ghost btn--sm" onClick={rebet} disabled={!hasLast || staked > 0} title="The last coup's bets again · R">
-            Rebet
+            <ArtRebet /> Rebet
           </button>
           <button type="button" className={`btn btn--gold btn--lg deal-btn`} onClick={deal} disabled={!check.ok} title={check.reason}>
-            Deal <kbd>Space</kbd>
+            <ArtDeal /> Deal <kbd>Space</kbd>
           </button>
         </div>
       </div>
@@ -161,10 +162,10 @@ function Settled() {
         <>
           <span className="ba-next">Click the felt for new bets</span>
           <button type="button" className="btn btn--ghost" onClick={clear} title="Clear the felt for new bets · C">
-            <IconClear width={15} height={15} /> Clear bets <kbd>C</kbd>
+            <ArtClear /> Clear bets <kbd>C</kbd>
           </button>
           <button type="button" className="btn btn--gold btn--lg deal-btn" onClick={rebetAndDeal} disabled={!canAgain}>
-            Rebet {money(again)} &amp; deal <kbd>Space</kbd>
+            <ArtRebet /> Rebet {money(again)} &amp; deal <kbd>Space</kbd>
           </button>
         </>
       )}

@@ -4,15 +4,20 @@ import { play } from '../audio'
 import { RackChip } from '../components/ChipStack'
 import { blackjackDenominations } from '../components/chips'
 import {
-  IconBook,
-  IconClear,
-  IconDouble,
-  IconFlag,
-  IconHand,
-  IconPlusCard,
-  IconShield,
-  IconSplit,
-} from '../components/icons'
+  ArtBuyIn,
+  ArtClear,
+  ArtDeal,
+  ArtDecline,
+  ArtDouble,
+  ArtHit,
+  ArtInsure,
+  ArtNewBet,
+  ArtRebet,
+  ArtSplit,
+  ArtStand,
+  ArtSurrender,
+} from '../components/gameIcons'
+import { IconBook } from '../components/icons'
 import { Money } from '../components/Money'
 import { tipHandlers, useTip } from '../components/tip'
 import { availableActions } from '../engine/blackjack'
@@ -98,7 +103,7 @@ function Betting() {
           <p>The rack is empty. This run is filed with its peak bankroll — sit back down with a fresh stake.</p>
         </div>
         <button type="button" className="btn btn--gold btn--lg" onClick={rebuy}>
-          Buy back in
+          <ArtBuyIn /> Buy back in
         </button>
       </div>
     )
@@ -157,13 +162,13 @@ function Betting() {
           </button>
         )}
         <button type="button" className="btn btn--ghost btn--sm" onClick={clearBet} disabled={bet === 0} title="Clear · C">
-          Clear
+          <ArtClear /> Clear
         </button>
         <button type="button" className="btn btn--ghost btn--sm" onClick={doubleBet} disabled={bet === 0} title="Double the bet · X">
-          ×2
+          <ArtDouble /> ×2
         </button>
         <button type="button" className="btn btn--gold btn--lg deal-btn" onClick={deal} disabled={!canDeal}>
-          Deal <kbd>Space</kbd>
+          <ArtDeal /> Deal <kbd>Space</kbd>
         </button>
       </div>
     </div>
@@ -173,11 +178,11 @@ function Betting() {
 // ---------------------------------------------------------------------------
 
 const ACTIONS: Array<{ action: Decision; label: string; key: string; icon: ReactNode }> = [
-  { action: 'surrender', label: 'Surrender', key: 'R', icon: <IconFlag /> },
-  { action: 'split', label: 'Split', key: 'P', icon: <IconSplit /> },
-  { action: 'double', label: 'Double', key: 'D', icon: <IconDouble /> },
-  { action: 'hit', label: 'Hit', key: 'H', icon: <IconPlusCard /> },
-  { action: 'stand', label: 'Stand', key: 'S', icon: <IconHand /> },
+  { action: 'surrender', label: 'Surrender', key: 'R', icon: <ArtSurrender /> },
+  { action: 'split', label: 'Split', key: 'P', icon: <ArtSplit /> },
+  { action: 'double', label: 'Double', key: 'D', icon: <ArtDouble /> },
+  { action: 'hit', label: 'Hit', key: 'H', icon: <ArtHit /> },
+  { action: 'stand', label: 'Stand', key: 'S', icon: <ArtStand /> },
 ]
 
 function Actions() {
@@ -307,7 +312,7 @@ function Insurance() {
         onClick={() => act('insurance')}
       >
         <span className="action__icon">
-          <IconShield />
+          <ArtInsure />
         </span>
         <span className="action__label">Insure {money(bet / 2)}</span>
         <kbd>I</kbd>
@@ -317,6 +322,9 @@ function Insurance() {
         className={`action action--wide${showCoach && !advise ? ' is-recommended' : ''}`}
         onClick={() => act('declineInsurance')}
       >
+        <span className="action__icon">
+          <ArtDecline />
+        </span>
         <span className="action__label">No thanks</span>
         <kbd>Space</kbd>
       </button>
@@ -350,15 +358,15 @@ function Settled() {
       </div>
       {broke ? (
         <button type="button" className="btn btn--gold btn--lg" onClick={rebuy}>
-          Buy back in
+          <ArtBuyIn /> Buy back in
         </button>
       ) : (
         <>
           <button type="button" className="btn btn--ghost" onClick={clearBet} title="Start the next hand with an empty circle · C">
-            <IconClear width={15} height={15} /> Clear bet <kbd>C</kbd>
+            <ArtClear /> Clear bet <kbd>C</kbd>
           </button>
           <button type="button" className="btn btn--ghost" onClick={nextRound} title="Pick a new wager · N">
-            New bet <kbd>N</kbd>
+            <ArtNewBet /> New bet <kbd>N</kbd>
           </button>
           <button
             type="button"
@@ -368,7 +376,7 @@ function Settled() {
               deal()
             }}
           >
-            Rebet {money(rebet)} &amp; deal <kbd>Space</kbd>
+            <ArtRebet /> Rebet {money(rebet)} &amp; deal <kbd>Space</kbd>
           </button>
         </>
       )}
