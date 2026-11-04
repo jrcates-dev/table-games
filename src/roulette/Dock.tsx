@@ -3,7 +3,8 @@ import { play } from '../audio'
 import { ChipRack } from '../components/ChipRack'
 import { DealerNotice } from '../components/DealerNotice'
 import { EdgePill } from '../components/EdgePill'
-import { IconBook, IconClear } from '../components/icons'
+import { ArtClear, ArtDouble, ArtRebet, ArtSpin } from '../components/gameIcons'
+import { IconBook } from '../components/icons'
 import { Money } from '../components/Money'
 import { OutOfChips } from '../components/OutOfChips'
 import { houseEdge } from '../engine/roulette/bets'
@@ -79,16 +80,16 @@ function Betting() {
         <BookHint />
         <div className="dock__buttons">
           <button type="button" className="btn btn--ghost btn--sm" onClick={clear} disabled={staked === 0} title="Take everything back · C">
-            <IconClear width={15} height={15} /> Clear
+            <ArtClear /> Clear
           </button>
           <button type="button" className="btn btn--ghost btn--sm" onClick={double} disabled={staked === 0 || staked > game.bankroll} title="Every bet doubled · D">
-            Double
+            <ArtDouble /> Double
           </button>
           <button type="button" className="btn btn--ghost btn--sm" onClick={rebet} disabled={!hasLast || staked > 0} title="The last spin's bets again · R">
-            Rebet
+            <ArtRebet /> Rebet
           </button>
           <button type="button" className="btn btn--gold btn--lg deal-btn" onClick={spin} disabled={!check.ok} title={check.reason}>
-            Spin <kbd>Space</kbd>
+            <ArtSpin /> Spin <kbd>Space</kbd>
           </button>
         </div>
       </div>
@@ -166,10 +167,10 @@ function Settled() {
         <>
           <span className="ba-next">Click the layout for new bets</span>
           <button type="button" className="btn btn--ghost" onClick={clear} title="Clear the layout for new bets · C">
-            <IconClear width={15} height={15} /> Clear bets <kbd>C</kbd>
+            <ArtClear /> Clear bets <kbd>C</kbd>
           </button>
           <button type="button" className="btn btn--gold btn--lg deal-btn" onClick={rebetAndSpin} disabled={!canAgain}>
-            Rebet {money(again)} &amp; spin <kbd>Space</kbd>
+            <ArtRebet /> Rebet {money(again)} &amp; spin <kbd>Space</kbd>
           </button>
         </>
       )}

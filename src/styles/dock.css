@@ -306,12 +306,18 @@
   display: grid;
   place-items: center;
   color: var(--accent);
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 45%, transparent));
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 7px color-mix(in srgb, var(--accent) 32%, transparent));
 }
 
 .action__icon svg {
-  width: 22px;
-  height: 22px;
+  width: 36px;
+  height: 36px;
+  margin-block: -2px;
+}
+
+/* Out of reach, a picture loses its colour as well as its light. */
+.action:disabled .action__icon {
+  filter: grayscale(0.85);
 }
 
 .action__label {
@@ -366,6 +372,23 @@
   opacity: 0.6;
 }
 
+/* The words keep to one line, and the button grows to hold them (the narrow
+   width a compact dock gives every play is not for these); the message beside
+   them gives way instead. */
+.action.action--wide {
+  flex: none;
+  width: auto;
+}
+
+.action--wide .action__label {
+  white-space: nowrap;
+}
+
+.action--wide .action__icon svg {
+  width: 30px;
+  height: 30px;
+}
+
 .action.is-recommended {
   border-color: rgba(255, 228, 160, 0.95);
   background:
@@ -402,6 +425,8 @@
 
 .action__book {
   position: absolute;
+  /* Over the picture, whose hand may reach up to it. */
+  z-index: 2;
   top: -9px;
   left: 50%;
   translate: -50% 0;
@@ -414,6 +439,99 @@
   color: #2a1d06;
   background: linear-gradient(180deg, #f7e2a6, #d6ae5c);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* ---- Pictures on the buttons ----------------------------------------------- */
+
+/* The illustrated pictures (gameIcons.tsx) sit a little proud of the text
+   beside them: they are drawn to be seen, not to match the cap height. */
+.btn .art-icon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-block: -6px;
+  margin-inline-start: -4px;
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
+}
+
+.btn--sm {
+  gap: 7px;
+}
+
+.btn--sm .art-icon {
+  width: 22px;
+  height: 22px;
+  margin-inline-start: -5px;
+}
+
+.btn--lg .art-icon {
+  width: 30px;
+  height: 30px;
+  margin-inline-start: -6px;
+}
+
+.btn:disabled .art-icon {
+  filter: grayscale(0.85);
+}
+
+/* Hovered, a picture acts its play out: the finger taps, the palm waves, the
+   knuckles rap; the rest lift to meet the pointer. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .action:hover:not(:disabled) .action__icon,
+  .btn:hover:not(:disabled) > .art-icon {
+    animation: art-lift 380ms var(--ease-spring) both;
+  }
+
+  .action--hit:hover:not(:disabled) .action__icon,
+  .uth-action--check:hover:not(:disabled) .action__icon {
+    animation: art-tap 560ms ease-in-out both;
+  }
+
+  .action--stand:hover:not(:disabled) .action__icon {
+    transform-origin: 50% 85%;
+    animation: art-wave 720ms ease-in-out both;
+  }
+}
+
+[data-effects='reduced'] .action__icon,
+[data-effects='reduced'] .btn > .art-icon {
+  animation: none !important;
+}
+
+@keyframes art-lift {
+  50% {
+    transform: translateY(-3px) scale(1.1);
+  }
+  100% {
+    transform: translateY(-1px) scale(1.06);
+  }
+}
+
+@keyframes art-tap {
+  30% {
+    transform: translateY(-3px);
+  }
+  55% {
+    transform: translateY(2px);
+  }
+  78% {
+    transform: translateY(-1px);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes art-wave {
+  25% {
+    transform: rotate(-11deg);
+  }
+  60% {
+    transform: rotate(9deg);
+  }
+  100% {
+    transform: none;
+  }
 }
 
 .book-btn {

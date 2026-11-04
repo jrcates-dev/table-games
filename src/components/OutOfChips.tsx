@@ -1,3 +1,5 @@
+import { ArtBuyIn } from './gameIcons'
+
 /** The dock when the rack is empty: the run is over, and a fresh stake is one press away. */
 export function OutOfChips({ onRebuy }: { onRebuy(): void }) {
   return (
@@ -7,7 +9,7 @@ export function OutOfChips({ onRebuy }: { onRebuy(): void }) {
         <p>The rack is empty. This run is filed with its peak — sit back down with a fresh stake.</p>
       </div>
       <button type="button" className="btn btn--gold btn--lg" onClick={onRebuy}>
-        Buy back in
+        <ArtBuyIn /> Buy back in
       </button>
     </div>
   )
