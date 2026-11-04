@@ -21,6 +21,7 @@ import {
   type SeatProfile,
   type SeatSettingsBase,
 } from './seat'
+import { tableSnapshot } from './tableSnapshot'
 
 export interface BaccaratStats {
   coups: number
@@ -93,6 +94,8 @@ const VERSION = 1
 const MAX_HISTORY = 200
 const storage = new SeatStorage<BaccaratProfile>('cta:baccarat:profile:v1', VERSION, DEFAULT_BACCARAT_SETTINGS)
 const timers = timerSet()
+/** The felt, saved as it changes so closing the app mid-coup loses nothing (see tableSnapshot.ts). */
+const felt = tableSnapshot<{ game: BaccaratState }>('cta:baccarat:felt:v1', 1)
 
 function freshProfile(startingBankroll: number): BaccaratProfile {
   return createSeatProfile(VERSION, startingBankroll, EMPTY_STATS, DEFAULT_BACCARAT_SETTINGS)
@@ -252,6 +255,18 @@ export const useBaccaratStore = create<BaccaratStore>((set, get) => {
     async init() {
       initialising ??= (async () => {
         const profile = storage.load() ?? freshProfile(BACCARAT_STARTING_BANKROLL)
+        const saved = felt.load(profile.runStartedAt)?.game
+        if (saved && (saved.phase === 'dealt' || baccaratAtRisk(saved) > 0)) {
+          // The app closed with chips down: they come back on the felt, in the
+          // same shoe, and a coup already dealt is turned over and paid.
+          set({ profile: { ...profile, bankroll: saved.bankroll }, ready: true, game: saved })
+          if (saved.phase === 'dealt') {
+            const settled = bac.settle(saved)
+            set({ game: settled, step: REVEAL.thirdB, lastCoup: { seq: settled.seq, coup: settled.coup!, resolutions: settled.resolutions } })
+            record(settled)
+          }
+          return
+        }
         set({ profile, ready: true, game: newGame(profile) })
       })()
       return initialising
@@ -406,6 +421,14 @@ export const useBaccaratStore = create<BaccaratStore>((set, get) => {
       persist()
     },
   }
+})
+
+// Every change to the felt is saved, so the snapshot never trails the table:
+// a coup that has since been paid can never be restored and paid twice.
+useBaccaratStore.subscribe((state, prev) => {
+  if (!state.ready) return
+  if (state.game === prev.game && state.profile.runStartedAt === prev.profile.runStartedAt) return
+  felt.save(state.profile.runStartedAt, { game: state.game })
 })
 
 export const selectCanChooseBaccaratBankroll = (s: BaccaratStore) => s.ready && s.game.phase !== 'dealt'

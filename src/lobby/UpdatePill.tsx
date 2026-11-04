@@ -13,8 +13,9 @@ import { selectCanChooseUthBankroll, uthAtRisk, useUthStore } from '../store/uth
 /**
  * "A new version is ready", over the lobby once a newer deploy has downloaded.
  *
- * Updating reloads the page, which would sweep anything still on a felt, so it
- * waits until every table is between hands with nothing down: a craps bet left
+ * Updating reloads the page. Each felt is saved and would come back, but a new
+ * build need not read an old build's felt (see tableSnapshot.ts), so it waits
+ * until every table is between hands with nothing down: a craps bet left
  * standing or a hand walked away from keeps it hidden until the chips are back
  * in the rack. Dismissed, it stays away until the lobby is next opened.
  */

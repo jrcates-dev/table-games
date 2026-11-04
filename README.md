@@ -57,6 +57,12 @@ it in the background. Once it has, the lobby shows a **New version** pill:
 launch. The pill waits until every table is between hands with nothing on the
 felt, so a table in play is never swapped out mid-hand.
 
+Closing the app costs nothing on the felt either. Each table saves what is in
+play as it changes, and opens again exactly as it was left: chips down, the
+point and puck, a hand half played. Anything already decided when it closed
+(dice in the air, a coup being turned over, a ball on the wheel, a hold'em hand
+raised or folded) is paid as the app opens, once.
+
 Pasted into iMessage, WhatsApp, Discord or Slack, the link shows a card with
 the lobby on it. That picture, `public/og-image.jpg` (1200×630), is the one
 image file in the project: a screenshot of the lobby, so retake it if the
@@ -419,7 +425,7 @@ orientations). Real physics, provably fair dice.
 
 ### Correctness
 
-`npm test` runs 329 tests. Beyond per-rule unit tests:
+`npm test` runs 439 tests. Beyond per-rule unit tests:
 
 - **Blackjack** plays 200,000 hands of perfect basic strategy and checks the
   realised edge, and plays Aria's high-limit shoe and its 6:5 tables through the
@@ -443,6 +449,10 @@ orientations). Real physics, provably fair dice.
   prices Trips exactly, checks the coach against the chart, the flop rule, the
   exact flop and river calculations and what the rack can cover, and plays a
   long session to check every chip moves where it should.
+- **Closing the app** with chips down at every table, before, during and after
+  a hand, checks the felt comes back as it was left, that whatever was already
+  decided is paid exactly once, and that a hand paid before the close is never
+  paid again.
 
 ## Cloud sync (optional)
 

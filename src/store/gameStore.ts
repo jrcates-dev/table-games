@@ -20,6 +20,7 @@ import {
 import { clampStartingBankroll } from './stake'
 import { LocalStorageAdapter, type LeaderboardEntry, type StorageAdapter } from './storage'
 import { resolveAdapter, supabaseConfigured } from './supabase'
+import { tableSnapshot } from './tableSnapshot'
 
 /** Milliseconds between dealt cards, by comfort setting. */
 export const DEAL_INTERVAL: Record<Settings['dealSpeed'], number> = {
@@ -121,6 +122,32 @@ function schedule(fn: () => void, ms: number) {
 function clearTimers() {
   timers.forEach(clearTimeout)
   timers = []
+}
+
+/**
+ * The hand in play, beyond the engine state itself: the rack it was dealt from,
+ * which its result is measured against, and the plays so far that left the
+ * book. Module-level, beside the timers, so the snapshot below can read them.
+ */
+let roundStartBankroll = 0
+let pendingMistakes: StrategyMistake[] = []
+
+/** The felt, saved as it changes so closing the app mid-hand loses nothing (see tableSnapshot.ts). */
+interface BlackjackFelt {
+  game: GameState
+  roundStartBankroll: number
+  pendingMistakes: StrategyMistake[]
+}
+const felt = tableSnapshot<BlackjackFelt>('cta:blackjack:felt:v1', 1)
+
+/**
+ * A hand dealt and not yet paid. Between hands nothing is at stake (the circle
+ * is not taken from the rack until the deal), so a table reopened then starts
+ * as it always has, with a fresh shoe and an empty circle.
+ */
+function handInPlay(game: GameState): boolean {
+  const { phase } = game.round
+  return phase === 'dealing' || phase === 'insurance' || phase === 'playerTurn' || phase === 'dealerTurn'
 }
 
 function record(card: Card): RecordedCard {
@@ -266,9 +293,16 @@ export const useGameStore = create<GameStore>((set, get) => {
     }
   }
 
-  let pendingMistakes: StrategyMistake[] = []
-  /** The rack as the hand in play was dealt, which its result is measured against. */
-  let roundStartBankroll = 0
+  /** A hand restored mid-flight picks up where its timers left off. */
+  const resume = () => {
+    let game = get().game
+    if (game.round.phase === 'dealing') {
+      game = bj.finishDealing(game)
+      if (game.round.phase === 'insurance' && !get().profile.settings.offerInsurance) game = bj.declineInsurance(game)
+      set({ game })
+    }
+    drive()
+  }
 
   return {
     game: bj.createGame(rulesFor(createProfile(STARTING_BANKROLL)), STARTING_BANKROLL, randomSeed()),
@@ -289,15 +323,31 @@ export const useGameStore = create<GameStore>((set, get) => {
         const adapter = await resolveAdapter()
         const stored = await adapter.load()
         const profile = stored ?? createProfile(STARTING_BANKROLL)
-        // The circle opens empty. Every round after this one carries the
-        // previous wager forward, but the first wager of a session is the
-        // player's to make.
-        set({
-          adapter,
-          profile,
-          ready: true,
-          game: bj.createGame(rulesFor(profile), profile.bankroll, randomSeed()),
-        })
+        // A first visit's profile is saved straight away: the table saves it
+        // only when a hand is paid, and the felt below is tied to its run, so
+        // a first hand closed mid-deal would otherwise come back to a new one.
+        if (!stored) void adapter.save(profile)
+        const saved = felt.load(profile.runStartedAt)
+        if (saved && handInPlay(saved.game)) {
+          // The app closed mid-hand: the hand comes back as it was, wager and
+          // all, and plays on from there. (The profile still holds the rack
+          // from before the deal, as it does all through a hand.)
+          bj.resumeHandIds(saved.game)
+          roundStartBankroll = saved.roundStartBankroll
+          pendingMistakes = saved.pendingMistakes ?? []
+          set({ adapter, profile, ready: true, game: saved.game })
+          resume()
+        } else {
+          // The circle opens empty. Every round after this one carries the
+          // previous wager forward, but the first wager of a session is the
+          // player's to make.
+          set({
+            adapter,
+            profile,
+            ready: true,
+            game: bj.createGame(rulesFor(profile), profile.bankroll, randomSeed()),
+          })
+        }
         void get().refreshLeaderboard()
       })()
       return initialising
@@ -420,6 +470,7 @@ export const useGameStore = create<GameStore>((set, get) => {
           }
         }
         set({ profile: { ...profile, stats } })
+        persist()
       }
 
       play('click')
@@ -647,6 +698,14 @@ export const useGameStore = create<GameStore>((set, get) => {
       persist()
     },
   }
+})
+
+// Every change to the felt is saved, so the snapshot never trails the table:
+// a hand that has since been paid can never be restored and paid twice.
+useGameStore.subscribe((state, prev) => {
+  if (!state.ready) return
+  if (state.game === prev.game && state.profile.runStartedAt === prev.profile.runStartedAt) return
+  felt.save(state.profile.runStartedAt, { game: state.game, roundStartBankroll, pendingMistakes })
 })
 
 /** Convenience selectors used across the UI. */

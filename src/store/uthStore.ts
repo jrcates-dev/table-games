@@ -22,6 +22,7 @@ import {
   type SeatProfile,
   type SeatSettingsBase,
 } from './seat'
+import { tableSnapshot } from './tableSnapshot'
 
 export interface UthStats {
   hands: number
@@ -111,6 +112,14 @@ const VERSION = 1
 const MAX_HISTORY = 200
 const storage = new SeatStorage<UthProfile>('cta:uth:profile:v1', VERSION, DEFAULT_UTH_SETTINGS)
 const timers = timerSet()
+/** The felt, saved as it changes so closing the app mid-hand loses nothing (see tableSnapshot.ts). */
+interface UthFelt {
+  game: UthState
+  /** The decisions so far, graded when the hand is paid. */
+  calls: Array<{ advice: UthAdvice; chosen: UthDecision }>
+  lastHand: { hole: string; street: NonNullable<UthState['raisedOn']> } | null
+}
+const felt = tableSnapshot<UthFelt>('cta:uth:felt:v1', 1)
 
 const PACE: Record<UthSettings['dealSpeed'], number> = { relaxed: 1.4, normal: 1, fast: 0.55 }
 
@@ -250,6 +259,14 @@ export const useUthStore = create<UthStore>((set, get) => {
     persist()
   }
 
+  /** Work out the flop's exact EVs for the coach, off the main thread. */
+  const lookAtFlop = (game: UthState) => {
+    const key = flopKey(game)
+    workOutFlop(game.player.map(bare), uth.visibleBoard(game).map(bare))?.then((evs) => {
+      if (flopKey(get().game) === key) set({ flopEvs: { key, evs } })
+    })
+  }
+
   /** After a raise or a fold: turn what is left of the board, then the dealer's cards, then pay. */
   const runOut = () => {
     let at = 450 * pace()
@@ -287,6 +304,29 @@ export const useUthStore = create<UthStore>((set, get) => {
     async init() {
       initialising ??= (async () => {
         const profile = storage.load() ?? freshProfile(UTH_STARTING_BANKROLL)
+        const saved = felt.load(profile.runStartedAt)
+        if (saved && uthAtRisk(saved.game) > 0) {
+          // The app closed with chips down: the hand comes back as it was, cards,
+          // board and every circle, and the rack is what it held beside them.
+          const { game } = saved
+          set({
+            profile: { ...profile, bankroll: game.bankroll },
+            ready: true,
+            game,
+            boardShown: game.revealed,
+            dealerShown: false,
+            calls: saved.calls ?? [],
+            lastHand: saved.lastHand ?? null,
+          })
+          if (game.phase === 'flop') lookAtFlop(game)
+          if (game.phase === 'reveal') {
+            // Raised or folded before the close, the hand was already decided: pay it.
+            const settled = uth.settle(game)
+            set({ game: settled, boardShown: 5, dealerShown: true })
+            record(settled)
+          }
+          return
+        }
         set({ profile, ready: true, game: newGame(profile) })
       })()
       return initialising
@@ -372,12 +412,7 @@ export const useUthStore = create<UthStore>((set, get) => {
       if (decision === 'check') {
         play('click')
         set({ game: next, boardShown: next.revealed })
-        if (next.phase === 'flop') {
-          const key = flopKey(next)
-          workOutFlop(next.player.map(bare), uth.visibleBoard(next).map(bare))?.then((evs) => {
-            if (flopKey(get().game) === key) set({ flopEvs: { key, evs } })
-          })
-        }
+        if (next.phase === 'flop') lookAtFlop(next)
         return
       }
       // Raised or folded, the hand is decided; the book holds it from here.
@@ -452,6 +487,21 @@ export const useUthStore = create<UthStore>((set, get) => {
       persist()
     },
   }
+})
+
+// Every change to the felt is saved, so the snapshot never trails the table:
+// a hand that has since been paid can never be restored and paid twice.
+useUthStore.subscribe((state, prev) => {
+  if (!state.ready) return
+  if (
+    state.game === prev.game &&
+    state.calls === prev.calls &&
+    state.lastHand === prev.lastHand &&
+    state.profile.runStartedAt === prev.profile.runStartedAt
+  ) {
+    return
+  }
+  felt.save(state.profile.runStartedAt, { game: state.game, calls: state.calls, lastHand: state.lastHand })
 })
 
 export const selectCanChooseUthBankroll = (s: UthStore) => s.ready && (s.game.phase === 'betting' || s.game.phase === 'showdown')
