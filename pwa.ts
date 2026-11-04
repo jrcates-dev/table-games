@@ -13,8 +13,10 @@ import type { Plugin, ResolvedConfig } from 'vite'
  * craps works offline even if it has never been opened.
  *
  * The cache is named for a hash of the build, so a new deploy installs beside
- * the old one and takes over the next time the app is opened from cold. A
- * running table is never swapped out from under the player mid-hand.
+ * the old one and waits. It takes over the next time the app is opened from
+ * cold, or sooner when the player taps the lobby's "new version" pill, which
+ * asks the waiting worker to step in (see src/lib/updates.ts). A running table
+ * is never swapped out from under the player mid-hand.
  */
 export function offlineCache(): Plugin {
   let config: ResolvedConfig
@@ -28,8 +30,9 @@ export function offlineCache(): Plugin {
       const outDir = config.build.outDir
       const files = listFiles(outDir)
         .map((file) => relative(outDir, file).split(sep).join('/'))
-        // Every phone browser reads woff2, so the woff fallbacks never load.
-        .filter((file) => file !== 'sw.js' && !file.endsWith('.woff'))
+        // Every phone browser reads woff2, so the woff fallbacks never load;
+        // the link-preview image is fetched by chat apps, never by the app.
+        .filter((file) => file !== 'sw.js' && !file.endsWith('.woff') && !file.startsWith('og-image.'))
         .sort()
       const hash = createHash('sha256')
       for (const file of files) hash.update(file).update(readFileSync(join(outDir, file)))
@@ -65,6 +68,12 @@ self.addEventListener('activate', (event) => {
       .then((keys) => Promise.all(keys.filter((key) => key.startsWith('arena-') && key !== CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim()),
   )
+})
+
+// The lobby's "new version" pill: take over now rather than at the next cold
+// start. The page reloads itself onto this build once it has.
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'skip-waiting') self.skipWaiting()
 })
 
 // Some hosts send Vary: Origin, and a module script carries an Origin header

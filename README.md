@@ -50,9 +50,17 @@ the right of the address bar. On a phone, add it to the home screen. It opens in
 a window of its own, straight to the lobby, offline too, and a second click
 brings the open window forward rather than dealing a second copy.
 
-Updates need nothing from you. Whenever the app opens online it checks for a new
-build, fetches it in the background, and opens on it from the next launch; a
-table in play is never swapped out mid-hand.
+Updates need nothing from you. Whenever the app opens online, or comes back
+into view after ten minutes or more away, it checks for a new build and fetches
+it in the background. Once it has, the lobby shows a **New version** pill:
+**Update** reloads onto it there and then, and the **×** leaves it for the next
+launch. The pill waits until every table is between hands with nothing on the
+felt, so a table in play is never swapped out mid-hand.
+
+Pasted into iMessage, WhatsApp, Discord or Slack, the link shows a card with
+the lobby on it. That picture, `public/og-image.jpg` (1200×630), is the one
+image file in the project: a screenshot of the lobby, so retake it if the
+lobby changes much.
 
 To install a build that is not pushed yet, `npm run app` builds it, serves it at
 http://localhost:4747 and opens it, ready to install the same way. That copy

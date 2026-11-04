@@ -23,6 +23,7 @@ import { useSharedBankroll } from '../store/sharedBankroll'
 import { clampStartingBankroll, MAX_STARTING_BANKROLL, MIN_STARTING_BANKROLL } from '../store/stake'
 import { selectCanChooseUthBankroll, selectUthHasRun, useUthStore } from '../store/uthStore'
 import { BaccaratArt, RouletteArt, UthArt } from './TableArt'
+import { UpdatePill } from './UpdatePill'
 
 /**
  * Whether the lobby has already risen into view this visit. The tables rise
@@ -116,6 +117,7 @@ export function Lobby() {
       <div className="lobby__corner">
         <MuteButton />
       </div>
+      <UpdatePill />
 
       <motion.header
         className="lobby__head"

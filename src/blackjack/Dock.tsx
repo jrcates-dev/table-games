@@ -20,6 +20,7 @@ import {
 import { IconBook } from '../components/icons'
 import { Money } from '../components/Money'
 import { tipHandlers, useTip } from '../components/tip'
+import { isTouchDevice } from '../lib/device'
 import { availableActions } from '../engine/blackjack'
 import { suggestedBetUnits } from '../engine/counting'
 import { evaluate } from '../engine/hand'
@@ -86,6 +87,7 @@ function Betting() {
   const rebuy = useGameStore((s) => s.rebuy)
   const showCount = useGameStore((s) => s.profile.settings.showCount)
   const rulePreset = useGameStore((s) => s.profile.settings.rulePreset)
+  const firstHand = useGameStore((s) => s.profile.stats.roundsPlayed === 0)
   const count = useCount()
 
   const houseEdge = (RULE_PRESETS[rulePreset] ?? RULE_PRESETS[DEFAULT_RULE_PRESET]).houseEdge
@@ -111,6 +113,7 @@ function Betting() {
 
   return (
     <div className="dock__row">
+      <FirstBetHint show={firstHand && bet === 0} />
       <div className="rack" role="group" aria-label="Chips">
         {denominations.map((denom, i) => {
           const affordable = denom.value <= game.bankroll - bet && bet + denom.value <= table.maxBet
@@ -172,6 +175,29 @@ function Betting() {
         </button>
       </div>
     </div>
+  )
+}
+
+/**
+ * A first-time player sits down to an empty circle and a Deal button that
+ * will not press. Until the very first hand is dealt, a line over the circle
+ * says what to do; the first chip clears it.
+ */
+function FirstBetHint({ show }: { show: boolean }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.p
+          className="first-bet-hint"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 4 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {isTouchDevice() ? 'Tap' : 'Click'} a chip to bet, then <strong>Deal</strong>
+        </motion.p>
+      )}
+    </AnimatePresence>
   )
 }
 
