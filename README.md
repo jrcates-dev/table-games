@@ -127,8 +127,9 @@ at any true count below +3.
   table's own rules: when the dealer hits soft 17 the six squares that changes
   (11 v A, 15 v A, 17 v A, soft 18 v 2, soft 19 v 6, 8-8 v A) change on the
   card and in the coach.
-- **Coach** — marks the correct play on the controls; optionally holds a
-  deviation so you can reconsider it.
+- **Coach** — marks the correct play on the controls, on from a new player's
+  first hand; optionally (off until you ask) holds a deviation so you can
+  reconsider it.
 - **Card counting** — Hi-Lo running and true count, decks left, the cut card,
   and a bet-spread suggestion. Derived from the shoe rather than accumulated,
   so it cannot drift, and it resets on a shuffle. Hover the count for what the
@@ -351,9 +352,11 @@ room under a marquee in chasing lights; taking a seat tilts the camera down
 until the table sits in its own pool of light on the carpet.
 
 Sound starts off; `M` turns it on and off, and Settings has its volume.
-Settings also choose the felt (emerald, sapphire, crimson, amethyst, onyx) and
-the card backs. Audio suspends while the tab is hidden, and the whole interface
-honours the system's reduced-motion setting.
+Settings also choose the felt (crimson to start; emerald, sapphire, amethyst,
+onyx) and the card backs. Vibration, where the phone can, starts off. Effects
+start on Lighter on a phone or a tablet and on Auto elsewhere, which picks
+Lighter for a modest machine too. Audio suspends while the tab is hidden, and
+the whole interface honours the system's reduced-motion setting.
 
 ---
 

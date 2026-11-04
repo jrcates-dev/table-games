@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { isTouchDevice } from '../lib/device'
 
 /**
  * Preferences that belong to the player rather than to either game.
@@ -20,20 +21,29 @@ export interface Prefs {
   felt: FeltTheme
   cardBack: CardBack
   effects: EffectsPref
-  /** A tap of vibration as chips land and dice settle, where the phone can. */
+  /** A tap of vibration as chips land and dice settle, where the phone can. Off until the player turns it on. */
   haptics: boolean
 }
 
 export const DEFAULT_PREFS: Prefs = {
   muted: true,
   master: 0.8,
-  felt: 'emerald',
+  felt: 'crimson',
   cardBack: 'crimson',
   effects: 'auto',
-  haptics: true,
+  haptics: false,
 }
 
 const PREF_KEYS = Object.keys(DEFAULT_PREFS) as Array<keyof Prefs>
+
+/**
+ * What a first visit starts with on this device. A phone or a tablet starts on
+ * the lighter effects, chosen outright rather than left to auto, so Settings
+ * shows what it is getting.
+ */
+export function defaultPrefs(): Prefs {
+  return { ...DEFAULT_PREFS, effects: isTouchDevice() ? 'reduced' : DEFAULT_PREFS.effects }
+}
 
 export const FELT_THEMES: Array<{ id: FeltTheme; name: string; swatch: string }> = [
   { id: 'emerald', name: 'Emerald', swatch: '#0f5e3f' },
@@ -59,20 +69,21 @@ const KEY = 'arena:prefs:v2'
 const LEGACY_KEY = 'arena:prefs:v1'
 
 function load(): Prefs {
+  const defaults = defaultPrefs()
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return { ...DEFAULT_PREFS, ...(JSON.parse(raw) as Partial<Prefs>) }
+    if (raw) return { ...defaults, ...(JSON.parse(raw) as Partial<Prefs>) }
     const legacy = localStorage.getItem(LEGACY_KEY)
-    if (!legacy) return { ...DEFAULT_PREFS }
+    if (!legacy) return defaults
     const old = JSON.parse(legacy) as Partial<Prefs>
     return {
-      ...DEFAULT_PREFS,
-      master: old.master ?? DEFAULT_PREFS.master,
-      felt: old.felt ?? DEFAULT_PREFS.felt,
-      cardBack: old.cardBack ?? DEFAULT_PREFS.cardBack,
+      ...defaults,
+      master: old.master ?? defaults.master,
+      felt: old.felt ?? defaults.felt,
+      cardBack: old.cardBack ?? defaults.cardBack,
     }
   } catch {
-    return { ...DEFAULT_PREFS }
+    return defaults
   }
 }
 

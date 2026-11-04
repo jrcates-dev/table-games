@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 /**
- * Sound starts off. These pin that down for a first visit, and for a player
- * whose preferences were saved back when it started on.
+ * What a first visit starts with: the sound off, crimson felt, no vibration,
+ * and on a phone or a tablet the lighter effects. These pin that down, and
+ * that a player's saved choices, old or new, are kept.
  */
 
 function storage(entries: Record<string, string>): Storage {
@@ -17,6 +18,11 @@ function storage(entries: Record<string, string>): Storage {
     removeItem: (key) => void data.delete(key),
     setItem: (key, value) => void data.set(key, value),
   }
+}
+
+/** A window whose main pointer is a finger, or a mouse. */
+function device(touch: boolean) {
+  vi.stubGlobal('window', { matchMedia: (query: string) => ({ matches: touch && query === '(pointer: coarse)' }) })
 }
 
 async function loadWith(entries: Record<string, string>) {
@@ -34,6 +40,32 @@ describe('preferences', () => {
   it('starts with the sound off', async () => {
     const prefs = await loadWith({})
     expect(prefs.muted).toBe(true)
+  })
+
+  it('starts on the crimson felt with vibration off', async () => {
+    const prefs = await loadWith({})
+    expect(prefs.felt).toBe('crimson')
+    expect(prefs.haptics).toBe(false)
+  })
+
+  it('starts a phone or a tablet on the lighter effects', async () => {
+    device(true)
+    const prefs = await loadWith({})
+    expect(prefs.effects).toBe('reduced')
+  })
+
+  it('leaves a computer on auto', async () => {
+    device(false)
+    const prefs = await loadWith({})
+    expect(prefs.effects).toBe('auto')
+  })
+
+  it('keeps what a player already chose, even on a phone', async () => {
+    device(true)
+    const prefs = await loadWith({
+      'arena:prefs:v2': JSON.stringify({ muted: true, master: 0.8, felt: 'emerald', cardBack: 'navy', effects: 'full', haptics: true }),
+    })
+    expect(prefs).toEqual({ muted: true, master: 0.8, felt: 'emerald', cardBack: 'navy', effects: 'full', haptics: true })
   })
 
   it('keeps a saved choice to have the sound on', async () => {
@@ -54,6 +86,6 @@ describe('preferences', () => {
         cardBack: 'navy',
       }),
     })
-    expect(prefs).toEqual({ muted: true, master: 0.6, felt: 'sapphire', cardBack: 'navy', effects: 'auto', haptics: true })
+    expect(prefs).toEqual({ muted: true, master: 0.6, felt: 'sapphire', cardBack: 'navy', effects: 'auto', haptics: false })
   })
 })
