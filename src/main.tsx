@@ -23,6 +23,7 @@ import './styles/uth.css'
 import './styles/responsive.css'
 import App from './App.tsx'
 import { SvgDefs } from './components/SvgDefs'
+import { installUpdates } from './lib/updates'
 
 // Development only: a handle on the stores for scripted walkthroughs of
 // specific hands and rolls. Stripped from production builds.
@@ -52,12 +53,9 @@ if (import.meta.env.DEV) {
 }
 
 // Production only: cache every file so the app installed on a phone's home
-// screen opens offline. See pwa.ts. A failed registration just means no cache.
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {})
-  })
-}
+// screen opens offline (see pwa.ts), and offer each new deploy in the lobby
+// once it has downloaded (see lib/updates.ts).
+if (import.meta.env.PROD) installUpdates(`${import.meta.env.BASE_URL}sw.js`)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

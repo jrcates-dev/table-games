@@ -1090,3 +1090,93 @@
   background-image: radial-gradient(circle, transparent 0.7px, rgba(11, 10, 13, 0.55) 1px);
   background-size: 2.5px 2.5px;
 }
+
+/* ---- New version ------------------------------------------------------------
+   Opposite the mute button on a wide screen; on a phone or a short window,
+   where the marquee fills the top, a bar along the bottom instead. Fixed, so
+   it stays in view however far the lobby is scrolled. */
+
+.update-pill {
+  position: fixed;
+  z-index: 30;
+  top: calc(18px + var(--safe-t));
+  left: calc(22px + var(--safe-l));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 32px);
+  padding: 6px 6px 6px 18px;
+  border-radius: 999px;
+  background: rgba(7, 4, 5, 0.9);
+  border: 1px solid rgba(217, 180, 106, 0.38);
+  box-shadow: var(--shadow-2);
+}
+
+.update-pill__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.update-pill__text .eyebrow {
+  color: var(--gold-2);
+  white-space: nowrap;
+}
+
+.update-pill__line {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.update-pill__go {
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.update-pill__go .is-spinning {
+  animation: update-spin 0.9s linear infinite;
+}
+
+@keyframes update-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .update-pill__go .is-spinning {
+    animation: none;
+  }
+}
+
+.update-pill__later {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  color: var(--text-3);
+}
+
+.update-pill__later:hover {
+  color: var(--text-1);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 899px), (max-height: 520px) {
+  .update-pill {
+    top: auto;
+    bottom: calc(14px + var(--safe-b));
+    left: 50%;
+    translate: -50% 0;
+  }
+
+  /* The eyebrow says it; the sentence would crowd a phone. */
+  .update-pill__line {
+    display: none;
+  }
+}
