@@ -44,12 +44,13 @@ export function RouletteReferencePanel() {
   const wheel = useRouletteStore((s) => s.game.wheel)
   const showEdges = useRouletteStore((s) => s.profile.settings.showEdges)
   const other: WheelType = wheel === 'double' ? 'single' : 'double'
-  // What is on the layout for the spin to come or the one in the air — once it
-  // is settled the layout has been swept and paid.
-  const bets = useRouletteStore((s) => (s.game.phase === 'settled' ? null : s.game.bets))
+  // What is on the layout for the spin to come or the one in the air — and,
+  // once it is settled, what rode on it, until the layout is opened again.
+  const settled = useRouletteStore((s) => s.game.phase === 'settled')
+  const bets = useRouletteStore((s) => s.game.bets)
   const yours = useMemo(() => {
     const onLayout = new Map<RouletteBetKind, number>()
-    for (const bet of Object.values(bets ?? {})) {
+    for (const bet of Object.values(bets)) {
       if (bet.amount <= 0) continue
       const row = rowFor(bet.kind)
       onLayout.set(row, (onLayout.get(row) ?? 0) + bet.amount)
@@ -119,7 +120,11 @@ export function RouletteReferencePanel() {
                 <div className="reference__main">
                   <strong>
                     {row.title}
-                    {stake ? <span className="reference__here">Yours · {money(stake)}</span> : null}
+                    {stake ? (
+                      <span className="reference__here">
+                        {settled ? 'Last spin' : 'Yours'} · {money(stake)}
+                      </span>
+                    ) : null}
                   </strong>
                   <span className="reference__pays">{payText(def)}</span>
                 </div>

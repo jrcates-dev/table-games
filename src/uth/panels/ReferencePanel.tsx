@@ -21,9 +21,14 @@ export function UthReferencePanel() {
   // The street waiting on you, if one is, and before the flop the two cards you hold.
   const street = useUthStore((s) => (s.game.phase === 'preflop' || s.game.phase === 'flop' || s.game.phase === 'river' ? s.game.phase : null))
   const hole = useUthStore((s) => (s.game.player.length === 2 ? holeName(s.game.player) : null))
-  const hand = street === 'preflop' ? hole : null
+  // Once a hand is decided it stays lit until the next one is dealt: your
+  // square of the chart, and the street you made the call on.
+  const lastHand = useUthStore((s) => s.lastHand)
+  const done = street ? null : lastHand
+  const hand = street === 'preflop' ? hole : (done?.hole ?? null)
+  const at = street ?? done?.street ?? null
   // Open the book on your square of the chart, or on the rule for the street you are on.
-  const focus = useBookFocus(street === 'preflop' ? (hand ? `preflop:${hand}` : null) : street)
+  const focus = useBookFocus(at === 'preflop' ? (hand ? `preflop:${hand}` : null) : at)
 
   return (
     <div className="reference">
@@ -49,14 +54,14 @@ export function UthReferencePanel() {
         </ol>
       </section>
 
-      <section className={`reference__group${street === 'preflop' ? ' is-live' : ''}`}>
+      <section className={`reference__group${at === 'preflop' ? ' is-live' : ''}`}>
         <h3 className="form-section__title">
           Before the flop: raise 4x or check
-          {street === 'preflop' && (
+          {(street === 'preflop' || done) && (
             <span className="reference__here">
               {hand ? (
                 <>
-                  Your hand · <span className="reference__hand">{hand}</span>
+                  {done ? 'Last hand' : 'Your hand'} · <span className="reference__hand">{hand}</span>
                 </>
               ) : (
                 'Your decision'
@@ -90,10 +95,10 @@ export function UthReferencePanel() {
         <p className="chart__foot">Gold raises 4x; the rest check. Any ace, any pair but deuces, K2s+, K5o+, Q6s+, Q8o+, J8s+, JTo.</p>
       </section>
 
-      <section ref={street === 'flop' ? focus : undefined} className={`reference__group${street === 'flop' ? ' is-live' : ''}`}>
+      <section ref={at === 'flop' ? focus : undefined} className={`reference__group${at === 'flop' ? ' is-live' : ''}`}>
         <h3 className="form-section__title">
           On the flop: bet 2x or check
-          {street === 'flop' && <span className="reference__here">Your decision</span>}
+          {at === 'flop' && <span className="reference__here">{done ? 'Last decision' : 'Your decision'}</span>}
         </h3>
         <ul className="uth-rules">
           <li>Two pair or better that uses your cards — but deuces with a pair on the board check</li>
@@ -107,10 +112,10 @@ export function UthReferencePanel() {
         </p>
       </section>
 
-      <section ref={street === 'river' ? focus : undefined} className={`reference__group${street === 'river' ? ' is-live' : ''}`}>
+      <section ref={at === 'river' ? focus : undefined} className={`reference__group${at === 'river' ? ' is-live' : ''}`}>
         <h3 className="form-section__title">
           On the river: bet 1x or fold
-          {street === 'river' && <span className="reference__here">Your decision</span>}
+          {at === 'river' && <span className="reference__here">{done ? 'Last decision' : 'Your decision'}</span>}
         </h3>
         <p className="reference__note">
           Count the cards you cannot see that would beat you if the dealer held one — the dealer’s outs. Bet with fewer than 21, fold with 21 or more. The Wizard also bets any hidden pair; counted exactly, the outs

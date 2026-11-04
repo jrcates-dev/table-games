@@ -153,6 +153,12 @@ interface UthStore {
   calls: Array<{ advice: UthAdvice; chosen: UthDecision }>
   /** The flop worked out exactly, for the flop it was worked out on. */
   flopEvs: { key: string; evs: FlopEvs } | null
+  /**
+   * The hand just played — its two cards, by the chart's name, and the street
+   * the Play bet or the fold was made on — which the book keeps lit until the
+   * next hand is dealt.
+   */
+  lastHand: { hole: string; street: NonNullable<UthState['raisedOn']> } | null
 
   init(): Promise<void>
   setChip(value: number): void
@@ -276,6 +282,7 @@ export const useUthStore = create<UthStore>((set, get) => {
     dealerShown: false,
     calls: [],
     flopEvs: null,
+    lastHand: null,
 
     async init() {
       initialising ??= (async () => {
@@ -342,7 +349,7 @@ export const useUthStore = create<UthStore>((set, get) => {
       const check = uth.canDeal(game)
       if (!check.ok) return refuse(check.reason)
       timers.clear()
-      set({ game: uth.deal(game), notice: null, lastNet: null, boardShown: 0, dealerShown: false, calls: [] })
+      set({ game: uth.deal(game), notice: null, lastNet: null, boardShown: 0, dealerShown: false, calls: [], lastHand: null })
     },
 
     rebetAndDeal() {
@@ -373,6 +380,8 @@ export const useUthStore = create<UthStore>((set, get) => {
         }
         return
       }
+      // Raised or folded, the hand is decided; the book holds it from here.
+      set({ lastHand: { hole: holeName(game.player), street: game.phase as NonNullable<UthState['raisedOn']> } })
       if (decision === 'fold') play('cardSweep')
       else play('chipStack', { count: Math.min(8, 2 + next.raise) })
       sync(next)
@@ -401,7 +410,7 @@ export const useUthStore = create<UthStore>((set, get) => {
     rebuy() {
       timers.clear()
       const profile = restartRun(get().profile)
-      set({ profile, game: newGame(profile), lastNet: null, notice: null, boardShown: 0, dealerShown: false, calls: [] })
+      set({ profile, game: newGame(profile), lastNet: null, notice: null, boardShown: 0, dealerShown: false, calls: [], lastHand: null })
       persist()
     },
 
@@ -420,7 +429,7 @@ export const useUthStore = create<UthStore>((set, get) => {
       }
       timers.clear()
       const profile = openingStake(state.profile, amount)
-      set({ profile, game: newGame(profile), lastNet: null, notice: null, boardShown: 0, dealerShown: false, calls: [] })
+      set({ profile, game: newGame(profile), lastNet: null, notice: null, boardShown: 0, dealerShown: false, calls: [], lastHand: null })
       persist()
     },
 
@@ -439,7 +448,7 @@ export const useUthStore = create<UthStore>((set, get) => {
     resetEverything() {
       timers.clear()
       const profile = erased(get().profile, freshProfile)
-      set({ profile, game: newGame(profile), lastNet: null, notice: null, boardShown: 0, dealerShown: false, calls: [] })
+      set({ profile, game: newGame(profile), lastNet: null, notice: null, boardShown: 0, dealerShown: false, calls: [], lastHand: null })
       persist()
     },
   }

@@ -122,7 +122,8 @@ at any true count below +3.
 
 ### Training
 
-- **The book** — the strategy card with your exact square lit, derived from the
+- **The book** — the strategy card with your exact square lit (and, once the
+  hand is over, your last square, until the next deal), derived from the
   table's own rules: when the dealer hits soft 17 the six squares that changes
   (11 v A, 15 v A, 17 v A, soft 18 v 2, soft 19 v 6, 8-8 v A) change on the
   card and in the coach.
@@ -329,7 +330,8 @@ seven-card hands.
 - **The scorecard** — each decision this hand against the book's, on the rail;
   statistics keep your share of book decisions and log every departure.
 - **The book** — the full pre-flop chart, the flop and river rules, the Blind
-  table and all three Trips tables priced.
+  table and all three Trips tables priced. Your hand stays lit in the chart
+  after it is played, until the next deal.
 
 ---
 

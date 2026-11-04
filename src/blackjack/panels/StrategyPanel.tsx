@@ -14,7 +14,7 @@ import {
   strategyChart,
   type ChartPosition,
 } from '../../engine/strategy'
-import type { Card, PlayerAction, PlayerHand } from '../../engine/types'
+import type { Card, GameState, PlayerAction, PlayerHand } from '../../engine/types'
 import { useGameStore } from '../../store/gameStore'
 
 /**
@@ -33,6 +33,32 @@ interface Live {
   insurance: boolean
 }
 
+/**
+ * The square a table puts in front of the player, if it is waiting on a
+ * decision: the hand in play against the dealer's upcard, and the book's play.
+ */
+function spotAt(game: GameState): Live | null {
+  const { round } = game
+  // An ace up holds the round on insurance before any other decision, which
+  // is exactly when a player reaches for the book. Light the square then too,
+  // advising the play that will be on offer once insurance is answered.
+  const insurance = round.phase === 'insurance'
+  if (round.phase !== 'playerTurn' && !insurance) return null
+  const hand = round.hands[round.activeHandIndex]
+  if (!hand || round.dealer.length === 0) return null
+  // Holding a natural there is nothing left to decide after insurance.
+  if (insurance && isNatural(hand)) return null
+  const upcard = round.dealer[0]
+  const legal = availableActions(insurance ? { ...game, round: { ...round, phase: 'playerTurn' } } : game)
+  return {
+    hand,
+    upcard,
+    position: chartPosition(hand, upcard, game.rules),
+    advice: basicStrategy(hand, upcard, { rules: game.rules, legal }),
+    insurance,
+  }
+}
+
 function describe({ hand, position }: Live): string {
   if (position.section === 'pairs') {
     const rank = hand.cards[0].rank
@@ -44,29 +70,22 @@ function describe({ hand, position }: Live): string {
 
 export function StrategyPanel() {
   const game = useGameStore((s) => s.game)
+  const lastDecision = useGameStore((s) => s.lastDecision)
   const rulePreset = useGameStore((s) => s.profile.settings.rulePreset)
-  const { round } = game
+  const { phase } = game.round
 
-  const live = useMemo<Live | null>(() => {
-    // An ace up holds the round on insurance before any other decision, which
-    // is exactly when a player reaches for the book. Light the square then too,
-    // advising the play that will be on offer once insurance is answered.
-    const insurance = round.phase === 'insurance'
-    if (round.phase !== 'playerTurn' && !insurance) return null
-    const hand = round.hands[round.activeHandIndex]
-    if (!hand || round.dealer.length === 0) return null
-    // Holding a natural there is nothing left to decide after insurance.
-    if (insurance && isNatural(hand)) return null
-    const upcard = round.dealer[0]
-    const legal = availableActions(insurance ? { ...game, round: { ...round, phase: 'playerTurn' } } : game)
-    return {
-      hand,
-      upcard,
-      position: chartPosition(hand, upcard, game.rules),
-      advice: basicStrategy(hand, upcard, { rules: game.rules, legal }),
-      insurance,
-    }
-  }, [game, round])
+  const live = useMemo(() => spotAt(game), [game])
+  // Once the hand is played its last square stays lit, so the book can still
+  // be checked against it, until the next hand is dealt.
+  const last = useMemo(() => (live || !lastDecision ? null : spotAt(lastDecision)), [live, lastDecision])
+  const spot = live ?? last
+  const eyebrow = live
+    ? live.insurance
+      ? 'Your hand · after insurance'
+      : 'Your hand'
+    : phase === 'dealerTurn'
+      ? 'Your hand'
+      : 'Last hand'
 
   const preset = RULE_PRESETS[rulePreset] ?? RULE_PRESETS[DEFAULT_RULE_PRESET]
   const exact = chartIsExact(game.rules)
@@ -75,19 +94,19 @@ export function StrategyPanel() {
   const used = new Set(chart.flatMap((section) => section.rows.flatMap((row) => row.cells)))
   // A pair, or a soft hand, is a long way down the card: open the book on it.
   const liveCell = useBookFocus(
-    live ? `${live.position.section}:${live.position.key}:${live.position.column}` : null,
+    spot ? `${spot.position.section}:${spot.position.key}:${spot.position.column}` : null,
   )
 
   return (
-    <div className={`chart${live ? ' is-focused' : ''}`}>
-      <div className={`chart__live${live ? ' is-on' : ''}`} data-pinned="">
-        {live ? (
+    <div className={`chart${spot ? ' is-focused' : ''}`}>
+      <div className={`chart__live${spot ? ' is-on' : ''}`} data-pinned="">
+        {spot ? (
           <>
-            <span className="eyebrow">{live.insurance ? 'Your hand · after insurance' : 'Your hand'}</span>
+            <span className="eyebrow">{eyebrow}</span>
             <p>
-              <strong>{describe(live)}</strong> against a dealer <strong>{live.upcard.rank}</strong>
+              <strong>{describe(spot)}</strong> against a dealer <strong>{spot.upcard.rank}</strong>
             </p>
-            <span className={`chart__advice cell--${live.position.cell}`}>{ACTION_LABELS[live.advice]}</span>
+            <span className={`chart__advice cell--${spot.position.cell}`}>{ACTION_LABELS[spot.advice]}</span>
           </>
         ) : (
           <p className="chart__idle">Deal a hand and your square lights up here while you decide.</p>
@@ -105,7 +124,7 @@ export function StrategyPanel() {
               <tr>
                 <th aria-label={section.caption} />
                 {CHART_COLUMNS.map((label, col) => (
-                  <th key={label} className={live && live.position.column === col ? 'is-col' : undefined}>
+                  <th key={label} className={spot && spot.position.column === col ? 'is-col' : undefined}>
                     {label}
                   </th>
                 ))}
@@ -113,12 +132,12 @@ export function StrategyPanel() {
             </thead>
             <tbody>
               {section.rows.map((row) => {
-                const rowLive = live !== null && live.position.section === row.section && row.keys.includes(live.position.key)
+                const rowLive = spot !== null && spot.position.section === row.section && row.keys.includes(spot.position.key)
                 return (
                   <tr key={row.label} className={rowLive ? 'is-row' : undefined}>
                     <th scope="row">{row.label}</th>
                     {row.cells.map((cell, col) => {
-                      const isLive = rowLive && live!.position.column === col
+                      const isLive = rowLive && spot!.position.column === col
                       return (
                         <td
                           key={col}

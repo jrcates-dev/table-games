@@ -17,14 +17,18 @@ export function BaccaratReferencePanel() {
   const live = useLiveOdds()
   const rows = [...BACCARAT_ORDER].sort((a, b) => BACCARAT_BETS[a].edge - BACCARAT_BETS[b].edge)
   // Once a coup is settled its square of the tableau is lit, so the chart never
-  // gets ahead of the cards on the felt; until then, the bets you have down are.
-  const coup = useBaccaratStore((s) => (s.game.phase === 'settled' ? s.game.coup : null))
+  // gets ahead of the cards on the felt, and it stays lit while the next coup's
+  // bets go down, until those cards come out.
+  const settled = useBaccaratStore((s) => s.game.phase === 'settled')
+  const coup = useBaccaratStore((s) => (s.game.phase === 'dealt' ? null : (s.lastCoup?.coup ?? null)))
   const square = coup ? tableauSquare(coup) : null
-  const bets = useBaccaratStore((s) => (s.game.phase === 'settled' ? null : s.game.bets))
-  const stake = (kind: (typeof rows)[number]) => bets?.[kind] ?? 0
+  // The bets you have down — or, once the coup is paid, the ones that rode on it.
+  const bets = useBaccaratStore((s) => s.game.bets)
+  const stake = (kind: (typeof rows)[number]) => bets[kind] ?? 0
   const first = rows.find((kind) => stake(kind) > 0) ?? null
+  const coupKey = coup && `coup:${square ? `${square.total}:${square.playerThird}` : 'natural'}`
   // Open the book on the coup just played, or on the first of your bets.
-  const focus = useBookFocus(coup ? `coup:${square ? `${square.total}:${square.playerThird}` : 'natural'}` : first && `bet:${first}`)
+  const focus = useBookFocus(settled ? coupKey : (first && `bet:${first}`) ?? coupKey)
 
   return (
     <div className="reference">
@@ -52,7 +56,7 @@ export function BaccaratReferencePanel() {
       <section className="reference__group">
         <h3 className="form-section__title">The Banker’s third card</h3>
         <p className="reference__note">When the Player stands, the Banker draws on 0–5 and stands on 6–7, as in the last column. When the Player draws, the Banker’s total and the Player’s third card decide it:</p>
-        <Tableau coup={coup} square={square} focus={focus} />
+        <Tableau coup={coup} square={square} focus={settled || !first ? focus : undefined} />
       </section>
 
       <section className="reference__group">
@@ -65,11 +69,15 @@ export function BaccaratReferencePanel() {
             const spec = BACCARAT_BETS[kind]
             const yours = stake(kind)
             return (
-              <div key={kind} ref={!coup && kind === first ? focus : undefined} className={`reference__row${yours > 0 ? ' is-live' : ''}`}>
+              <div key={kind} ref={!settled && kind === first ? focus : undefined} className={`reference__row${yours > 0 ? ' is-live' : ''}`}>
                 <div className="reference__main">
                   <strong>
                     {spec.title}
-                    {yours > 0 && <span className="reference__here">Yours · {money(yours, true)}</span>}
+                    {yours > 0 && (
+                      <span className="reference__here">
+                        {settled ? 'Last coup' : 'Yours'} · {money(yours, true)}
+                      </span>
+                    )}
                   </strong>
                   <span className="reference__pays">{spec.pays}</span>
                 </div>
@@ -138,7 +146,7 @@ const COLUMNS: Array<number | null> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, null]
  * the blackjack book lights the player's own. `focus` goes on that square, or,
  * after a natural that never reached the chart, on the line that says so.
  */
-function Tableau({ coup, square, focus }: { coup: Coup | null; square: TableauSquare | null; focus: (node: HTMLElement | null) => void }) {
+function Tableau({ coup, square, focus }: { coup: Coup | null; square: TableauSquare | null; focus?: (node: HTMLElement | null) => void }) {
   return (
     <div className={`chart${square ? ' is-focused' : ''}`}>
       {coup && (

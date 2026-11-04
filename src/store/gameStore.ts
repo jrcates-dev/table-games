@@ -73,6 +73,11 @@ interface GameStore {
   leaderboard: LeaderboardEntry[]
   /** Set for a moment after settlement so the felt can flash the result. */
   lastNet: number | null
+  /**
+   * The table as it stood at the player's last decision. Once the hand is
+   * played the book keeps that square lit, until the next hand is dealt.
+   */
+  lastDecision: GameState | null
   cloudAvailable: boolean
 
   init(): Promise<void>
@@ -274,6 +279,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     challenge: null,
     leaderboard: [],
     lastNet: null,
+    lastDecision: null,
     cloudAvailable: supabaseConfigured,
 
     async init() {
@@ -358,7 +364,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       roundStartBankroll = game.bankroll
 
       const dealt = bj.deal(game)
-      set({ game: dealt, animating: true, lastNet: null, challenge: null })
+      set({ game: dealt, animating: true, lastNet: null, challenge: null, lastDecision: null })
 
       // Stagger the click of each card landing.
       // Each snap is timed to the card landing, not leaving the shoe.
@@ -432,7 +438,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const next = apply[action](game)
       // A card physically arrives on hit, double and split.
       if (next.round.seq > game.round.seq) play('card', { at: landing() })
-      set({ game: next })
+      set({ game: next, lastDecision: game })
       drive()
     },
 
@@ -498,6 +504,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         profile: next,
         game: bj.createGame(rulesFor(next), stake, randomSeed()),
         lastNet: null,
+        lastDecision: null,
       })
       persist()
       void get().refreshLeaderboard()
@@ -544,7 +551,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         state.game.round.phase === 'betting'
           ? bj.setBet({ ...state.game, bankroll: stake }, state.game.pendingBet)
           : bj.createGame(rulesFor(profile), stake, randomSeed())
-      set({ profile, game })
+      set({ profile, game, lastDecision: null })
       persist()
     },
 
@@ -599,7 +606,10 @@ export const useGameStore = create<GameStore>((set, get) => {
       // because the count would otherwise be meaningless.
       if (patch.rulePreset && patch.rulePreset !== profile.settings.rulePreset) {
         if (game.round.phase === 'betting') {
-          set({ game: bj.setBet(bj.createGame(rulesFor(next), profile.bankroll, randomSeed()), game.pendingBet) })
+          set({
+            game: bj.setBet(bj.createGame(rulesFor(next), profile.bankroll, randomSeed()), game.pendingBet),
+            lastDecision: null,
+          })
         }
       }
       persist()
@@ -630,6 +640,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         profile,
         game: bj.createGame(rulesFor(profile), stake, randomSeed()),
         lastNet: null,
+        lastDecision: null,
         challenge: null,
         animating: false,
       })
