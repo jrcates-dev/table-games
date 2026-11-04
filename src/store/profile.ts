@@ -82,8 +82,12 @@ export interface StrategyMistake {
 }
 
 export interface Settings {
+  /**
+   * Mark the book's play on the controls. On from a new player's first hand,
+   * so the strategy is in front of them before they think to ask for it.
+   */
   showCoach: boolean
-  /** Block a play that deviates from basic strategy until confirmed. */
+  /** Block a play that deviates from basic strategy until confirmed. Off until asked for. */
   coachStrict: boolean
   showCount: boolean
   showTotals: boolean
@@ -109,7 +113,7 @@ export interface Settings {
 export const RULES_REVISION = 2
 
 export const DEFAULT_SETTINGS: Settings = {
-  showCoach: false,
+  showCoach: true,
   coachStrict: false,
   showCount: false,
   showTotals: true,
