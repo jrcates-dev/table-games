@@ -8,7 +8,6 @@ import { useUthUi } from '../../store/tableUi'
 
 export function UthSettingsPanel() {
   const settings = useUthStore((s) => s.profile.settings)
-  const tripsTable = useUthStore((s) => s.game.tripsTable)
   const displayName = useUthStore((s) => s.profile.displayName)
   const update = useUthStore((s) => s.updateSettings)
   const setName = useUthStore((s) => s.setDisplayName)
@@ -20,9 +19,10 @@ export function UthSettingsPanel() {
   return (
     <div className="settings">
       <Section title="The table">
-        <Field label="Trips pays" hint="The three tables you meet on the Strip differ only on the full house, flush and straight — enough to more than triple what the bet costs. Changes between hands.">
+        <Field label="Trips pays" hint="The three tables you meet on the Strip differ only on the full house, flush and straight — enough to more than triple what the bet costs. A change mid-hand starts with the next one.">
           <Segmented
-            value={tripsTable}
+            // The table chosen; a hand already out is still paid at the one it was bet at.
+            value={settings.tripsTable}
             onChange={(next) => update({ tripsTable: next })}
             options={ids.map((id) => ({ value: id, label: `${TRIPS_TABLES[id].name.split('-').slice(3, 6).join('-')} · ${percent(tripsEdge(TRIPS_TABLES[id]), 2)}` }))}
           />

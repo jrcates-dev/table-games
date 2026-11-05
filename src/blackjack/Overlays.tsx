@@ -4,11 +4,10 @@ import { IconInfo } from '../components/icons'
 import { needsShuffle, penetrationPct } from '../engine/cards'
 import { betRamp, breakEvenCount, EDGE_PER_TRUE_COUNT, suggestedBetUnits, type CountSnapshot } from '../engine/counting'
 import type { Decision } from '../engine/ev'
-import { DEFAULT_RULE_PRESET, RULE_PRESETS } from '../engine/rules'
 import { ACTION_LABELS } from '../engine/strategy'
 import { money, percent } from '../lib/format'
 import { lastPressWasTouch } from '../lib/touch'
-import { selectCanShuffle, useCount, useGameStore } from '../store/gameStore'
+import { selectCanShuffle, selectDealtPreset, useCount, useGameStore } from '../store/gameStore'
 import { useUiStore } from '../store/uiStore'
 import { betShare, decisionEvsFor } from './prices'
 
@@ -88,9 +87,8 @@ const stepCount = (from: number) => signed(Math.ceil(from * 10 - 1e-9) / 10, 1)
  * "Count says" bets from, with the step the shoe is on now lit.
  */
 function CountTip({ count }: { count: CountSnapshot }) {
-  const rulePreset = useGameStore((s) => s.profile.settings.rulePreset)
+  const { houseEdge } = useGameStore(selectDealtPreset)
   const table = useGameStore((s) => s.table())
-  const houseEdge = (RULE_PRESETS[rulePreset] ?? RULE_PRESETS[DEFAULT_RULE_PRESET]).houseEdge
   const ramp = betRamp(houseEdge)
   const now = suggestedBetUnits(count.true, houseEdge)
   const start = stepCount(breakEvenCount(houseEdge))

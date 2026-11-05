@@ -4,7 +4,7 @@ import { play } from '../audio'
 import * as bj from '../engine/blackjack'
 import { countSnapshot } from '../engine/counting'
 import { formatTotal } from '../engine/hand'
-import { DEFAULT_RULE_PRESET, RULE_PRESETS, STARTING_BANKROLL, tableById } from '../engine/rules'
+import { DEFAULT_RULE_PRESET, presetFor, RULE_PRESETS, sameRules, STARTING_BANKROLL, tableById } from '../engine/rules'
 import { randomSeed } from '../engine/rng'
 import { basicStrategy } from '../engine/strategy'
 import type { Card, GameState, PlayerAction, PlayerHand, TableTier } from '../engine/types'
@@ -503,14 +503,21 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (game.round.phase !== 'roundOver') return
       const table = tableById(profile.tableId)
       let next = bj.nextRound({ ...game, bankroll: profile.bankroll })
-      // The cut card was reached during the last round; the shoe is now fresh
-      // and the running count has reset to zero.
-      if (next.shoe.shuffleCount !== game.shoe.shuffleCount) play('shuffle')
+      // A table chosen in Settings while this hand was out deals from here, on
+      // its own fresh shoe; the wager moves across with the player.
+      const switched = !sameRules(next.rules, rulesFor(profile))
+      if (switched) {
+        next = bj.setBet(bj.createGame(rulesFor(profile), profile.bankroll, randomSeed()), next.pendingBet)
+      } else if (next.shoe.shuffleCount !== game.shoe.shuffleCount) {
+        // The cut card was reached during the last round; the shoe is now
+        // fresh and the running count has reset to zero.
+        play('shuffle')
+      }
       // Carry the previous wager forward, but never below the table minimum or
       // above what is left in the rack.
       const carried = Math.max(table.minBet, Math.min(next.pendingBet, profile.bankroll))
       next = bj.setBet(next, profile.bankroll >= table.minBet ? carried : 0)
-      set({ game: next, lastNet: null, challenge: null, animating: false })
+      set({ game: next, lastNet: null, challenge: null, animating: false, ...(switched && { lastDecision: null }) })
     },
 
     shuffleUp() {
@@ -653,15 +660,23 @@ export const useGameStore = create<GameStore>((set, get) => {
       const next = { ...profile, settings }
       set({ profile: next })
 
-      // A rule change only takes effect between rounds, and starts a fresh shoe
-      // because the count would otherwise be meaningless.
+      // Changing tables never waits on the player to clear the felt. The new
+      // table deals from a fresh shoe, because the count would otherwise be
+      // meaningless, and the wager in the circle moves across with the player.
       if (patch.rulePreset && patch.rulePreset !== profile.settings.rulePreset) {
         if (game.round.phase === 'betting') {
           set({
             game: bj.setBet(bj.createGame(rulesFor(next), profile.bankroll, randomSeed()), game.pendingBet),
             lastDecision: null,
           })
+        } else if (game.round.phase === 'roundOver') {
+          // The hand is paid: sweep it off as the dealer would, and the next
+          // round opens at the new table with the last wager carried over.
+          get().nextRound()
         }
+        // A hand still being played is not abandoned, or a bad one could be
+        // walked away from for free. It finishes under the rules it was dealt
+        // at, and the new table deals the next one (see nextRound).
       }
       persist()
     },
@@ -710,6 +725,15 @@ useGameStore.subscribe((state, prev) => {
 
 /** Convenience selectors used across the UI. */
 export const selectPhase = (s: GameStore) => s.game.round.phase
+/**
+ * The table the cards on the felt are being dealt at. It is the one chosen in
+ * Settings, except while a hand dealt before a switch is still out: that hand
+ * finishes, and is priced, under the table it started at.
+ */
+export const selectDealtPreset = (s: GameStore) => {
+  const chosen = RULE_PRESETS[s.profile.settings.rulePreset] ?? RULE_PRESETS[DEFAULT_RULE_PRESET]
+  return sameRules(chosen.rules, s.game.rules) ? chosen : (presetFor(s.game.rules) ?? chosen)
+}
 export const selectActions = (s: GameStore) => bj.availableActions(s.game)
 /**
  * The lobby offers to set the rack whenever no hand is in play. Before the

@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { useBookFocus } from '../../components/bookFocus'
 import { availableActions } from '../../engine/blackjack'
 import { formatTotal, isNatural } from '../../engine/hand'
-import { DEFAULT_RULE_PRESET, RULE_PRESETS } from '../../engine/rules'
 import {
   ACTION_LABELS,
   basicStrategy,
@@ -15,7 +14,7 @@ import {
   type ChartPosition,
 } from '../../engine/strategy'
 import type { Card, GameState, PlayerAction, PlayerHand } from '../../engine/types'
-import { useGameStore } from '../../store/gameStore'
+import { selectDealtPreset, useGameStore } from '../../store/gameStore'
 
 /**
  * The book: basic strategy, with the player's own square lit.
@@ -71,7 +70,8 @@ function describe({ hand, position }: Live): string {
 export function StrategyPanel() {
   const game = useGameStore((s) => s.game)
   const lastDecision = useGameStore((s) => s.lastDecision)
-  const rulePreset = useGameStore((s) => s.profile.settings.rulePreset)
+  // The table this hand is dealt at, which the card below is worked out for.
+  const preset = useGameStore(selectDealtPreset)
   const { phase } = game.round
 
   const live = useMemo(() => spotAt(game), [game])
@@ -87,7 +87,6 @@ export function StrategyPanel() {
       ? 'Your hand'
       : 'Last hand'
 
-  const preset = RULE_PRESETS[rulePreset] ?? RULE_PRESETS[DEFAULT_RULE_PRESET]
   const exact = chartIsExact(game.rules)
   const chart = useMemo(() => strategyChart(game.rules), [game.rules])
   // Only the codes this card actually uses go in its key.
