@@ -19,6 +19,7 @@ import {
   type SeatProfile,
   type SeatSettingsBase,
 } from './seat'
+import { tableSnapshot } from './tableSnapshot'
 
 export interface RouletteStats {
   spins: number
@@ -76,6 +77,8 @@ const VERSION = 1
 const MAX_HISTORY = 200
 const storage = new SeatStorage<RouletteProfile>('cta:roulette:profile:v1', VERSION, DEFAULT_ROULETTE_SETTINGS)
 const timers = timerSet()
+/** The layout, saved as it changes so closing the app mid-spin loses nothing (see tableSnapshot.ts). */
+const felt = tableSnapshot<{ game: RouletteState }>('cta:roulette:felt:v1', 1)
 
 /** Seconds from the ball leaving the dealer's hand to the ball at rest. */
 export const SPIN_SECONDS: Record<RouletteSettings['spinSpeed'], number> = { relaxed: 7, normal: 5, fast: 2.8 }
@@ -186,7 +189,20 @@ export const useRouletteStore = create<RouletteStore>((set, get) => {
     async init() {
       initialising ??= (async () => {
         const profile = storage.load() ?? freshProfile(ROULETTE_STARTING_BANKROLL)
-        set({ profile, ready: true, game: newGame(profile), chip: profile.settings.wheel === 'single' ? 25 : 5 })
+        const chip = profile.settings.wheel === 'single' ? 25 : 5
+        const saved = felt.load(profile.runStartedAt)?.game
+        if (saved && (saved.phase === 'spinning' || rouletteAtRisk(saved) > 0)) {
+          // The app closed with chips down: they come back on the layout, and a
+          // ball already spinning comes to rest in the pocket it was bound for.
+          set({ profile: { ...profile, bankroll: saved.bankroll }, ready: true, game: saved, chip })
+          if (saved.phase === 'spinning') {
+            const settled = rl.settle(saved)
+            set({ game: settled })
+            record(settled)
+          }
+          return
+        }
+        set({ profile, ready: true, game: newGame(profile), chip })
       })()
       return initialising
     },
@@ -353,6 +369,14 @@ export const useRouletteStore = create<RouletteStore>((set, get) => {
       persist()
     },
   }
+})
+
+// Every change to the layout is saved, so the snapshot never trails the table:
+// a spin that has since been paid can never be restored and paid twice.
+useRouletteStore.subscribe((state, prev) => {
+  if (!state.ready) return
+  if (state.game === prev.game && state.profile.runStartedAt === prev.profile.runStartedAt) return
+  felt.save(state.profile.runStartedAt, { game: state.game })
 })
 
 export const selectCanChooseRouletteBankroll = (s: RouletteStore) => s.ready && s.game.phase !== 'spinning'

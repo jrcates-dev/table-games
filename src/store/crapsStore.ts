@@ -24,6 +24,7 @@ import {
   type CrapsStorageAdapter,
 } from './crapsStorage'
 import { clampStartingBankroll } from './stake'
+import { tableSnapshot } from './tableSnapshot'
 
 /**
  * How long the dice are in the air.
@@ -115,6 +116,14 @@ interface CrapsStore {
 }
 
 let initialising: Promise<void> | null = null
+
+/** The felt, saved as it changes so closing the app mid-shoot loses nothing (see tableSnapshot.ts). */
+const felt = tableSnapshot<{ game: CrapsState }>('cta:craps:felt:v1', 1)
+
+/** Chips on the felt or dice in the air: a table worth putting back as it was. */
+function feltInPlay(game: CrapsState): boolean {
+  return game.phase === 'rolling' || Object.keys(game.bets).length > 0
+}
 
 /** Module-level so a hot reload cannot orphan a pending settle. */
 let timers: ReturnType<typeof setTimeout>[] = []
@@ -265,7 +274,21 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
         const adapter = new LocalCrapsAdapter()
         const stored = await adapter.load()
         const profile = stored ?? createCrapsProfile(CRAPS_STARTING_BANKROLL)
-        set({ adapter, profile, ready: true, game: newGame(profile), undoStack: [] })
+        const saved = felt.load(profile.runStartedAt)
+        if (saved && feltInPlay(saved.game)) {
+          // The app closed with chips down: the felt comes back as it was, point,
+          // puck and every bet, and the rack is what it held beside them.
+          const { game } = saved
+          set({ adapter, profile: { ...profile, bankroll: game.bankroll }, ready: true, game, undoStack: [] })
+          if (game.phase === 'rolling') {
+            // The dice had landed as far as the engine was concerned; settle the roll.
+            const settled = craps.settle(game)
+            set({ game: settled, lastThrow: { before: game, after: settled } })
+            record(game, settled)
+          }
+        } else {
+          set({ adapter, profile, ready: true, game: newGame(profile), undoStack: [] })
+        }
         void get().refreshLeaderboard()
       })()
       return initialising
@@ -559,6 +582,14 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
 export const selectCanChooseCrapsBankroll = (s: CrapsStore) => s.ready && s.game.phase === 'betting'
 /** Whether choosing a bankroll in the lobby would end a run already played. */
 export const selectCrapsBankrollHasRun = (s: CrapsStore) => s.profile.stats.rolls > 0
+
+// Every change to the felt is saved, so the snapshot never trails the table:
+// a roll that has since been paid can never be restored and paid twice.
+useCrapsStore.subscribe((state, prev) => {
+  if (!state.ready) return
+  if (state.game === prev.game && state.profile.runStartedAt === prev.profile.runStartedAt) return
+  felt.save(state.profile.runStartedAt, { game: state.game })
+})
 
 /** Everything standing on the felt, plus what it would take to cover it. */
 export function useCrapsEquity() {

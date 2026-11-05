@@ -25,6 +25,17 @@ function nextHandId(): string {
   return `hand-${++handCounter}`
 }
 
+/**
+ * Carry the hand counter past every hand in a state restored from storage, so
+ * a split after reopening the app cannot mint an id already on the felt.
+ */
+export function resumeHandIds(state: GameState): void {
+  for (const hand of state.round.hands) {
+    const n = Number(/^hand-(\d+)$/.exec(hand.id)?.[1])
+    if (n > handCounter) handCounter = n
+  }
+}
+
 function emptyRound(): GameState['round'] {
   return {
     phase: 'betting',
