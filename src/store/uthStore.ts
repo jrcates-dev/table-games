@@ -204,6 +204,8 @@ export const useUthStore = create<UthStore>((set, get) => {
   }
   const sync = (game: UthState) => set({ game, profile: { ...get().profile, bankroll: game.bankroll } })
   const pace = () => PACE[get().profile.settings.dealSpeed]
+  /** Pay the hand. A pay table chosen while it was out takes over once it is paid. */
+  const settleHand = (game: UthState) => uth.setTripsTable(uth.settle(game), get().profile.settings.tripsTable)
 
   const record = (settled: UthState) => {
     const { profile, calls } = get()
@@ -282,7 +284,7 @@ export const useUthStore = create<UthStore>((set, get) => {
     timers.schedule(() => set({ dealerShown: true }), at)
     at += 1100 * pace()
     timers.schedule(() => {
-      const settled = uth.settle(get().game)
+      const settled = settleHand(get().game)
       set({ game: settled })
       record(settled)
     }, at)
@@ -321,7 +323,7 @@ export const useUthStore = create<UthStore>((set, get) => {
           if (game.phase === 'flop') lookAtFlop(game)
           if (game.phase === 'reveal') {
             // Raised or folded before the close, the hand was already decided: pay it.
-            const settled = uth.settle(game)
+            const settled = settleHand(game)
             set({ game: settled, boardShown: 5, dealerShown: true })
             record(settled)
           }
@@ -426,8 +428,10 @@ export const useUthStore = create<UthStore>((set, get) => {
     setTripsTable(tripsTable) {
       const { game, profile } = get()
       const next = uth.setTripsTable(game, tripsTable)
-      if (next === game && game.tripsTable !== tripsTable) return refuse('Change the pay table between hands')
       set({ game: next, profile: withSettings(profile, { tripsTable }) })
+      // Never refused: a Trips bet already out is paid at the table it was made
+      // at, and the new one takes over once this hand is paid (see settleHand).
+      if (next === game && game.tripsTable !== tripsTable) set({ notice: 'The new pay table starts with the next hand' })
       persist()
     },
 

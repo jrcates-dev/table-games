@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Field, MoneyInput, Section, Segmented, Toggle } from '../../components/controls'
 import { AppearanceSettings, SoundSettings } from '../../components/GlobalSettings'
-import { RULE_PRESETS } from '../../engine/rules'
+import { DEFAULT_RULE_PRESET, RULE_PRESETS } from '../../engine/rules'
 import { money } from '../../lib/format'
-import { useGameStore } from '../../store/gameStore'
+import { selectDealtPreset, useGameStore } from '../../store/gameStore'
 import { MAX_STARTING_BANKROLL, MIN_STARTING_BANKROLL } from '../../store/stake'
 import { getSupabase } from '../../store/supabase'
 import { ruleLines } from '../rulesText'
@@ -16,17 +16,28 @@ export function SettingsPanel() {
   const reset = useGameStore((s) => s.resetEverything)
   const phase = useGameStore((s) => s.game.round.phase)
   const rules = useGameStore((s) => s.game.rules)
+  const dealt = useGameStore(selectDealtPreset)
   const cloud = useGameStore((s) => s.cloudAvailable)
   const [confirm, setConfirm] = useState(false)
+
+  // Tables can be changed at any point. Between hands the switch is immediate,
+  // the wager moving across; a hand already out is played to the end first.
+  const chosen = RULE_PRESETS[settings.rulePreset] ?? RULE_PRESETS[DEFAULT_RULE_PRESET]
+  const midHand = phase !== 'betting' && phase !== 'roundOver'
+  const rulesHint =
+    dealt !== chosen
+      ? `The new table deals the next hand, from a fresh shoe. This one ${midHand ? 'plays out' : 'was dealt'} at ${dealt.name}.`
+      : midHand
+        ? `${ruleLines(rules).join(' · ')}. A switch now takes effect after this hand.`
+        : ruleLines(rules).join(' · ')
 
   return (
     <div className="settings">
       <Section title="The table">
-        <Field label="House rules" hint={phase === 'betting' ? ruleLines(rules).join(' · ') : 'Changes apply between hands.'}>
+        <Field label="House rules" hint={rulesHint}>
           <select
             className="select"
             value={settings.rulePreset}
-            disabled={phase !== 'betting'}
             onChange={(event) => update({ rulePreset: event.target.value })}
           >
             {Object.entries(RULE_PRESETS).map(([key, preset]) => (

@@ -24,11 +24,10 @@ import { isTouchDevice } from '../lib/device'
 import { availableActions } from '../engine/blackjack'
 import { suggestedBetUnits } from '../engine/counting'
 import { evaluate } from '../engine/hand'
-import { DEFAULT_RULE_PRESET, RULE_PRESETS } from '../engine/rules'
 import { basicStrategy, shouldTakeInsurance } from '../engine/strategy'
 import type { Decision } from '../engine/ev'
 import { money, signedMoney } from '../lib/format'
-import { useCount, useGameStore } from '../store/gameStore'
+import { selectDealtPreset, useCount, useGameStore } from '../store/gameStore'
 import { useUiStore } from '../store/uiStore'
 import { actionTipId, tipAction } from './prices'
 
@@ -86,11 +85,10 @@ function Betting() {
   const deal = useGameStore((s) => s.dealRound)
   const rebuy = useGameStore((s) => s.rebuy)
   const showCount = useGameStore((s) => s.profile.settings.showCount)
-  const rulePreset = useGameStore((s) => s.profile.settings.rulePreset)
+  const { houseEdge } = useGameStore(selectDealtPreset)
   const firstHand = useGameStore((s) => s.profile.stats.roundsPlayed === 0)
   const count = useCount()
 
-  const houseEdge = (RULE_PRESETS[rulePreset] ?? RULE_PRESETS[DEFAULT_RULE_PRESET]).houseEdge
   const denominations = blackjackDenominations(table.maxBet, game.bankroll)
   const bet = game.pendingBet
   const canDeal = bet >= table.minBet && bet <= game.bankroll

@@ -107,6 +107,16 @@ export const RULE_PRESETS: Record<string, { name: string; rules: RuleSet; houseE
 
 export const DEFAULT_RULE_PRESET = 'ariaSalon'
 
+/** Whether two rule sets deal the same game, field by field (a saved hand's rules are a copy, not the preset itself). */
+export function sameRules(a: RuleSet, b: RuleSet): boolean {
+  return (Object.keys(a) as (keyof RuleSet)[]).every((key) => a[key] === b[key])
+}
+
+/** The preset these rules were dealt from, if they still match one. */
+export function presetFor(rules: RuleSet): (typeof RULE_PRESETS)[string] | undefined {
+  return Object.values(RULE_PRESETS).find((preset) => sameRules(preset.rules, rules))
+}
+
 /**
  * Table tiers. Higher limits unlock as the bankroll grows, which gives the
  * pure-bankroll economy a sense of progression without bolting on XP or levels.
