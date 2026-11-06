@@ -5,7 +5,7 @@ import { angleBetween, cardAt, cardLift, cardTurn, shadowAt } from '../component
 import { CardBackFace, CardFace } from '../components/PlayingCard'
 import type { DealtCard, RoundState } from '../engine/types'
 import type { CardBack } from '../prefs/prefsStore'
-import { CARD_SCALE, DEALER_FAN, DEALER_ROW, DISCARD, fan, handCenters, handFan, SHOE } from './geometry'
+import { CARD_SCALE, DEALER_FAN, DEALER_ROW, DISCARD, fan, handCenters, handFan, SHOE, type Spot } from './geometry'
 
 /**
  * Every card on the felt.
@@ -74,6 +74,8 @@ export const CardLayer = memo(function CardLayer({
   interval,
   flight,
   back,
+  shoe = SHOE,
+  discard = DISCARD,
 }: {
   round: RoundState
   /** The depth of the player's cards: see playerRowY. */
@@ -84,6 +86,9 @@ export const CardLayer = memo(function CardLayer({
   /** Seconds a card spends in the air. */
   flight: number
   back: CardBack
+  /** Where the cards come from and go to: the shoe and the discard rack, wherever they stand. */
+  shoe?: Spot
+  discard?: Spot
 }) {
   const roundKey = round.hands[0]?.id ?? 'none'
   const placed = layoutCards(round, dealerPeek, rowY)
@@ -99,6 +104,8 @@ export const CardLayer = memo(function CardLayer({
             delay={staggering ? p.card.seq * interval : 0}
             flight={flight}
             back={back}
+            shoe={shoe}
+            discard={discard}
           />
         ))}
       </AnimatePresence>
@@ -108,7 +115,21 @@ export const CardLayer = memo(function CardLayer({
 
 const EASE_PITCH: [number, number, number, number] = [0.18, 0.72, 0.22, 1]
 
-function TableCard({ placed, delay, flight, back }: { placed: Placed; delay: number; flight: number; back: CardBack }) {
+function TableCard({
+  placed,
+  delay,
+  flight,
+  back,
+  shoe,
+  discard,
+}: {
+  placed: Placed
+  delay: number
+  flight: number
+  back: CardBack
+  shoe: Spot
+  discard: Spot
+}) {
   const { card, x, y, spin, order, dim } = placed
   // The opening deal staggers each card by its place in the deal; anything
   // after that (a split box re-spacing) moves immediately.
@@ -161,10 +182,10 @@ function TableCard({ placed, delay, flight, back }: { placed: Placed; delay: num
   return (
     <motion.div
       className="bj-card"
-      initial={{ transform: placeAt(SHOE.x, SHOE.y - 20) }}
+      initial={{ transform: placeAt(shoe.x, shoe.y - 20) }}
       animate={{ transform: placeAt(x, y) }}
       exit={{
-        transform: placeAt(DISCARD.x, DISCARD.y),
+        transform: placeAt(discard.x, discard.y),
         transition: { duration: 0.55, delay: order * 0.03, ease: [0.5, 0, 0.3, 1] },
       }}
       transition={move}
@@ -181,10 +202,10 @@ function TableCard({ placed, delay, flight, back }: { placed: Placed; delay: num
           and a flattened card shows both of its faces at once. */}
       <motion.div
         className="bj-card__spin"
-        initial={{ transform: cardLift(60, SHOE.angle) }}
-        animate={{ transform: landed ? cardLift(rest, spin) : [cardLift(60, SHOE.angle), cardLift(118, angleBetween(SHOE.angle, spin)), cardLift(rest, spin)] }}
+        initial={{ transform: cardLift(60, shoe.angle) }}
+        animate={{ transform: landed ? cardLift(rest, spin) : [cardLift(60, shoe.angle), cardLift(118, angleBetween(shoe.angle, spin)), cardLift(rest, spin)] }}
         exit={{
-          transform: [cardLift(rest, spin), cardLift(26, angleBetween(spin, DISCARD.angle), (1 + RACKED) / 2), cardLift(4, DISCARD.angle, RACKED)],
+          transform: [cardLift(rest, spin), cardLift(26, angleBetween(spin, discard.angle), (1 + RACKED) / 2), cardLift(4, discard.angle, RACKED)],
           transition: { duration: 0.55, delay: order * 0.03 },
         }}
         transition={landed ? { duration: 0.42 } : { duration: flight, delay: entryDelay, times: [0, 0.42, 1], ease: ['easeOut', EASE_PITCH] }}

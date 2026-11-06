@@ -2,7 +2,7 @@ import { Drawer } from '../components/Drawer'
 import { IconBook, IconSettings, IconStats } from '../components/icons'
 import { Stage } from '../components/Stage'
 import { TopBar, TopBarButton } from '../components/TopBar'
-import { COMPACT_RESERVE, COMPACT_TOPBAR, useCompact } from '../lib/compact'
+import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_COUNT, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money } from '../lib/format'
 import { useSessionNet } from '../lib/session'
 import { usePrefs } from '../prefs/prefsStore'
@@ -21,7 +21,7 @@ import { ResultBanner } from './Banner'
 import { BetLayer } from './Bets'
 import { CardLayer } from './Cards'
 import { Dock } from './Dock'
-import { CAMERA, PLANE, STAGE } from './geometry'
+import { CAMERA, DISCARD, PLANE, SHOE, STAGE, UPRIGHT_DISCARD, UPRIGHT_SHOE } from './geometry'
 import { playerRowY } from './handRow'
 import { useBlackjackKeys } from './hooks'
 import { CoachChallenge, CountHud, ShuffleConfirm, ShuffleNotice } from './Overlays'
@@ -40,14 +40,30 @@ import { BlackjackTable, DiscardRack, Shoe } from './Table'
 const PHONE_FILL = { left: 318, top: 226, right: 1315, bottom: 772 }
 
 /**
+ * Upright on a phone, the width is what runs short, so the picture closes in
+ * on the middle of the table: the dealer's hand, yours, the betting circle and
+ * the insurance line, and above them the tray, with the shoe and the discard
+ * rack standing behind it (UPRIGHT_SHOE) in the height the screen has to
+ * spare. A split spreads the boxes across the felt, and the picture draws back
+ * (gliding, see Stage) just far enough to keep every hand whole.
+ */
+function portraitFill(boxes: number) {
+  const half = boxes >= 4 ? 500 : boxes === 3 ? 410 : boxes === 2 ? 350 : 300
+  return { left: 800 - half, top: 40, right: 800 + half, bottom: 790 }
+}
+
+/**
  * The blackjack table.
  *
  * A fixed composition — the felt tilted away as a seated player sees it —
  * scaled to fit the window, with the rack and decisions docked below it and
- * the reference panels sliding in over the right-hand side.
+ * the reference panels sliding in over the right-hand side. On a phone it
+ * plays either way up: sideways the whole table shows, upright the middle of
+ * it does, larger, over a dock stacked in two rows.
  */
 export default function BlackjackView() {
   const compact = useCompact()
+  const portrait = usePortrait()
   const game = useGameStore((s) => s.game)
   const ready = useGameStore((s) => s.ready)
   const bankroll = useGameStore((s) => s.profile.bankroll)
@@ -72,6 +88,9 @@ export default function BlackjackView() {
   const flight = CARD_FLIGHT[settings.dealSpeed] * 1.15
   const discarded = game.shoe.pos / Math.max(1, game.shoe.cutIndex)
   const rowY = playerRowY(game.round, rules.blackjackPayout)
+  const boxes = game.round.hands.length
+  const shoe = portrait ? UPRIGHT_SHOE : SHOE
+  const discard = portrait ? UPRIGHT_DISCARD : DISCARD
 
   return (
     <div className="bj">
@@ -118,9 +137,10 @@ export default function BlackjackView() {
           width={STAGE.w}
           height={STAGE.h}
           safeBottom={772}
-          reserve={compact ? COMPACT_RESERVE : 134}
-          reserveTop={compact ? COMPACT_TOPBAR : 0}
-          fill={compact ? PHONE_FILL : undefined}
+          reserve={portrait ? PORTRAIT_RESERVE : compact ? COMPACT_RESERVE : 134}
+          reserveTop={portrait ? PORTRAIT_TOPBAR + (settings.showCount ? PORTRAIT_COUNT : 0) : compact ? COMPACT_TOPBAR : 0}
+          fill={portrait ? portraitFill(boxes) : compact ? PHONE_FILL : undefined}
+          glide={portrait}
         >
           <div className="bj-camera" style={{ perspective: CAMERA.perspective }}>
             <div
@@ -134,11 +154,20 @@ export default function BlackjackView() {
               }}
             >
               <BlackjackTable rules={rules} />
-              <DiscardRack fraction={discarded} back={back} />
-              <Shoe back={back} onShuffle={canShuffle ? askShuffle : undefined} />
+              <DiscardRack fraction={discarded} back={back} at={discard} />
+              <Shoe back={back} onShuffle={canShuffle ? askShuffle : undefined} at={shoe} />
               <ActiveHandGlow round={game.round} rowY={rowY} />
               <BetLayer game={game} />
-              <CardLayer round={game.round} rowY={rowY} dealerPeek={rules.dealerPeek} interval={interval} flight={flight} back={back} />
+              <CardLayer
+                round={game.round}
+                rowY={rowY}
+                dealerPeek={rules.dealerPeek}
+                interval={interval}
+                flight={flight}
+                back={back}
+                shoe={shoe}
+                discard={discard}
+              />
               <Badges round={game.round} rowY={rowY} showTotals={settings.showTotals} />
             </div>
           </div>

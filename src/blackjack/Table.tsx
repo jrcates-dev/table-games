@@ -9,7 +9,7 @@ import type { RuleSet } from '../engine/types'
 import { useEffectsLevel } from '../lib/effects'
 import { noiseDataUrl } from '../lib/noise'
 import type { CardBack } from '../prefs/prefsStore'
-import { CARD, CIRCLE, DISCARD, FELT, PLANE, SHOE, TABLE, TRAY } from './geometry'
+import { CARD, CIRCLE, DISCARD, FELT, PLANE, SHOE, TABLE, TRAY, type Spot } from './geometry'
 import { dealerRuleText, payoutWords } from './rulesText'
 
 const { cx, edgeY } = TABLE
@@ -213,11 +213,11 @@ function DealerTray() {
  * The six-deck shoe: smoked acrylic, the next card's back showing at the mouth.
  * Between hands it takes a double-click, which asks to shuffle up early.
  */
-export const Shoe = memo(function Shoe({ back, onShuffle }: { back: CardBack; onShuffle?: () => void }) {
+export const Shoe = memo(function Shoe({ back, onShuffle, at = SHOE }: { back: CardBack; onShuffle?: () => void; at?: Spot }) {
   return (
     <div
       className={`bj-shoe${onShuffle ? ' is-armed' : ''}`}
-      style={{ left: SHOE.x, top: SHOE.y, transform: `rotateZ(${SHOE.angle}deg)` }}
+      style={{ left: at.x, top: at.y, transform: `rotateZ(${at.angle}deg)` }}
       title={onShuffle ? 'Double-click to reshuffle' : undefined}
       onDoubleClick={onShuffle}
     >
@@ -248,10 +248,10 @@ export const Shoe = memo(function Shoe({ back, onShuffle }: { back: CardBack; on
  * The discard holder. The stack inside grows as the shoe is dealt, which is
  * the only honest penetration meter a real table has.
  */
-export function DiscardRack({ fraction, back }: { fraction: number; back: CardBack }) {
+export function DiscardRack({ fraction, back, at = DISCARD }: { fraction: number; back: CardBack; at?: Spot }) {
   const height = Math.max(0, Math.min(1, fraction)) * 56
   return (
-    <div className="bj-discard" style={{ left: DISCARD.x, top: DISCARD.y, transform: `rotateZ(${DISCARD.angle}deg)` }}>
+    <div className="bj-discard" style={{ left: at.x, top: at.y, transform: `rotateZ(${at.angle}deg)` }}>
       <div className="bj-discard__shadow" />
       <div className="bj-discard__floor" />
       {height > 1 && (

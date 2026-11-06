@@ -347,10 +347,33 @@
   background: radial-gradient(110% 90% at 50% 52%, transparent 38%, rgba(0, 0, 0, 0.88) 100%);
 }
 
-/* Felt from edge to edge, which takes the room's place at a table on a phone
-   (see the phone section of responsive.css). */
+/* Felt from edge to edge, which takes the room's place at a table on a phone,
+   either way up (see the phone sections of responsive.css): lit from above the
+   middle, as the felt drawn in the picture is. */
 .room__felt {
   display: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1s ease;
+  /* A layer of its own, painted once: whatever repaints over it never repaints it. */
+  will-change: opacity;
+  background:
+    radial-gradient(48% 62% at 50% 44%, rgba(255, 242, 208, 0.1), transparent 100%),
+    radial-gradient(85% 110% at 50% 42%, var(--felt-hi) 0%, var(--felt-mid) 42%, var(--felt-lo) 82%, var(--felt-edge) 120%);
+}
+
+.room__felt::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--noise);
+  background-size: 160px;
+  opacity: 0.07;
+}
+
+.room--table .room__felt {
+  opacity: 1;
 }
 
 /* ---- Stage ---------------------------------------------------------------- */

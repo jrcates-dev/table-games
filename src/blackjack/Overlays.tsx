@@ -45,7 +45,10 @@ export function CountHud() {
       onBlur={() => setExplain(false)}
     >
       <span className="eyebrow count-hud__head">
-        Hi-Lo count
+        {/* Upright, the HUD is a strip across the screen, with room for the name alone. */}
+        <span>
+          Hi-Lo<span className="count-hud__word"> count</span>
+        </span>
         <IconInfo width={14} height={14} />
       </span>
       <div className="count-hud__grid">

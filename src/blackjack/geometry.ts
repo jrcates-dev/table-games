@@ -62,6 +62,22 @@ export const DEALT = { w: CARD.w * CARD_SCALE, h: CARD.h * CARD_SCALE } as const
 /** The shoe and the discard rack, each sized to hold cards this big. */
 export const SHOE = { x: 1192, y: 192, angle: -20, w: 156, d: 240, h: 80 } as const
 export const DISCARD = { x: 306, y: 190, angle: 20 } as const
+
+/** Where something stands on the felt, and how it is turned. */
+export interface Spot {
+  x: number
+  y: number
+  angle: number
+}
+
+/**
+ * Upright on a phone the picture is too narrow for the shoe and the discard
+ * rack to stand either side of the tray, so they stand behind its two ends, on
+ * the dealer's side of it, where the picture has height to spare. Every card
+ * still leaves the one and goes to the other.
+ */
+export const UPRIGHT_SHOE: Spot = { x: 958, y: -92, angle: -12 }
+export const UPRIGHT_DISCARD: Spot = { x: 546, y: -80, angle: 12 }
 export const TRAY = { x: 750, y: 100, w: 540, h: 66 } as const
 
 export const DEALER_ROW = { x: 750, y: 237 } as const

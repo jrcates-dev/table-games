@@ -7,6 +7,13 @@ import { useSyncExternalStore } from 'react'
  */
 const COMPACT = '(max-height: 500px)'
 
+/**
+ * A phone held upright. The lobby and blackjack are laid out for it (see
+ * BlackjackView and the upright section of responsive.css); every other table
+ * asks to be turned sideways. Kept in step with that stylesheet's query.
+ */
+const PORTRAIT = '(orientation: portrait) and (max-width: 600px)'
+
 /** Screen pixels the compact dock takes off the bottom of a table. */
 export const COMPACT_RESERVE = 80
 
@@ -14,8 +21,22 @@ export const COMPACT_RESERVE = 80
 export const TOPBAR = 70
 export const COMPACT_TOPBAR = 50
 
+/**
+ * Upright, the top bar and the dock, which stacks its row in two (see
+ * responsive.css). Both are measured inside the notch and the home bar, which
+ * the upright stage already keeps clear of.
+ */
+export const PORTRAIT_TOPBAR = 52
+export const PORTRAIT_RESERVE = 146
+/** Upright, the card count's strip under the top bar, when it is on. */
+export const PORTRAIT_COUNT = 46
+
 export function isCompact(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia?.(COMPACT).matches === true
+  return matches(COMPACT)
+}
+
+export function isPortrait(): boolean {
+  return matches(PORTRAIT)
 }
 
 /**
@@ -23,15 +44,33 @@ export function isCompact(): boolean {
  * over the felt, so until the player opens it the rail starts folded.
  */
 export function railStartsFolded(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia?.(`${COMPACT}, (max-width: 1100px)`).matches === true
+  return matches(`${COMPACT}, (max-width: 1100px)`)
 }
 
 export function useCompact(): boolean {
-  return useSyncExternalStore(subscribe, isCompact, () => false)
+  return useSyncExternalStore(subscriber(COMPACT), isCompact, () => false)
 }
 
-function subscribe(onChange: () => void): () => void {
-  const query = window.matchMedia(COMPACT)
-  query.addEventListener('change', onChange)
-  return () => query.removeEventListener('change', onChange)
+export function usePortrait(): boolean {
+  return useSyncExternalStore(subscriber(PORTRAIT), isPortrait, () => false)
+}
+
+function matches(query: string): boolean {
+  return typeof window !== 'undefined' && window.matchMedia?.(query).matches === true
+}
+
+const subscribers = new Map<string, (onChange: () => void) => () => void>()
+
+/** One stable subscribe function per query, so React never resubscribes on a render. */
+function subscriber(query: string): (onChange: () => void) => () => void {
+  let subscribe = subscribers.get(query)
+  if (!subscribe) {
+    subscribe = (onChange) => {
+      const list = window.matchMedia(query)
+      list.addEventListener('change', onChange)
+      return () => list.removeEventListener('change', onChange)
+    }
+    subscribers.set(query, subscribe)
+  }
+  return subscribe
 }
