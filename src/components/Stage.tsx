@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { IconZoomIn, IconZoomOut } from './icons'
 import { StageScale } from './stageScale'
 import { useStageZoom, type StageZoom } from './stageZoom'
@@ -41,12 +41,22 @@ interface StageProps {
   reserveTop?: number
   /** Let a finger look closer: pinch, drag, and a button. See stageZoom. */
   zoom?: StageZoom
+  /**
+   * Move to a new fit rather than jump to it, once the stage is on screen: a
+   * `fill` that changes with play (blackjack upright, drawing back for a split)
+   * then eases there.
+   */
+  glide?: boolean
 }
 
-export function Stage({ width, height, children, className, maxScale = 1.6, safeBottom, reserve = 0, reserveTop = 0, fill, zoom }: StageProps) {
+const GLIDE = 'transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1)'
+
+export function Stage({ width, height, children, className, maxScale = 1.6, safeBottom, reserve = 0, reserveTop = 0, fill, zoom, glide = false }: StageProps) {
   const ref = useRef<HTMLDivElement>(null)
   const layer = useRef<HTMLDivElement>(null)
   const [box, setBox] = useState({ w: width, h: height })
+  // Not until the first fit has been painted: sitting down, the picture is simply there.
+  const [gliding, setGliding] = useState(false)
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -57,6 +67,15 @@ export function Stage({ width, height, children, className, maxScale = 1.6, safe
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  useEffect(() => {
+    if (!glide) return
+    const id = requestAnimationFrame(() => setGliding(true))
+    return () => {
+      cancelAnimationFrame(id)
+      setGliding(false)
+    }
+  }, [glide])
 
   let scale: number, top: number, left: number
   if (fill) {
@@ -94,6 +113,7 @@ export function Stage({ width, height, children, className, maxScale = 1.6, safe
               width,
               height,
               transform: `translate(${left}px, ${top}px) scale(${scale})`,
+              transition: glide && gliding ? GLIDE : undefined,
             }}
           >
             {children}

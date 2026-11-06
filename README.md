@@ -100,6 +100,11 @@ raked into the discard rack when the hand is done — whose stack grows as the
 shoe is dealt, the only penetration meter a real table has. Winning bets are
 paid from the dealer's tray; losing ones are swept into it.
 
+On a phone it plays either way up. Sideways you see the whole table; held
+upright the view closes in on the dealer's hand and yours, with the shoe and
+the discard rack behind the tray, and the chips and plays in a two-row dock
+under your thumb. The other tables need the width, and ask to be turned.
+
 | | |
 |---|---|
 | Deal · rebet and deal · decline insurance | `Space` |

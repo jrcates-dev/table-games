@@ -280,8 +280,8 @@
    rail give the felt every pixel they can, and the tables reserve less room
    for the dock to match (see lib/compact.ts). Narrow windows — a phone
    sideways, a tablet either way up — tighten the dock so it fits across. Held
-   upright, a phone cannot show a table at all, so the table asks to be turned
-   (the lobby still works upright). Keyboard hints go wherever the pointer is a
+   upright, a phone shows the lobby and blackjack, each laid out for it; every
+   other table asks to be turned. Keyboard hints go wherever the pointer is a
    finger.
    --------------------------------------------------------------------------- */
 
@@ -399,28 +399,6 @@
 
   .room__felt {
     display: block;
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 1s ease;
-    /* A layer of its own, painted once: whatever repaints over it never repaints it. */
-    will-change: opacity;
-    background:
-      radial-gradient(48% 62% at 50% 44%, rgba(255, 242, 208, 0.1), transparent 100%),
-      radial-gradient(85% 110% at 50% 42%, var(--felt-hi) 0%, var(--felt-mid) 42%, var(--felt-lo) 82%, var(--felt-edge) 120%);
-  }
-
-  .room__felt::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: var(--noise);
-    background-size: 160px;
-    opacity: 0.07;
-  }
-
-  .room--table .room__felt {
-    opacity: 1;
   }
 
   /* -- Top bar -- */
@@ -812,6 +790,381 @@
 
   .roll-btn svg {
     display: none;
+  }
+}
+
+/* ---- Blackjack held upright ------------------------------------------------
+   One player's hand stands up into a tall screen well, so blackjack plays
+   upright too. As sideways, the screen is the felt. The top bar keeps clear
+   of the notch, the picture closes in on the middle of the table (see
+   BlackjackView), and the dock runs the width of the screen with its row
+   stacked in two: the chips over the wager and the deal, the hand over the
+   plays. Kept in step with PORTRAIT in lib/compact.ts. */
+
+@media (orientation: portrait) and (max-width: 600px) {
+  .room__ground,
+  .bj .table-body {
+    display: none;
+  }
+
+  .room__felt {
+    display: block;
+  }
+
+  /* The picture keeps inside the notch, so the room it leaves for the top bar
+     is the bar alone (PORTRAIT_TOPBAR); the dock already stands clear of the
+     home bar. */
+  .bj__stage {
+    top: var(--safe-t);
+  }
+
+  /* -- Top bar: the way back, the rack and the panels, with the sign's words
+        left to the lobby -- */
+
+  .bj > .topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: calc(6px + var(--safe-t)) 8px 6px;
+  }
+
+  .bj .brand {
+    gap: 4px;
+    padding: 2px 4px 2px 0;
+  }
+
+  .bj .brand__back {
+    width: 18px;
+  }
+
+  .bj .brand .monogram {
+    width: 32px;
+    height: 32px;
+  }
+
+  .bj .brand__text {
+    display: none;
+  }
+
+  .bj .topbar__right {
+    gap: 10px;
+  }
+
+  .bj .bankroll__label {
+    font-size: 9px;
+  }
+
+  .bj .bankroll__value {
+    font-size: 21px;
+  }
+
+  /* As sideways: the rack's menu shows this table's result and the session's. */
+  .bj .bankroll__session,
+  .bj .bankroll__results {
+    display: none;
+  }
+
+  .bj .topbar__actions {
+    gap: 4px;
+  }
+
+  .bj .topbar .icon-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* -- Panels and notes hang under the top bar, across the screen -- */
+
+  .bj .drawer,
+  .bj .drawer--wide {
+    top: calc(52px + var(--safe-t));
+    left: 6px;
+    right: 6px;
+    bottom: calc(var(--dock-floor) + 8px);
+    width: auto;
+    border-radius: 18px;
+  }
+
+  .bj .drawer__head {
+    padding: 12px 14px 10px;
+  }
+
+  .bj .drawer__title {
+    font-size: 19px;
+    margin-top: 0;
+  }
+
+  .bj .drawer__body {
+    padding: 12px 14px 18px;
+  }
+
+  /* The rack's menu hangs from the bar itself, the bankroll being too near
+     the middle to hang a menu this wide from. */
+  .bj .bankroll-wrap {
+    position: static;
+  }
+
+  .bj .rack-menu {
+    top: 100%;
+    right: 8px;
+    width: min(320px, calc(100% - 16px));
+  }
+
+  /* The count is a strip under the top bar rather than a card in the corner,
+     where the discard rack stands upright; the picture moves down to make room
+     (PORTRAIT_COUNT). */
+  .bj .count-hud {
+    left: 8px;
+    right: 8px;
+    top: calc(50px + var(--safe-t));
+    width: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px 10px;
+    padding: 6px 12px 8px;
+    border-radius: 14px;
+  }
+
+  .bj .count-hud__head {
+    flex: none;
+    gap: 6px;
+  }
+
+  .bj .count-hud__word {
+    display: none;
+  }
+
+  .bj .count-hud__grid {
+    display: flex;
+    gap: 12px;
+    margin: 0;
+  }
+
+  .bj .count-hud__grid div {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 5px;
+    white-space: nowrap;
+  }
+
+  .bj .count-hud__grid strong {
+    font-size: 18px;
+  }
+
+  .bj .count-hud__shoe {
+    flex: 1 1 100%;
+    height: 4px;
+  }
+
+  .bj .count-hud__cut {
+    top: -3px;
+    height: 10px;
+  }
+
+  .bj .shuffle-notice {
+    top: calc(54px + var(--safe-t));
+    right: 8px;
+    max-width: min(280px, calc(100% - 16px));
+  }
+
+  /* The call fits across the screen, a long one taking two lines. */
+  .bj .banner {
+    width: max-content;
+    max-width: calc(100vw - 24px);
+    padding: 10px 22px 12px;
+    white-space: normal;
+    border-radius: 18px;
+  }
+
+  .bj .banner__title {
+    font-size: 30px;
+    letter-spacing: 0.08em;
+  }
+
+  .bj .banner__sub {
+    font-size: 24px;
+  }
+
+  /* -- The dock, the width of the screen and two rows deep -- */
+
+  .bj .dock-wrap {
+    left: 6px;
+    right: 6px;
+    translate: none;
+    width: auto;
+    max-width: none;
+  }
+
+  .bj .dock {
+    width: 100%;
+    min-height: 0;
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  .bj .dock__row {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    min-height: 0;
+  }
+
+  /* The top bar has the book; the dock gives its corner to the plays. */
+  .bj .book-btn {
+    display: none;
+  }
+
+  /* Betting: every chip in one row, then the wager and the deal under it. */
+  .bj .rack {
+    flex: 1 1 100%;
+    justify-content: safe center;
+    gap: 2px;
+    padding: 6px 6px 3px;
+    border-radius: 16px;
+  }
+
+  .bj .rack__chip svg {
+    width: 42px;
+    height: 42px;
+  }
+
+  .bj .wager {
+    flex: 0 1 auto;
+    min-width: 64px;
+  }
+
+  .bj .wager .eyebrow {
+    display: block;
+  }
+
+  .bj .wager__value,
+  .bj .settled__net,
+  .bj .hand-info__total {
+    font-size: 26px;
+  }
+
+  .bj .dock--betting .dock__buttons {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: flex-end;
+  }
+
+  .bj .btn--sm {
+    height: 44px;
+  }
+
+  .bj .dock__buttons .btn--sm:has(> .art-icon) {
+    width: 44px;
+  }
+
+  .bj .btn--lg {
+    height: 50px;
+  }
+
+  .bj .deal-btn {
+    flex: 1 1 auto;
+    padding: 0 12px;
+  }
+
+  /* Playing: the hand on one line, then a row of plays a thumb can't miss. */
+  .bj .hand-info {
+    flex: 1 1 100%;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .bj .hand-info .eyebrow {
+    display: inline;
+  }
+
+  .bj .hand-info__total {
+    font-size: 24px;
+  }
+
+  .bj .actions {
+    flex: 1 1 100%;
+    gap: 6px;
+  }
+
+  .bj .action {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    height: 62px;
+    padding: 0 2px;
+    gap: 3px;
+    border-radius: 14px;
+  }
+
+  .bj .action__icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .bj .action__label {
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+  }
+
+  .bj .action__book {
+    top: -8px;
+    padding: 1px 6px;
+  }
+
+  /* Insurance: the offer across the top, the two answers side by side under it. */
+  .bj .dock__message {
+    flex: 1 1 100%;
+    max-width: none;
+    text-align: center;
+  }
+
+  .bj .dock__message p {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .bj .never-ask {
+    justify-content: center;
+    margin-top: 6px;
+  }
+
+  .bj .action.action--wide {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 52px;
+    padding: 0 10px;
+  }
+
+  /* Settled: the result beside the two ways to change the bet, then the deal
+     across the bottom, under the thumb. */
+  .bj .settled {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .bj .dock--over .btn--ghost {
+    flex: none;
+    height: 44px;
+    padding: 0 12px;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .bj .dock--over .btn--gold {
+    flex: 1 1 100%;
+  }
+
+  .bj .waiting {
+    min-height: 50px;
+  }
+
+  /* The first bet's hint sits over the dock, where the chips are. */
+  .bj .first-bet-hint {
+    bottom: calc(100% + 10px);
   }
 }
 

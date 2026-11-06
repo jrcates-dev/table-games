@@ -8,7 +8,7 @@ import { installNoise } from './lib/noise'
 import { installTouch } from './lib/touch'
 import { Lobby } from './lobby/Lobby'
 import { usePrefs } from './prefs/prefsStore'
-import { useAppStore } from './store/appStore'
+import { useAppStore, type Screen } from './store/appStore'
 import { useBaccaratStore } from './store/baccaratStore'
 import { useRouletteStore } from './store/rouletteStore'
 import { useUthStore } from './store/uthStore'
@@ -88,7 +88,7 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
         <FxLayer />
-        {screen !== 'lobby' && <RotateHint />}
+        {!UPRIGHT.includes(screen) && <RotateHint />}
       </div>
     </MotionConfig>
   )
@@ -111,9 +111,16 @@ const SCREEN_MOTION_LIGHT: Variants = {
 }
 
 /**
- * A table is laid out for a landscape screen. Held upright, a phone shows this
- * instead (responsive.css decides when), with the way back to the lobby, which
- * does work upright.
+ * The screens laid out for a phone held upright as well as sideways. Blackjack
+ * has one player's hand to show, and it stands up into a tall screen well (see
+ * BlackjackView); the other tables need the width.
+ */
+const UPRIGHT: Screen[] = ['lobby', 'blackjack']
+
+/**
+ * The other tables are laid out for a landscape screen. Held upright, a phone
+ * shows this instead (responsive.css decides when), with the way back to the
+ * lobby, which does work upright.
  */
 function RotateHint() {
   const go = useAppStore((s) => s.go)
@@ -121,7 +128,7 @@ function RotateHint() {
     <div className="rotate-hint" role="dialog" aria-label="Turn your phone sideways">
       <div className="rotate-hint__phone" aria-hidden="true" />
       <p className="rotate-hint__text">Turn your phone sideways</p>
-      <p className="rotate-hint__sub">The tables are laid out for a landscape screen.</p>
+      <p className="rotate-hint__sub">This table is laid out for a landscape screen. Blackjack plays either way up.</p>
       <button type="button" className="btn btn--ghost" onClick={() => go('lobby')}>
         Back to the lobby
       </button>
