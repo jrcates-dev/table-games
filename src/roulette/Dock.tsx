@@ -14,6 +14,7 @@ import { money, signedMoney } from '../lib/format'
 import { useRouletteStore } from '../store/rouletteStore'
 import { useRouletteUi } from '../store/tableUi'
 import { callText, rouletteDenominations } from './betInfo'
+import { measureDock } from '../lib/compact'
 
 /**
  * The player's side of the rail: the chip in hand and the spin while the
@@ -27,7 +28,7 @@ export function RouletteDock() {
   const mode = phase === 'spinning' ? 'wait' : phase === 'settled' ? 'over' : 'betting'
 
   return (
-    <div className="dock-wrap">
+    <div className="dock-wrap" ref={measureDock}>
       <DealerNotice notice={notice} onDismiss={dismiss} />
       <AnimatePresence mode="wait" initial={false}>
         <motion.div

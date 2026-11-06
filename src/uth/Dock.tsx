@@ -14,6 +14,7 @@ import { money, signedMoney } from '../lib/format'
 import { currentAdvice, holeName, useUthStore } from '../store/uthStore'
 import { useUthUi } from '../store/tableUi'
 import { DECISION_LABEL, DECISION_MULTIPLE, uthDenominations } from './betInfo'
+import { measureDock } from '../lib/compact'
 
 /**
  * The player's side of the rail: the chips while the circles are open, the
@@ -27,7 +28,7 @@ export function UthDock() {
   const mode = phase === 'betting' ? 'betting' : phase === 'reveal' ? 'wait' : phase === 'showdown' ? 'over' : 'decide'
 
   return (
-    <div className="dock-wrap">
+    <div className="dock-wrap" ref={measureDock}>
       <DealerNotice notice={notice} onDismiss={dismiss} />
       <AnimatePresence mode="wait" initial={false}>
         <motion.div

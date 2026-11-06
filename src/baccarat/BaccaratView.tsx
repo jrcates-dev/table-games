@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { CAMERA, PLANE, STAGE } from '../blackjack/geometry'
+import { CAMERA, PLANE, STAGE, UPRIGHT_DISCARD, UPRIGHT_SHOE } from '../blackjack/geometry'
 import { DiscardRack, Shoe } from '../blackjack/Table'
 import { BetPicker } from '../components/BetPicker'
 import { Drawer } from '../components/Drawer'
@@ -9,7 +9,7 @@ import { Stage } from '../components/Stage'
 import { TableBanner, type Headline } from '../components/TableBanner'
 import { TopBar, TopBarButton } from '../components/TopBar'
 import { BANKER_COMMISSION } from '../engine/baccarat/rules'
-import { COMPACT_RESERVE, COMPACT_TOPBAR, TOPBAR, useCompact } from '../lib/compact'
+import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money, signedMoney } from '../lib/format'
 import { useSessionNet } from '../lib/session'
 import { usePrefs } from '../prefs/prefsStore'
@@ -25,9 +25,17 @@ import { BaccaratSettingsPanel } from './panels/SettingsPanel'
 import { BaccaratStatsPanel } from './panels/StatsPanel'
 import { Rail } from './Rail'
 import { BetLayer, CardLayer, SpotLayer, Totals } from './Table'
+import { UPRIGHT_TOTAL } from './geometry'
 
 /** Sideways on a phone: the two hands down to the bets, the discard rack to the shoe (see Stage's `fill`). */
 const PHONE_FILL = { left: 318, top: 234, right: 1315, bottom: 792 }
+
+/**
+ * Upright on a phone: the two boxes and the apron of bets, the Dragons at each
+ * end, with the tray above and the shoe and discard rack behind it, as at
+ * blackjack (UPRIGHT_SHOE). The totals stand over the boxes (UPRIGHT_TOTAL).
+ */
+const UPRIGHT_FILL = { left: 440, top: 40, right: 1160, bottom: 800 }
 
 /**
  * The mini-baccarat table: the blackjack table's walnut and felt, an eight-deck
@@ -36,6 +44,7 @@ const PHONE_FILL = { left: 318, top: 234, right: 1315, bottom: 792 }
  */
 export default function BaccaratView() {
   const compact = useCompact()
+  const portrait = usePortrait()
   const game = useBaccaratStore((s) => s.game)
   const ready = useBaccaratStore((s) => s.ready)
   const bankroll = useBaccaratStore((s) => s.profile.bankroll)
@@ -90,9 +99,9 @@ export default function BaccaratView() {
       </TopBar>
 
       <div className="tv__stage">
-        <Stage width={STAGE.w} height={STAGE.h} safeBottom={792} reserve={compact ? COMPACT_RESERVE : 134}
-          reserveTop={compact ? COMPACT_TOPBAR : TOPBAR}
-          fill={compact ? PHONE_FILL : undefined}
+        <Stage width={STAGE.w} height={STAGE.h} safeBottom={792} reserve={portrait ? PORTRAIT_RESERVE : compact ? COMPACT_RESERVE : 134}
+          reserveTop={portrait ? PORTRAIT_TOPBAR : compact ? COMPACT_TOPBAR : TOPBAR}
+          fill={portrait ? UPRIGHT_FILL : compact ? PHONE_FILL : undefined}
           zoom={{ focus: '[data-spot]', playing: game.phase === 'dealt', betting: game.phase === 'betting' }}
         >
           <div className="bj-camera" style={{ perspective: CAMERA.perspective }}>
@@ -107,12 +116,12 @@ export default function BaccaratView() {
               }}
             >
               <BaccaratFelt />
-              <DiscardRack fraction={discarded} back={back} />
-              <Shoe back={back} />
+              <DiscardRack fraction={discarded} back={back} at={portrait ? UPRIGHT_DISCARD : undefined} />
+              <Shoe back={back} at={portrait ? UPRIGHT_SHOE : undefined} />
               <SpotLayer />
               <BetLayer />
-              <CardLayer />
-              <Totals />
+              <CardLayer shoe={portrait ? UPRIGHT_SHOE : undefined} discard={portrait ? UPRIGHT_DISCARD : undefined} />
+              <Totals at={portrait ? UPRIGHT_TOTAL : undefined} />
             </div>
           </div>
         </Stage>

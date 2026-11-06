@@ -7,6 +7,7 @@ import { ArtBuyIn, ArtClear, ArtOdds, ArtRoll, ArtUndo } from '../components/gam
 import * as craps from '../engine/craps/craps'
 import { money } from '../lib/format'
 import { useCrapsStore, type NumberMode } from '../store/crapsStore'
+import { measureDock } from '../lib/compact'
 
 /**
  * The shooter's side of the rail.
@@ -35,7 +36,7 @@ export function CrapsDock() {
   const broke = game.bankroll + atRisk < table.minBet
 
   return (
-    <div className="dock-wrap">
+    <div className="dock-wrap" ref={measureDock}>
       <Notice />
       <div className="dock dock--craps">
         {!check.ok && !rolling && !broke && <p className="dock__blocked">{check.reason}</p>}

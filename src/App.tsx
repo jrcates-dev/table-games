@@ -111,16 +111,17 @@ const SCREEN_MOTION_LIGHT: Variants = {
 }
 
 /**
- * The screens laid out for a phone held upright as well as sideways. Blackjack
- * has one player's hand to show, and it stands up into a tall screen well (see
- * BlackjackView); the other tables need the width.
+ * The screens laid out for a phone held upright as well as sideways: the lobby,
+ * and every table but craps, whose layout is twice as wide as it is deep and
+ * upright shrinks to a strip across the middle of the screen with bets too
+ * small to tap. Each table's view has its upright picture (its upright fill).
  */
-const UPRIGHT: Screen[] = ['lobby', 'blackjack']
+const UPRIGHT: Screen[] = ['lobby', 'blackjack', 'baccarat', 'roulette', 'uth']
 
 /**
- * The other tables are laid out for a landscape screen. Held upright, a phone
- * shows this instead (responsive.css decides when), with the way back to the
- * lobby, which does work upright.
+ * Craps is laid out for a landscape screen. Held upright, a phone shows this
+ * instead (responsive.css decides when), with the way back to the lobby,
+ * which does work upright.
  */
 function RotateHint() {
   const go = useAppStore((s) => s.go)
@@ -128,7 +129,7 @@ function RotateHint() {
     <div className="rotate-hint" role="dialog" aria-label="Turn your phone sideways">
       <div className="rotate-hint__phone" aria-hidden="true" />
       <p className="rotate-hint__text">Turn your phone sideways</p>
-      <p className="rotate-hint__sub">This table is laid out for a landscape screen. Blackjack plays either way up.</p>
+      <p className="rotate-hint__sub">The craps layout needs a landscape screen. Every other table plays either way up.</p>
       <button type="button" className="btn btn--ghost" onClick={() => go('lobby')}>
         Back to the lobby
       </button>
