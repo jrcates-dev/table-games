@@ -280,9 +280,8 @@
    rail give the felt every pixel they can, and the tables reserve less room
    for the dock to match (see lib/compact.ts). Narrow windows — a phone
    sideways, a tablet either way up — tighten the dock so it fits across. Held
-   upright, a phone shows the lobby and every table but craps, each laid out
-   for it; craps asks to be turned. Keyboard hints go wherever the pointer is a
-   finger.
+   upright, a phone shows the lobby and every table laid out for it. Keyboard
+   hints go wherever the pointer is a finger.
    --------------------------------------------------------------------------- */
 
 /* The lobby scrolls clear of the notch, the corners and the home bar; the
@@ -794,7 +793,7 @@
 }
 
 /* ---- Held upright ---------------------------------------------------------
-   Blackjack, baccarat, Ultimate Texas Hold'em and roulette play upright too.
+   Every table plays upright too.
    As sideways, the screen is the felt. The top bar keeps clear of the notch,
    each view closes its picture in on the middle of its table (its upright
    fill), and the dock runs the width of the screen with its row stacked in
@@ -814,61 +813,61 @@
   /* The picture keeps inside the notch, so the room it leaves for the top bar
      is the bar alone (PORTRAIT_TOPBAR); the dock already stands clear of the
      home bar. */
-  :is(.bj__stage, .tv__stage) {
+  :is(.bj__stage, .cr__stage, .tv__stage) {
     top: var(--safe-t);
   }
 
   /* -- Top bar: the way back, the rack and the panels, with the sign's words
         left to the lobby -- */
 
-  :is(.bj, .tv) > .topbar {
+  :is(.bj, .cr, .tv) > .topbar {
     display: flex;
     justify-content: space-between;
     gap: 8px;
     padding: calc(6px + var(--safe-t)) 8px 6px;
   }
 
-  :is(.bj, .tv) .brand {
+  :is(.bj, .cr, .tv) .brand {
     gap: 4px;
     padding: 2px 4px 2px 0;
   }
 
-  :is(.bj, .tv) .brand__back {
+  :is(.bj, .cr, .tv) .brand__back {
     width: 18px;
   }
 
-  :is(.bj, .tv) .brand .monogram {
+  :is(.bj, .cr, .tv) .brand .monogram {
     width: 32px;
     height: 32px;
   }
 
-  :is(.bj, .tv) .brand__text {
+  :is(.bj, .cr, .tv) .brand__text {
     display: none;
   }
 
-  :is(.bj, .tv) .topbar__right {
+  :is(.bj, .cr, .tv) .topbar__right {
     gap: 10px;
   }
 
-  :is(.bj, .tv) .bankroll__label {
+  :is(.bj, .cr, .tv) .bankroll__label {
     font-size: 9px;
   }
 
-  :is(.bj, .tv) .bankroll__value {
+  :is(.bj, .cr, .tv) .bankroll__value {
     font-size: 21px;
   }
 
   /* As sideways: the rack's menu shows this table's result and the session's. */
-  :is(.bj, .tv) .bankroll__session,
-  :is(.bj, .tv) .bankroll__results {
+  :is(.bj, .cr, .tv) .bankroll__session,
+  :is(.bj, .cr, .tv) .bankroll__results {
     display: none;
   }
 
-  :is(.bj, .tv) .topbar__actions {
+  :is(.bj, .cr, .tv) .topbar__actions {
     gap: 4px;
   }
 
-  :is(.bj, .tv) .topbar .icon-btn {
+  :is(.bj, .cr, .tv) .topbar .icon-btn {
     width: 38px;
     height: 38px;
   }
@@ -878,9 +877,9 @@
         dock's height changes with the phase; --dock-h follows it
         (measureDock in lib/compact.ts). -- */
 
-  :is(.bj, .tv) .drawer,
-  :is(.bj, .tv) .drawer--wide,
-  .tv .rail {
+  :is(.bj, .cr, .tv) .drawer,
+  :is(.bj, .cr, .tv) .drawer--wide,
+  :is(.cr, .tv) .rail {
     top: calc(52px + var(--safe-t));
     left: 6px;
     right: 6px;
@@ -889,14 +888,14 @@
     border-radius: 18px;
   }
 
-  .tv .rail {
+  :is(.cr, .tv) .rail {
     padding: 10px;
     gap: 8px;
   }
 
   /* Folded, the bets and the zoom sit in the felt's bottom corners, just over
      the dock, under the thumb and clear of the shoe and the wheel up top. */
-  .tv .rail-tab {
+  :is(.cr, .tv) .rail-tab {
     top: auto;
     right: 8px;
     bottom: calc(var(--dock-floor) + var(--dock-h, 128px) + 10px);
@@ -908,7 +907,7 @@
     border-radius: 14px;
   }
 
-  .tv .rail-tab strong {
+  :is(.cr, .tv) .rail-tab strong {
     font-size: 18px;
   }
 
@@ -919,7 +918,7 @@
     transform-origin: 50% 100%;
   }
 
-  .tv .stage__zoom-btn {
+  :is(.cr, .tv) .stage__zoom-btn {
     position: absolute;
     top: auto !important;
     bottom: calc(var(--dock-floor) + var(--dock-h, 128px) + 10px);
@@ -934,26 +933,26 @@
     opacity: 0;
   }
 
-  :is(.bj, .tv) .drawer__head {
+  :is(.bj, .cr, .tv) .drawer__head {
     padding: 12px 14px 10px;
   }
 
-  :is(.bj, .tv) .drawer__title {
+  :is(.bj, .cr, .tv) .drawer__title {
     font-size: 19px;
     margin-top: 0;
   }
 
-  :is(.bj, .tv) .drawer__body {
+  :is(.bj, .cr, .tv) .drawer__body {
     padding: 12px 14px 18px;
   }
 
   /* The rack's menu hangs from the bar itself, the bankroll being too near
      the middle to hang a menu this wide from. */
-  :is(.bj, .tv) .bankroll-wrap {
+  :is(.bj, .cr, .tv) .bankroll-wrap {
     position: static;
   }
 
-  :is(.bj, .tv) .rack-menu {
+  :is(.bj, .cr, .tv) .rack-menu {
     top: 100%;
     right: 8px;
     width: min(320px, calc(100% - 16px));
@@ -1019,7 +1018,7 @@
   }
 
   /* The call fits across the screen, a long one taking two lines. */
-  :is(.bj, .tv) .banner {
+  :is(.bj, .cr, .tv) .banner {
     width: max-content;
     max-width: calc(100vw - 24px);
     padding: 10px 22px 12px;
@@ -1027,18 +1026,18 @@
     border-radius: 18px;
   }
 
-  :is(.bj, .tv) .banner__title {
+  :is(.bj, .cr, .tv) .banner__title {
     font-size: 30px;
     letter-spacing: 0.08em;
   }
 
-  :is(.bj, .tv) .banner__sub {
+  :is(.bj, .cr, .tv) .banner__sub {
     font-size: 24px;
   }
 
   /* -- The dock, the width of the screen and two rows deep -- */
 
-  :is(.bj, .tv) .dock-wrap {
+  :is(.bj, .cr, .tv) .dock-wrap {
     left: 6px;
     right: 6px;
     translate: none;
@@ -1046,14 +1045,14 @@
     max-width: none;
   }
 
-  :is(.bj, .tv) .dock {
+  :is(.bj, .cr, .tv) .dock {
     width: 100%;
     min-height: 0;
     padding: 8px;
     border-radius: 20px;
   }
 
-  :is(.bj, .tv) .dock__row {
+  :is(.bj, .cr, .tv) .dock__row {
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
@@ -1061,12 +1060,12 @@
   }
 
   /* The top bar has the book; the dock gives its corner to the plays. */
-  :is(.bj, .tv) .book-btn {
+  :is(.bj, .cr, .tv) .book-btn {
     display: none;
   }
 
   /* Betting: every chip in one row, then the wager and the deal under it. */
-  :is(.bj, .tv) .rack {
+  :is(.bj, .cr, .tv) .rack {
     flex: 1 1 100%;
     justify-content: safe center;
     gap: 2px;
@@ -1074,51 +1073,51 @@
     border-radius: 16px;
   }
 
-  :is(.bj, .tv) .rack__chip svg {
+  :is(.bj, .cr, .tv) .rack__chip svg {
     width: 42px;
     height: 42px;
   }
 
-  :is(.bj, .tv) .wager {
+  :is(.bj, .cr, .tv) .wager {
     flex: 0 1 auto;
     min-width: 64px;
   }
 
-  :is(.bj, .tv) .wager .eyebrow {
+  :is(.bj, .cr, .tv) .wager .eyebrow {
     display: block;
   }
 
-  :is(.bj, .tv) .wager__value,
-  :is(.bj, .tv) .settled__net,
-  :is(.bj, .tv) .hand-info__total {
+  :is(.bj, .cr, .tv) .wager__value,
+  :is(.bj, .cr, .tv) .settled__net,
+  :is(.bj, .cr, .tv) .hand-info__total {
     font-size: 26px;
   }
 
-  :is(.bj, .tv) .dock--betting .dock__buttons {
+  :is(.bj, .cr, .tv) .dock--betting .dock__buttons {
     flex: 1 1 0;
     min-width: 0;
     justify-content: flex-end;
   }
 
-  :is(.bj, .tv) .btn--sm {
+  :is(.bj, .cr, .tv) .btn--sm {
     height: 44px;
   }
 
-  :is(.bj, .tv) .dock__buttons .btn--sm:has(> .art-icon) {
+  :is(.bj, .cr, .tv) .dock__buttons .btn--sm:has(> .art-icon) {
     width: 44px;
   }
 
-  :is(.bj, .tv) .btn--lg {
+  :is(.bj, .cr, .tv) .btn--lg {
     height: 50px;
   }
 
-  :is(.bj, .tv) .deal-btn {
+  :is(.bj, .cr, .tv) .deal-btn {
     flex: 1 1 auto;
     padding: 0 12px;
   }
 
   /* Playing: the hand on one line, then a row of plays a thumb can't miss. */
-  :is(.bj, .tv) .hand-info {
+  :is(.bj, .cr, .tv) .hand-info {
     flex: 1 1 100%;
     flex-direction: row;
     align-items: baseline;
@@ -1126,20 +1125,20 @@
     gap: 10px;
   }
 
-  :is(.bj, .tv) .hand-info .eyebrow {
+  :is(.bj, .cr, .tv) .hand-info .eyebrow {
     display: inline;
   }
 
-  :is(.bj, .tv) .hand-info__total {
+  :is(.bj, .cr, .tv) .hand-info__total {
     font-size: 24px;
   }
 
-  :is(.bj, .tv) .actions {
+  :is(.bj, .cr, .tv) .actions {
     flex: 1 1 100%;
     gap: 6px;
   }
 
-  :is(.bj, .tv) .action {
+  :is(.bj, .cr, .tv) .action {
     flex: 1 1 0;
     min-width: 0;
     width: auto;
@@ -1149,39 +1148,39 @@
     border-radius: 14px;
   }
 
-  :is(.bj, .tv) .action__icon svg {
+  :is(.bj, .cr, .tv) .action__icon svg {
     width: 28px;
     height: 28px;
   }
 
-  :is(.bj, .tv) .action__label {
+  :is(.bj, .cr, .tv) .action__label {
     font-size: 10.5px;
     letter-spacing: 0.04em;
   }
 
-  :is(.bj, .tv) .action__book {
+  :is(.bj, .cr, .tv) .action__book {
     top: -8px;
     padding: 1px 6px;
   }
 
   /* Insurance: the offer across the top, the two answers side by side under it. */
-  :is(.bj, .tv) .dock__message {
+  :is(.bj, .cr, .tv) .dock__message {
     flex: 1 1 100%;
     max-width: none;
     text-align: center;
   }
 
-  :is(.bj, .tv) .dock__message p {
+  :is(.bj, .cr, .tv) .dock__message p {
     font-size: 13px;
     line-height: 1.4;
   }
 
-  :is(.bj, .tv) .never-ask {
+  :is(.bj, .cr, .tv) .never-ask {
     justify-content: center;
     margin-top: 6px;
   }
 
-  :is(.bj, .tv) .action.action--wide {
+  :is(.bj, .cr, .tv) .action.action--wide {
     flex: 1 1 0;
     min-width: 0;
     height: 52px;
@@ -1190,12 +1189,12 @@
 
   /* Settled: the result beside the two ways to change the bet, then the deal
      across the bottom, under the thumb. */
-  :is(.bj, .tv) .settled {
+  :is(.bj, .cr, .tv) .settled {
     flex: 1 1 auto;
     min-width: 0;
   }
 
-  :is(.bj, .tv) .dock--over .btn--ghost {
+  :is(.bj, .cr, .tv) .dock--over .btn--ghost {
     flex: none;
     height: 44px;
     padding: 0 12px;
@@ -1203,82 +1202,17 @@
     font-size: 11px;
   }
 
-  :is(.bj, .tv) .dock--over .btn--gold {
+  :is(.bj, .cr, .tv) .dock--over .btn--gold {
     flex: 1 1 100%;
   }
 
-  :is(.bj, .tv) .waiting {
+  :is(.bj, .cr, .tv) .waiting {
     min-height: 50px;
   }
 
   /* The first bet's hint sits over the dock, where the chips are. */
   .bj .first-bet-hint {
     bottom: calc(100% + 10px);
-  }
-}
-
-/* ---- Held upright, a table asks to be turned -------------------------------- */
-
-.rotate-hint {
-  display: none;
-}
-
-@media (orientation: portrait) and (max-width: 600px) {
-  .rotate-hint {
-    position: fixed;
-    z-index: 1000;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: calc(24px + var(--safe-t)) calc(24px + var(--safe-r)) calc(24px + var(--safe-b)) calc(24px + var(--safe-l));
-    text-align: center;
-    background: radial-gradient(120% 80% at 50% 35%, #1c1410 0%, var(--ink-0) 70%);
-  }
-
-  .rotate-hint__phone {
-    width: 54px;
-    height: 92px;
-    margin-bottom: 18px;
-    border: 3px solid var(--gold-2);
-    border-radius: 12px;
-    animation: rotate-hint 2.4s var(--ease-spring) infinite;
-  }
-
-  .rotate-hint__text {
-    font-family: var(--font-display);
-    font-size: 22px;
-    color: var(--gold-1);
-  }
-
-  .rotate-hint__sub {
-    max-width: 280px;
-    font-size: 14px;
-    color: var(--text-2);
-  }
-
-  .rotate-hint .btn {
-    margin-top: 18px;
-  }
-
-  /* The table underneath sits still: nothing paints that no one can see. */
-  .app:has(.rotate-hint) .screen,
-  .app:has(.rotate-hint) .room {
-    visibility: hidden;
-  }
-}
-
-@keyframes rotate-hint {
-  0%,
-  25% {
-    rotate: 0deg;
-  }
-
-  55%,
-  100% {
-    rotate: -90deg;
   }
 }
 

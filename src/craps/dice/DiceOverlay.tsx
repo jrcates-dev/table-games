@@ -142,8 +142,8 @@ function overlap(a: Box, b: Box): number {
  * Where no lane is wholly clear, the one with the least of it hidden.
  */
 function clearLane(canvas: HTMLElement, camera: THREE.Camera, space: THREE.Object3D): number {
+  // Nothing may cover the far end and it can still be out of the picture: upright on a phone the frame stops short of it.
   const covers = [...document.querySelectorAll(COVERS)].map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0)
-  if (covers.length === 0) return 0
   const frame = wholeTableRect(canvas)
   const view = { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
   camera.updateMatrixWorld()

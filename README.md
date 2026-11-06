@@ -103,9 +103,10 @@ paid from the dealer's tray; losing ones are swept into it.
 On a phone it plays either way up. Sideways you see the whole table; held
 upright the view closes in on the dealer's hand and yours, with the shoe and
 the discard rack behind the tray, and the chips and plays in a two-row dock
-under your thumb. Baccarat, roulette and Ultimate Texas Hold'em do the same
-(the wheel stands above roulette's layout, and Hold'em's pay tables flank the
-shuffler behind the tray). Craps needs the width, and asks to be turned.
+under your thumb. Every other table does the same: the wheel stands above
+roulette's layout, Hold'em's pay tables flank the shuffler behind the tray,
+and craps shows your end of the layout and the prop box, with the dice thrown
+short to land in view.
 
 | | |
 |---|---|

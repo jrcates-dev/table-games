@@ -8,10 +8,9 @@ import { useSyncExternalStore } from 'react'
 const COMPACT = '(max-height: 500px)'
 
 /**
- * A phone held upright. The lobby and the card tables and roulette are laid
- * out for it (each view's upright fill, and the upright section of
- * responsive.css); craps asks to be turned sideways. Kept in step with that
- * stylesheet's query.
+ * A phone held upright. The lobby and every table are laid out for it (each
+ * view's upright fill, and the upright section of responsive.css). Kept in
+ * step with that stylesheet's query.
  */
 const PORTRAIT = '(orientation: portrait) and (max-width: 600px)'
 
