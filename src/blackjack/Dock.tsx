@@ -31,6 +31,7 @@ import { money, signedMoney } from '../lib/format'
 import { useCount, useGameStore } from '../store/gameStore'
 import { useUiStore } from '../store/uiStore'
 import { actionTipId, tipAction } from './prices'
+import { measureDock } from '../lib/compact'
 
 /**
  * The player's side of the rail: the rack while betting, the decisions while
@@ -51,7 +52,7 @@ export function Dock() {
             : 'wait'
 
   return (
-    <div className="dock-wrap">
+    <div className="dock-wrap" ref={measureDock}>
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={mode}

@@ -11,7 +11,7 @@ import { TopBar, TopBarButton } from '../components/TopBar'
 import { CATEGORY_LABEL } from '../engine/uth/poker'
 import { TRIPS_TABLES } from '../engine/uth/rules'
 import type { UthDecision } from '../engine/uth/types'
-import { COMPACT_RESERVE, COMPACT_TOPBAR, TOPBAR, useCompact } from '../lib/compact'
+import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money, signedMoney } from '../lib/format'
 import { useSessionNet } from '../lib/session'
 import { selectCanChooseUthBankroll, selectUthHasRun, useUthStore, uthAtRisk } from '../store/uthStore'
@@ -23,10 +23,18 @@ import { UthReferencePanel } from './panels/ReferencePanel'
 import { UthSettingsPanel } from './panels/SettingsPanel'
 import { UthStatsPanel } from './panels/StatsPanel'
 import { Rail } from './Rail'
+import { UPRIGHT_SHUFFLER } from './geometry'
 import { BetLayer, CardLayer, HandLabels, Shuffler, SpotLayer } from './Table'
 
 /** Sideways on a phone: the dealer's cards down to your circles, the pay tables to the shuffler (see Stage's `fill`). */
 const PHONE_FILL = { left: 300, top: 228, right: 1310, bottom: 750 }
+
+/**
+ * Upright on a phone: the dealer's cards, the board and yours, between your
+ * four circles, with the shuffler and the pay tables behind the tray
+ * (UPRIGHT_SHUFFLER, UPRIGHT_PAY_TABLES).
+ */
+const UPRIGHT_FILL = { left: 420, top: 20, right: 1180, bottom: 770 }
 
 /**
  * The Ultimate Texas Hold'em table: the D table again, a shuffler where the
@@ -35,6 +43,7 @@ const PHONE_FILL = { left: 300, top: 228, right: 1310, bottom: 750 }
  */
 export default function UthView() {
   const compact = useCompact()
+  const portrait = usePortrait()
   const game = useUthStore((s) => s.game)
   const ready = useUthStore((s) => s.ready)
   const bankroll = useUthStore((s) => s.profile.bankroll)
@@ -87,9 +96,9 @@ export default function UthView() {
       </TopBar>
 
       <div className="tv__stage">
-        <Stage width={STAGE.w} height={STAGE.h} safeBottom={750} reserve={compact ? COMPACT_RESERVE : 134}
-          reserveTop={compact ? COMPACT_TOPBAR : TOPBAR}
-          fill={compact ? PHONE_FILL : undefined}
+        <Stage width={STAGE.w} height={STAGE.h} safeBottom={750} reserve={portrait ? PORTRAIT_RESERVE : compact ? COMPACT_RESERVE : 134}
+          reserveTop={portrait ? PORTRAIT_TOPBAR : compact ? COMPACT_TOPBAR : TOPBAR}
+          fill={portrait ? UPRIGHT_FILL : compact ? PHONE_FILL : undefined}
           zoom={{ focus: '[data-spot]', playing: game.phase !== 'betting' && game.phase !== 'showdown', betting: game.phase === 'betting' }}
         >
           <div className="bj-camera" style={{ perspective: CAMERA.perspective }}>
@@ -103,11 +112,11 @@ export default function UthView() {
                 transform: `translateZ(${CAMERA.z}px) rotateX(${CAMERA.tilt}deg)`,
               }}
             >
-              <UthFelt tripsTable={game.tripsTable} />
-              <Shuffler />
+              <UthFelt tripsTable={game.tripsTable} upright={portrait} />
+              <Shuffler at={portrait ? UPRIGHT_SHUFFLER : undefined} />
               <SpotLayer />
               <BetLayer />
-              <CardLayer />
+              <CardLayer shuffler={portrait ? UPRIGHT_SHUFFLER : undefined} />
               <HandLabels />
             </div>
           </div>

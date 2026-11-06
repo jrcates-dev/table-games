@@ -10,7 +10,7 @@ import { TopBar, TopBarButton } from '../components/TopBar'
 import { houseEdge } from '../engine/roulette/bets'
 import { WHEEL_NAME } from '../engine/roulette/rules'
 import { pocketColor, pocketLabel } from '../engine/roulette/wheel'
-import { COMPACT_RESERVE, COMPACT_TOPBAR, TOPBAR, useCompact } from '../lib/compact'
+import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money, percent, signedMoney } from '../lib/format'
 import { useSessionNet } from '../lib/session'
 import { rouletteAtRisk, selectCanChooseRouletteBankroll, selectRouletteHasRun, useRouletteStore } from '../store/rouletteStore'
@@ -18,7 +18,7 @@ import { useRouletteUi } from '../store/tableUi'
 import { rouletteDenominations, spotId, tipFor } from './betInfo'
 import { RouletteDock } from './Dock'
 import { RouletteFelt } from './Felt'
-import { CAMERA, PLANE, STAGE } from './geometry'
+import { CAMERA, PLANE, STAGE, UPRIGHT_WHEEL_SHIFT } from './geometry'
 import { BetLayer, Dolly, HighlightLayer, SpotLayer } from './Layout'
 import { RouletteReferencePanel } from './panels/ReferencePanel'
 import { RouletteSettingsPanel } from './panels/SettingsPanel'
@@ -34,11 +34,19 @@ import { Wheel } from './Wheel'
 const PHONE_FILL = { left: 96, top: 200, right: 1564, bottom: 690 }
 
 /**
+ * Upright on a phone: the layout across the screen, from the zeros to the
+ * column bets, with the wheel standing beyond its far edge
+ * (UPRIGHT_WHEEL_SHIFT).
+ */
+const UPRIGHT_FILL = { left: 470, top: -150, right: 1270, bottom: 650 }
+
+/**
  * The roulette table: the wheel set into the felt at the left, the layout
  * running away from it, every bet priced on the rail and under the pointer.
  */
 export default function RouletteView() {
   const compact = useCompact()
+  const portrait = usePortrait()
   const game = useRouletteStore((s) => s.game)
   const ready = useRouletteStore((s) => s.ready)
   const bankroll = useRouletteStore((s) => s.profile.bankroll)
@@ -92,9 +100,9 @@ export default function RouletteView() {
       </TopBar>
 
       <div className="tv__stage">
-        <Stage width={STAGE.w} height={STAGE.h} safeBottom={650} reserve={compact ? COMPACT_RESERVE : 134}
-          reserveTop={compact ? COMPACT_TOPBAR : TOPBAR}
-          fill={compact ? PHONE_FILL : undefined}
+        <Stage width={STAGE.w} height={STAGE.h} safeBottom={650} reserve={portrait ? PORTRAIT_RESERVE : compact ? COMPACT_RESERVE : 134}
+          reserveTop={portrait ? PORTRAIT_TOPBAR : compact ? COMPACT_TOPBAR : TOPBAR}
+          fill={portrait ? UPRIGHT_FILL : compact ? PHONE_FILL : undefined}
           zoom={{ focus: '[data-spot]', playing: game.phase === 'spinning', betting: game.phase === 'betting' }}
         >
           <div className="bj-camera" style={{ perspective: CAMERA.perspective }}>
@@ -110,7 +118,13 @@ export default function RouletteView() {
             >
               <RouletteFelt wheel={game.wheel} />
               <HighlightLayer />
-              <Wheel />
+              {portrait ? (
+                <div className="ro-wheel-upright" style={{ transform: `translate(${UPRIGHT_WHEEL_SHIFT.x}px, ${UPRIGHT_WHEEL_SHIFT.y}px)` }}>
+                  <Wheel />
+                </div>
+              ) : (
+                <Wheel />
+              )}
               <SpotLayer />
               <BetLayer />
               <Dolly />

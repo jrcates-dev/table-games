@@ -14,17 +14,18 @@ import type { DealtCard } from '../engine/types'
 import type { UthState } from '../engine/uth/types'
 import { usePrefs } from '../prefs/prefsStore'
 import { uthDealTiming, useUthStore } from '../store/uthStore'
-import { boardSpot, CARD_SCALE, dealerSpot, LABELS, playerSpot, SHUFFLER, SHUFFLER_MOUTH, SPOT_ORDER, SPOTS, type UthSpotKind } from './geometry'
+import type { Spot } from '../blackjack/geometry'
+import { boardSpot, CARD_SCALE, dealerSpot, LABELS, playerSpot, SHUFFLER, shufflerMouth, SPOT_ORDER, SPOTS, type UthSpotKind } from './geometry'
 
 const S = CARD_SCALE
-const FROM = { x: SHUFFLER_MOUTH.x / S, y: SHUFFLER_MOUTH.y / S, angle: SHUFFLER_MOUTH.angle }
-const AWAY = { x: SHUFFLER.x / S, y: SHUFFLER.y / S, angle: SHUFFLER.angle }
+/** In the card layer's units. */
+const scaled = (at: Spot) => ({ x: at.x / S, y: at.y / S, angle: at.angle })
 
 /** The shuffler at the dealer's right: a fresh deck for every hand, and the cards go back in after it. */
-export const Shuffler = memo(function Shuffler() {
+export const Shuffler = memo(function Shuffler({ at = SHUFFLER }: { at?: Spot }) {
   const back = usePrefs((s) => s.cardBack)
   return (
-    <div className="bj-shoe uth-shuffler" style={{ left: SHUFFLER.x, top: SHUFFLER.y, transform: `rotateZ(${SHUFFLER.angle}deg)` }}>
+    <div className="bj-shoe uth-shuffler" style={{ left: at.x, top: at.y, transform: `rotateZ(${at.angle}deg)` }}>
       <div className="bj-shoe__shadow" />
       <Box3D
         w={136}
@@ -103,7 +104,7 @@ function placed(game: UthState, boardShown: number, dealerShown: boolean): Place
 }
 
 /** Every card in the hand, dealt from the shuffler and gathered back into it. */
-export const CardLayer = memo(function CardLayer() {
+export const CardLayer = memo(function CardLayer({ shuffler = SHUFFLER }: { shuffler?: Spot }) {
   const game = useUthStore((s) => s.game)
   const boardShown = useUthStore((s) => s.boardShown)
   const dealerShown = useUthStore((s) => s.dealerShown)
@@ -127,8 +128,8 @@ export const CardLayer = memo(function CardLayer() {
               key={`${game.seq}:${p.card.id}`}
               card={{ ...p.card, faceDown: p.faceDown }}
               place={{ x: p.at[0] / S, y: p.at[1] / S, spin: 0, order: p.order }}
-              from={FROM}
-              away={AWAY}
+              from={scaled(shufflerMouth(shuffler))}
+              away={scaled(shuffler)}
               delay={p.card.seq * interval}
               flight={flight}
               back={back}
@@ -195,10 +196,12 @@ function stacksFor(game: UthState): StackItem[] {
     const r = done ? game.resolutions.find((x) => x.kind === kind) : undefined
     items.push({ key: `${round}:bet:${kind}`, amount, at, swept: r?.effect === 'lose', delay: 0.3 + i * 0.1, seed: i * 7 + 3 })
     if (r?.effect === 'win' && r.net > 0) {
+      // Play is the last circle before the felt's edge, which upright on a phone is the screen's, so it is paid on its inside.
+      const side = kind === 'play' ? -1 : 1
       items.push({
         key: `${round}:pay:${kind}`,
         amount: r.net,
-        at: [at[0] + SIZE * 0.95, at[1] - 6],
+        at: [at[0] + side * SIZE * 0.95, at[1] - 6],
         from: [TRAY.x + (i - 1.5) * 60, TRAY.y + 20],
         delay: 0.5 + i * 0.14,
         seed: i * 11 + 40,

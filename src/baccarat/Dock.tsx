@@ -14,6 +14,7 @@ import { play } from '../audio'
 import { useBaccaratStore, useLiveOdds } from '../store/baccaratStore'
 import { useBaccaratUi } from '../store/tableUi'
 import { baccaratDenominations } from './betInfo'
+import { measureDock } from '../lib/compact'
 
 /**
  * The player's side of the rail: the chip in hand and the deal while the felt
@@ -27,7 +28,7 @@ export function BaccaratDock() {
   const mode = game.phase === 'dealt' ? 'wait' : game.phase === 'settled' ? 'over' : 'betting'
 
   return (
-    <div className="dock-wrap">
+    <div className="dock-wrap" ref={measureDock}>
       <DealerNotice notice={notice} onDismiss={dismiss} />
       <AnimatePresence mode="wait" initial={false}>
         <motion.div

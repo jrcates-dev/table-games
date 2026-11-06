@@ -5,7 +5,7 @@ import { IconBook, IconSettings, IconStats } from '../components/icons'
 import { Stage } from '../components/Stage'
 import { TopBar, TopBarButton } from '../components/TopBar'
 import * as craps from '../engine/craps/craps'
-import { COMPACT_RESERVE, COMPACT_TOPBAR, TOPBAR, useCompact } from '../lib/compact'
+import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money } from '../lib/format'
 import { useSessionNet } from '../lib/session'
 import { selectCanChooseCrapsBankroll, selectCrapsBankrollHasRun, useCrapsStore } from '../store/crapsStore'
@@ -36,6 +36,13 @@ const DiceOverlay = lazy(() => import('./dice/DiceOverlay').then((m) => ({ defau
 const PHONE_FILL = { left: 59, top: 200, right: 1400, bottom: 776 }
 
 /**
+ * Upright on a phone: your end of the table and the stickman's prop box in the
+ * middle, which between them hold every bet. The mirrored far end runs off
+ * the edge, and the dice are thrown short to land in view (see DICE.lanes).
+ */
+const UPRIGHT_FILL = { left: 62, top: 200, right: 1094, bottom: 776 }
+
+/**
  * True once the table has finished rising into view. The dice bring three.js,
  * a WebGL context and their shaders, a second or more of work on an older
  * phone; started after the entrance, none of it stutters the move.
@@ -59,6 +66,7 @@ function useAfterEntrance(ms = 900) {
  */
 export default function CrapsView() {
   const compact = useCompact()
+  const portrait = usePortrait()
   const diceReady = useAfterEntrance()
   const game = useCrapsStore((s) => s.game)
   const ready = useCrapsStore((s) => s.ready)
@@ -80,9 +88,9 @@ export default function CrapsView() {
     <div className="cr" onContextMenu={(event) => event.preventDefault()}>
       <div className="cr__stage">
         {/* The pass line is the one bet every player makes; it must never sit under the dock. */}
-        <Stage width={STAGE.w} height={STAGE.h} safeBottom={776} reserve={compact ? COMPACT_RESERVE : 150}
-          reserveTop={compact ? COMPACT_TOPBAR : TOPBAR}
-          fill={compact ? PHONE_FILL : undefined}
+        <Stage width={STAGE.w} height={STAGE.h} safeBottom={776} reserve={portrait ? PORTRAIT_RESERVE : compact ? COMPACT_RESERVE : 150}
+          reserveTop={portrait ? PORTRAIT_TOPBAR : compact ? COMPACT_TOPBAR : TOPBAR}
+          fill={portrait ? UPRIGHT_FILL : compact ? PHONE_FILL : undefined}
           zoom={{ focus: '[data-spot]', playing: game.phase === 'rolling', betting: game.phase === 'betting' }}
         >
           <div className="cr-camera" style={{ perspective: CAMERA.perspective }}>

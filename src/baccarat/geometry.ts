@@ -42,6 +42,15 @@ export const TOTAL = {
   banker: { x: HAND.banker.x + BOX.w / 2 + 34, y: 330 },
 } as const
 
+/**
+ * Upright on a phone the picture stops at the boxes' outer edges, so each
+ * total stands over the top of its own box instead, in front of the tray.
+ */
+export const UPRIGHT_TOTAL = {
+  player: { x: HAND.player.x, y: BOX.top + 4 },
+  banker: { x: HAND.banker.x, y: BOX.top + 4 },
+} as const
+
 export type SpotShape =
   | { type: 'band'; r0: number; r1: number; spread: number }
   | { type: 'circle'; cx: number; cy: number; r: number }

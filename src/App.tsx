@@ -8,7 +8,7 @@ import { installNoise } from './lib/noise'
 import { installTouch } from './lib/touch'
 import { Lobby } from './lobby/Lobby'
 import { usePrefs } from './prefs/prefsStore'
-import { useAppStore, type Screen } from './store/appStore'
+import { useAppStore } from './store/appStore'
 import { useBaccaratStore } from './store/baccaratStore'
 import { useRouletteStore } from './store/rouletteStore'
 import { useUthStore } from './store/uthStore'
@@ -88,7 +88,6 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
         <FxLayer />
-        {!UPRIGHT.includes(screen) && <RotateHint />}
       </div>
     </MotionConfig>
   )
@@ -108,32 +107,6 @@ const SCREEN_MOTION_LIGHT: Variants = {
   enter: (d: number) => ({ opacity: 0, transform: `translateY(${d * 24}px)` }),
   center: { opacity: 1, transform: 'translateY(0px)', transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
   exit: (d: number) => ({ opacity: 0, transform: `translateY(${d * -16}px)`, transition: { duration: 0.18, ease: [0.4, 0, 1, 1] } }),
-}
-
-/**
- * The screens laid out for a phone held upright as well as sideways. Blackjack
- * has one player's hand to show, and it stands up into a tall screen well (see
- * BlackjackView); the other tables need the width.
- */
-const UPRIGHT: Screen[] = ['lobby', 'blackjack']
-
-/**
- * The other tables are laid out for a landscape screen. Held upright, a phone
- * shows this instead (responsive.css decides when), with the way back to the
- * lobby, which does work upright.
- */
-function RotateHint() {
-  const go = useAppStore((s) => s.go)
-  return (
-    <div className="rotate-hint" role="dialog" aria-label="Turn your phone sideways">
-      <div className="rotate-hint__phone" aria-hidden="true" />
-      <p className="rotate-hint__text">Turn your phone sideways</p>
-      <p className="rotate-hint__sub">This table is laid out for a landscape screen. Blackjack plays either way up.</p>
-      <button type="button" className="btn btn--ghost" onClick={() => go('lobby')}>
-        Back to the lobby
-      </button>
-    </div>
-  )
 }
 
 /** `M` mutes from anywhere; typing in a field is never a shortcut. */

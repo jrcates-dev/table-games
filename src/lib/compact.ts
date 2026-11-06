@@ -8,9 +8,9 @@ import { useSyncExternalStore } from 'react'
 const COMPACT = '(max-height: 500px)'
 
 /**
- * A phone held upright. The lobby and blackjack are laid out for it (see
- * BlackjackView and the upright section of responsive.css); every other table
- * asks to be turned sideways. Kept in step with that stylesheet's query.
+ * A phone held upright. The lobby and every table are laid out for it (each
+ * view's upright fill, and the upright section of responsive.css). Kept in
+ * step with that stylesheet's query.
  */
 const PORTRAIT = '(orientation: portrait) and (max-width: 600px)'
 
@@ -30,6 +30,29 @@ export const PORTRAIT_TOPBAR = 52
 export const PORTRAIT_RESERVE = 146
 /** Upright, the card count's strip under the top bar, when it is on. */
 export const PORTRAIT_COUNT = 46
+
+/**
+ * A ref for a dock's wrapper: keeps `--dock-h` on the page at the dock's height
+ * as it grows and shrinks from one phase to the next, so what floats over the
+ * felt upright on a phone (the bets tab, the zoom, a drawer) stands just above
+ * it however many rows it has (see responsive.css).
+ */
+export function measureDock(el: HTMLElement | null): (() => void) | undefined {
+  if (!el || typeof ResizeObserver === 'undefined') return
+  const root = document.documentElement
+  let last = -1
+  const observer = new ResizeObserver(() => {
+    const height = Math.round(el.getBoundingClientRect().height)
+    if (height === last) return
+    last = height
+    root.style.setProperty('--dock-h', `${height}px`)
+  })
+  observer.observe(el)
+  return () => {
+    observer.disconnect()
+    root.style.removeProperty('--dock-h')
+  }
+}
 
 export function isCompact(): boolean {
   return matches(COMPACT)

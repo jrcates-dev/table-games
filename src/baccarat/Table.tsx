@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { memo, useEffect, useRef, type ReactNode } from 'react'
 import { play } from '../audio'
-import { CAMERA, DISCARD, PLANE, SHOE, TRAY } from '../blackjack/geometry'
+import { CAMERA, DISCARD, PLANE, SHOE, TRAY, type Spot } from '../blackjack/geometry'
 import { ChipStack } from '../components/ChipStack'
 import { FeltCard } from '../components/FeltCard'
 import { stackAt, stackMove } from '../components/feltMotion'
@@ -17,8 +17,9 @@ import { anchorFor, CARD_SCALE, cardSpot, shapePath, SPOTS, TOTAL } from './geom
 
 // The card layer is scaled down to the baccarat card's size, so everything placed in it is in its units.
 const S = CARD_SCALE
-const SHOE_MOUTH = { x: (SHOE.x - 36) / S, y: (SHOE.y + 74) / S, angle: SHOE.angle }
-const TO_DISCARD = { x: DISCARD.x / S, y: DISCARD.y / S, angle: DISCARD.angle }
+/** Where a card leaves the shoe, and where it goes in the discard rack, in the card layer's units. */
+const mouthOf = (shoe: Spot) => ({ x: (shoe.x - 36) / S, y: (shoe.y + 74) / S, angle: shoe.angle })
+const rackOf = (discard: Spot) => ({ x: discard.x / S, y: discard.y / S, angle: discard.angle })
 
 /** The click targets: the printed shapes themselves. Left-click (a tap) bets the chip in hand; right-click (a held card's button) takes the bet back. */
 export function SpotLayer() {
@@ -54,7 +55,7 @@ export function SpotLayer() {
 }
 
 /** The coup, turned over the way the dealer turns it: see `REVEAL`. */
-export const CardLayer = memo(function CardLayer() {
+export const CardLayer = memo(function CardLayer({ shoe = SHOE, discard = DISCARD }: { shoe?: Spot; discard?: Spot }) {
   const coup = useBaccaratStore((s) => s.game.coup)
   const seq = useBaccaratStore((s) => s.game.seq)
   const phase = useBaccaratStore((s) => s.game.phase)
@@ -80,8 +81,8 @@ export const CardLayer = memo(function CardLayer() {
               key={`${seq}:${card.id}`}
               card={{ ...card, faceDown: shown.faceDown }}
               place={{ x: spot.x / S, y: spot.y / S, spin: spot.spin, order: index }}
-              from={SHOE_MOUTH}
-              away={TO_DISCARD}
+              from={mouthOf(shoe)}
+              away={rackOf(discard)}
               delay={card.seq < 4 ? card.seq * interval : 0}
               flight={flight}
               back={back}
@@ -112,8 +113,8 @@ function visibleTotal(hand: CoupCard[], step: number, settled: boolean): number 
   return up.length < 2 ? null : handTotal(up.map((c) => c.rank))
 }
 
-/** Each hand's total, standing beside its box as soon as it is turned. */
-export function Totals() {
+/** Each hand's total, standing beside its box (or, upright, over it) as soon as it is turned. */
+export function Totals({ at = TOTAL }: { at?: Record<'player' | 'banker', { x: number; y: number }> }) {
   const coup = useBaccaratStore((s) => s.game.coup)
   const phase = useBaccaratStore((s) => s.game.phase)
   const step = useBaccaratStore((s) => s.step)
@@ -131,7 +132,7 @@ export function Totals() {
         const won = settled && (coup.winner === side || coup.winner === 'tie')
         const natural = (side === 'player' ? coup.player : coup.banker).length === 2 && total >= 8
         return (
-          <Billboard key={`${seq}:${side}`} x={TOTAL[side].x} y={TOTAL[side].y}>
+          <Billboard key={`${seq}:${side}`} x={at[side].x} y={at[side].y}>
             <motion.div
               className={`total-pill ba-total ba-total--${side}${won ? ' is-active' : ''}${natural ? ' is-natural' : ''}`}
               initial={{ opacity: 0, transform: 'scale(0.7)' }}

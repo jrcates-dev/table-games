@@ -28,6 +28,13 @@ export const CAMERA = {
 /** Wood, padded rail, felt. */
 export const TABLE = { r: 120, rail: 58 } as const
 
+/**
+ * Upright on a phone the layout takes the width, so the wheel stands beyond its
+ * far edge, over the middle of it, instead of at its left: the whole wheel,
+ * ball and all, moved by this much.
+ */
+export const UPRIGHT_WHEEL_SHIFT = { x: 728, y: -570 } as const
+
 /** The wheel head, set into the table at the left. */
 export const WHEEL = {
   cx: 250,

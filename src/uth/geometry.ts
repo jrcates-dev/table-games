@@ -58,8 +58,29 @@ export const PAY_TABLES = {
 export const TRAY_WIDTH = 470
 
 /**
+ * Upright, the pay tables either side of the dealer's cards would fall off the
+ * edges of the picture, so they stand further back, flanking the shuffler
+ * behind the tray.
+ */
+export const UPRIGHT_PAY_TABLES = {
+  blind: { x0: 330, x1: 540, y: -190 },
+  trips: { x0: 960, x1: 1170, y: -190 },
+}
+
+/**
  * The shuffler, out at the far corner of the dealer's edge to leave the Trips
  * table room; cards come out of its mouth and go back in.
  */
 export const SHUFFLER = { x: 1236, y: 196, angle: -20 } as const
-export const SHUFFLER_MOUTH = { x: SHUFFLER.x - 34, y: SHUFFLER.y + 70, angle: SHUFFLER.angle }
+
+/**
+ * Upright on a phone the shuffler stands behind the middle of the tray,
+ * between the pay tables (UPRIGHT_PAY_TABLES), the corner it stands in
+ * sideways being out of the picture.
+ */
+export const UPRIGHT_SHUFFLER = { x: 750, y: -110, angle: 0 } as const
+
+/** Where a card comes out of the shuffler. */
+export function shufflerMouth(at: { x: number; y: number; angle: number }) {
+  return { x: at.x - 34, y: at.y + 70, angle: at.angle }
+}

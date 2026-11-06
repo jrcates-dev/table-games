@@ -3,7 +3,7 @@ import { CARD } from '../blackjack/geometry'
 import { DTable, FeltText } from '../components/DTable'
 import { CATEGORY_LABEL, type Category } from '../engine/uth/poker'
 import { BLIND_PAYS, TRIPS_TABLES, type TripsTableId } from '../engine/uth/rules'
-import { boardSpot, CARD_SCALE, dealerSpot, PAY_TABLES, playerSpot, SPOT_ORDER, SPOTS, TRAY_WIDTH } from './geometry'
+import { boardSpot, CARD_SCALE, dealerSpot, PAY_TABLES, playerSpot, SPOT_ORDER, SPOTS, TRAY_WIDTH, UPRIGHT_PAY_TABLES } from './geometry'
 
 /**
  * The printing on an Ultimate Texas Hold'em felt: outlines for the dealer's
@@ -15,8 +15,9 @@ const ORDER: Category[] = ['royal', 'straightFlush', 'quads', 'fullHouse', 'flus
 
 const pays = (n: number) => (n === 1.5 ? '3 TO 2' : `${n} TO 1`)
 
-export const UthFelt = memo(function UthFelt({ tripsTable }: { tripsTable: TripsTableId }) {
+export const UthFelt = memo(function UthFelt({ tripsTable, upright = false }: { tripsTable: TripsTableId; upright?: boolean }) {
   const w = CARD.w * CARD_SCALE
+  const tables = upright ? UPRIGHT_PAY_TABLES : PAY_TABLES
   const h = CARD.h * CARD_SCALE
   return (
     <DTable id="uth" trayWidth={TRAY_WIDTH}>
@@ -35,7 +36,7 @@ export const UthFelt = memo(function UthFelt({ tripsTable }: { tripsTable: Trips
         })}
 
         <PayTable
-          {...PAY_TABLES.blind}
+          {...tables.blind}
           title="BLIND PAYS"
           rows={[
             ...ORDER.filter((c) => BLIND_PAYS[c] !== undefined).map((c) => [CATEGORY_LABEL[c].toUpperCase(), pays(BLIND_PAYS[c]!)] as [string, string]),
@@ -44,7 +45,7 @@ export const UthFelt = memo(function UthFelt({ tripsTable }: { tripsTable: Trips
           foot={['DEALER OPENS', 'WITH A PAIR OR BETTER']}
         />
         <PayTable
-          {...PAY_TABLES.trips}
+          {...tables.trips}
           title="TRIPS PAYS"
           rows={ORDER.map((c) => [CATEGORY_LABEL[c].toUpperCase(), pays(TRIPS_TABLES[tripsTable].pays[c]!)] as [string, string])}
           foot={['PAID WIN, LOSE OR FOLD']}
