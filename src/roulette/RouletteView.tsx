@@ -10,7 +10,7 @@ import { TopBar, TopBarButton } from '../components/TopBar'
 import { houseEdge } from '../engine/roulette/bets'
 import { WHEEL_NAME } from '../engine/roulette/rules'
 import { pocketColor, pocketLabel } from '../engine/roulette/wheel'
-import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
+import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_SPINS, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money, percent, signedMoney } from '../lib/format'
 import { useSessionNet } from '../lib/session'
 import { rouletteAtRisk, selectCanChooseRouletteBankroll, selectRouletteHasRun, useRouletteStore } from '../store/rouletteStore'
@@ -23,6 +23,7 @@ import { BetLayer, Dolly, HighlightLayer, SpotLayer } from './Layout'
 import { RouletteReferencePanel } from './panels/ReferencePanel'
 import { RouletteSettingsPanel } from './panels/SettingsPanel'
 import { RouletteStatsPanel } from './panels/StatsPanel'
+import { PhoneBoard } from './PhoneBoard'
 import { Rail } from './Rail'
 import { Wheel } from './Wheel'
 
@@ -102,6 +103,7 @@ export default function RouletteView() {
       <div className="tv__stage">
         <Stage width={STAGE.w} height={STAGE.h} safeBottom={650} reserve={portrait ? PORTRAIT_RESERVE : compact ? COMPACT_RESERVE : 134}
           reserveTop={portrait ? PORTRAIT_TOPBAR : compact ? COMPACT_TOPBAR : TOPBAR}
+          band={portrait ? PORTRAIT_SPINS : 0}
           fill={portrait ? UPRIGHT_FILL : compact ? PHONE_FILL : undefined}
           zoom={{ focus: '[data-spot]', playing: game.phase === 'spinning', betting: game.phase === 'betting' }}
         >
@@ -135,6 +137,7 @@ export default function RouletteView() {
 
       <RouletteBanner />
       <Rail />
+      {(portrait || compact) && <PhoneBoard upright={portrait} />}
       <RouletteDock />
       <SpotTip describe={(id) => tipFor(game, spotId(id), showEdges)} />
       <BetPicker />

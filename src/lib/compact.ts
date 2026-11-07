@@ -30,6 +30,11 @@ export const PORTRAIT_TOPBAR = 52
 export const PORTRAIT_RESERVE = 146
 /** Upright, the card count's strip under the top bar, when it is on. */
 export const PORTRAIT_COUNT = 46
+/**
+ * Upright, roulette's strip of the last numbers under the top bar (see the
+ * roulette stylesheet): the band the picture keeps clear of (Stage's `band`).
+ */
+export const PORTRAIT_SPINS = 36
 
 /**
  * A ref for a dock's wrapper: keeps `--dock-h` on the page at the dock's height
