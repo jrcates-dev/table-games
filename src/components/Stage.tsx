@@ -39,6 +39,13 @@ interface StageProps {
   fill?: { left: number; top: number; right: number; bottom: number }
   /** Screen pixels the top bar covers, kept clear when the picture is zoomed. */
   reserveTop?: number
+  /**
+   * Screen pixels under the top bar taken by a strip of the table's own
+   * (roulette's last numbers, upright). The `fill` keeps clear of it, but the
+   * picture moves down only as far as it must: the room to spare under it is
+   * spent first, and only where there is none does the picture shrink.
+   */
+  band?: number
   /** Let a finger look closer: pinch, drag, and a button. See stageZoom. */
   zoom?: StageZoom
   /**
@@ -51,7 +58,7 @@ interface StageProps {
 
 const GLIDE = 'transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1)'
 
-export function Stage({ width, height, children, className, maxScale = 1.6, safeBottom, reserve = 0, reserveTop = 0, fill, zoom, glide = false }: StageProps) {
+export function Stage({ width, height, children, className, maxScale = 1.6, safeBottom, reserve = 0, reserveTop = 0, band = 0, fill, zoom, glide = false }: StageProps) {
   const ref = useRef<HTMLDivElement>(null)
   const layer = useRef<HTMLDivElement>(null)
   const [box, setBox] = useState({ w: width, h: height })
@@ -79,11 +86,14 @@ export function Stage({ width, height, children, className, maxScale = 1.6, safe
 
   let scale: number, top: number, left: number
   if (fill) {
-    // The part that matters, as large as the room between the bars allows and centred in it.
-    const room = box.h - reserveTop - reserve
+    // The part that matters, as large as the room between the bars (and under
+    // any band) allows, centred between the bars unless that would put it
+    // under the band.
+    const room = box.h - reserveTop - band - reserve
     scale = Math.min(maxScale, room / (fill.bottom - fill.top), box.w / (fill.right - fill.left))
     scale = Math.max(0.2, scale)
-    top = reserveTop + (room - (fill.bottom - fill.top) * scale) / 2 - fill.top * scale
+    top = reserveTop + (room + band - (fill.bottom - fill.top) * scale) / 2 - fill.top * scale
+    if (band > 0) top = Math.max(top, reserveTop + band - fill.top * scale)
     left = box.w / 2 - ((fill.left + fill.right) / 2) * scale
   } else {
     scale = Math.min(box.w / width, box.h / height)
@@ -97,9 +107,11 @@ export function Stage({ width, height, children, className, maxScale = 1.6, safe
   }
 
   const floor = fill?.bottom ?? safeBottom ?? height
+  // Zoomed, the picture keeps clear of the band as it does of the top bar.
+  const clearTop = reserveTop + band
   const frame = useMemo(
-    () => ({ scale, left, top, w: box.w, h: box.h, width, floor, reserveTop, reserve }),
-    [scale, left, top, box.w, box.h, width, floor, reserveTop, reserve],
+    () => ({ scale, left, top, w: box.w, h: box.h, width, floor, reserveTop: clearTop, reserve }),
+    [scale, left, top, box.w, box.h, width, floor, clearTop, reserve],
   )
   const { zoomed, toggle } = useStageZoom(ref, layer, frame, zoom)
 
@@ -124,7 +136,7 @@ export function Stage({ width, height, children, className, maxScale = 1.6, safe
         <button
           type="button"
           className={`icon-btn stage__zoom-btn${zoomed ? ' is-active' : ''}`}
-          style={{ top: reserveTop + 6 }}
+          style={{ top: clearTop + 6 }}
           hidden={zoom.playing}
           aria-label={zoomed ? 'Show the whole table' : 'Zoom in on the layout'}
           onClick={toggle}

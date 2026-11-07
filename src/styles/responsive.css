@@ -911,6 +911,13 @@
     font-size: 18px;
   }
 
+  /* Roulette's call hangs over the wheel, under the strip of last numbers
+     (PhoneBoard) rather than across it. */
+  .tv--roulette .banner-anchor {
+    top: max(19%, calc(156px + var(--safe-t)));
+    left: 50%;
+  }
+
   /* Baccarat's totals stand over the far side of the boxes (UPRIGHT_TOTAL),
      where the picture is smallest; a size up keeps them read at a glance. */
   .tv--baccarat .ba-total {
