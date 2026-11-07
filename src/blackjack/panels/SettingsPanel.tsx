@@ -18,15 +18,18 @@ export function SettingsPanel() {
   const rules = useGameStore((s) => s.game.rules)
   const cloud = useGameStore((s) => s.cloudAvailable)
   const [confirm, setConfirm] = useState(false)
+  // Between hands, including while the last one is still on the felt: a
+  // change clears it away and starts a fresh shoe (see updateSettings).
+  const betweenHands = phase === 'betting' || phase === 'roundOver'
 
   return (
     <div className="settings">
       <Section title="The table">
-        <Field label="House rules" hint={phase === 'betting' ? ruleLines(rules).join(' · ') : 'Changes apply between hands.'}>
+        <Field label="House rules" hint={betweenHands ? ruleLines(rules).join(' · ') : 'Changes apply between hands.'}>
           <select
             className="select"
             value={settings.rulePreset}
-            disabled={phase !== 'betting'}
+            disabled={!betweenHands}
             onChange={(event) => update({ rulePreset: event.target.value })}
           >
             {Object.entries(RULE_PRESETS).map(([key, preset]) => (
