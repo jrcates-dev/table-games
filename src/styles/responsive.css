@@ -1349,4 +1349,11 @@
   .rack-reset .money-input input {
     height: 40px;
   }
+
+  /* Safari zooms the whole page in on a field printed under 16px the moment it
+     takes focus, the game-type picker included, and leaves the table zoomed. */
+  .select,
+  .drawer .money-input input {
+    font-size: 16px;
+  }
 }

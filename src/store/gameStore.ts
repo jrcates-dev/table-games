@@ -654,11 +654,15 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({ profile: next })
 
       // A rule change only takes effect between rounds, and starts a fresh shoe
-      // because the count would otherwise be meaningless.
+      // because the count would otherwise be meaningless. A hand just settled
+      // is between rounds too: it is cleared off the felt first, as a dealer
+      // would, and the wager carried forward onto the new game.
       if (patch.rulePreset && patch.rulePreset !== profile.settings.rulePreset) {
-        if (game.round.phase === 'betting') {
+        if (game.round.phase === 'roundOver') get().nextRound()
+        const current = get().game
+        if (current.round.phase === 'betting') {
           set({
-            game: bj.setBet(bj.createGame(rulesFor(next), profile.bankroll, randomSeed()), game.pendingBet),
+            game: bj.setBet(bj.createGame(rulesFor(next), get().profile.bankroll, randomSeed()), current.pendingBet),
             lastDecision: null,
           })
         }

@@ -431,8 +431,10 @@ export const useUthStore = create<UthStore>((set, get) => {
       persist()
     },
 
-    updateSettings(patch) {
-      if (patch.tripsTable && patch.tripsTable !== get().game.tripsTable) get().setTripsTable(patch.tripsTable)
+    updateSettings({ tripsTable, ...patch }) {
+      // The pay table is saved only once the table takes it: one refused mid-hand
+      // must not come back as the table's the next time the app opens.
+      if (tripsTable && tripsTable !== get().game.tripsTable) get().setTripsTable(tripsTable)
       set({ profile: withSettings(get().profile, patch) })
       persist()
     },

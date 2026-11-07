@@ -933,6 +933,12 @@
   background: #16151c;
 }
 
+/* Mid-hand the house rules wait for the hand to finish; the picker says so. */
+.select:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .select:focus,
 .money-input input:focus {
   border-color: var(--gold-line-strong);
