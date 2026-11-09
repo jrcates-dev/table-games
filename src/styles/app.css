@@ -482,15 +482,17 @@
   line-height: 1.1;
 }
 
+/* The name in the same neon as the lobby's sign, turned down for the corner. */
 .brand__name {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 15px;
   letter-spacing: 0.32em;
-  background: var(--gold-foil);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #ffe6ee;
+  text-shadow:
+    0 0 1px #fff,
+    0 0 4px #ff3d7a,
+    0 0 9px rgba(240, 20, 90, 0.6);
 }
 
 .brand__game {

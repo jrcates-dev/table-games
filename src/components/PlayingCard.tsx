@@ -259,10 +259,8 @@ export const CardBackFace = memo(function CardBackFace({ theme }: { theme: CardB
       ))}
       <circle cx="125" cy="175" r="44" fill={lo} stroke="#e3c170" strokeWidth="2" />
       <circle cx="125" cy="175" r="38" fill="none" stroke="#e3c170" strokeWidth="0.8" opacity="0.7" />
-      <path
-        d="M125 144 L 146 200 H 138 L 133 186 H 117 L 112 200 H 104 Z M 125 160 L 119 179 H 131 Z"
-        fill="url(#gold-foil)"
-      />
+      {/* The house spade, struck in gold. */}
+      <path d={SUIT_PATH.S} transform="translate(125 174) scale(0.46) translate(-50 -50)" fill="url(#gold-foil)" />
     </svg>
   )
 })

@@ -22,25 +22,29 @@
 }
 
 .lobby__head {
+  /* The house chip's width; the starburst behind it scales with it. */
+  --crest: 70px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding-top: 26px;
+  /* Room above the sign for the starburst. */
+  padding-top: calc(var(--crest) * 1.02);
 }
 
 /* ---- The marquee ---------------------------------------------------------- */
 
 .marquee {
+  --bulb: 13px;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 38px 78px 24px;
+  padding: 40px 80px 26px;
   border-radius: 28px;
   background:
-    radial-gradient(120% 120% at 50% 0%, rgba(255, 196, 120, 0.14), transparent 60%),
+    radial-gradient(120% 120% at 50% 0%, rgba(255, 120, 160, 0.12), transparent 60%),
     linear-gradient(180deg, #210e12 0%, #0f0608 100%);
   box-shadow:
     0 0 0 2px #5c4419,
@@ -55,139 +59,220 @@
 
 .marquee__bulbs {
   position: absolute;
-  inset: 13px;
+  inset: 14px;
   pointer-events: none;
 }
 
+/* An unlit bulb: clear glass over the filament, in a brass socket. */
 .marquee__bulb {
   position: absolute;
-  width: 11px;
-  height: 11px;
-  margin: -5.5px;
+  width: var(--bulb);
+  height: var(--bulb);
+  margin: calc(var(--bulb) / -2);
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #7d5f33, #2e2010 75%);
+  background: radial-gradient(circle at 36% 30%, rgba(255, 236, 200, 0.5) 0 12%, #8a6a3a 32%, #3a2913 70%, #22170b 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.55),
-    0 1px 0 rgba(255, 230, 170, 0.12);
+    0 0 0 1.5px #1a1108,
+    0 0 0 2.5px rgba(227, 193, 112, 0.42),
+    0 2px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* A bank of lit lamps over the sockets; the bank, not each lamp, flashes. */
+/*
+ * A bank of lit lamps over the sockets. The banks, not the lamps, switch: the
+ * light show (lightShow.ts) animates each bank's opacity.
+ */
 .marquee__lights {
   position: absolute;
   inset: 0;
-  animation: bulb-chase 1.05s steps(1) infinite;
-  animation-delay: calc(var(--phase) * -0.35s);
   will-change: opacity;
 }
 
 .marquee__lamp {
   position: absolute;
-  width: 11px;
-  height: 11px;
-  margin: -5.5px;
+  width: var(--bulb);
+  height: var(--bulb);
+  margin: calc(var(--bulb) / -2);
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #ffffff, #ffeec4 40%, #ffbd5a 100%);
+  background: radial-gradient(circle at 40% 36%, #ffffff 0 18%, #fff4d6 34%, #ffd27a 62%, #ffab3d 100%);
   box-shadow:
-    0 0 6px 2px rgba(255, 204, 110, 0.8),
-    0 0 18px 5px rgba(255, 170, 70, 0.32);
+    0 0 0 1.5px #1a1108,
+    0 0 0 2.5px rgba(227, 193, 112, 0.5),
+    0 0 8px 2px rgba(255, 210, 120, 0.85),
+    0 0 22px 7px rgba(255, 160, 60, 0.32);
 }
 
-@keyframes bulb-chase {
-  0% {
-    opacity: 1;
-  }
-  33.333% {
-    opacity: 0.1;
-  }
-}
-
+/* The house chip, set on the top of the frame in its starburst. */
 .marquee__crest {
   position: absolute;
   left: 50%;
   top: 0;
-  translate: -50% -58%;
+  translate: -50% -50%;
   display: grid;
   place-items: center;
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #1b0c0f 55%, transparent 70%);
+  width: var(--crest);
+  height: var(--crest);
 }
 
 .marquee__crest .monogram {
-  filter: drop-shadow(0 0 22px rgba(227, 193, 112, 0.5));
+  position: relative;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 14px rgba(255, 190, 110, 0.45)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
 }
+
+.crest-rays {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: calc(var(--crest) * 2.7);
+  height: calc(var(--crest) * 1.35);
+  translate: -50% 0;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px rgba(255, 196, 110, 0.4));
+}
+
+.crest-rays__bulb {
+  fill: #fff6e0;
+  filter: drop-shadow(0 0 2px #ffd27a) drop-shadow(0 0 4px rgba(255, 170, 60, 0.9));
+  animation: crest-twinkle 1.8s steps(1, end) infinite;
+  animation-delay: calc(var(--i) * -0.3s);
+}
+
+@keyframes crest-twinkle {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---- The name in neon ------------------------------------------------------ */
 
 .lobby__title {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(52px, 8.4vh, 104px);
-  letter-spacing: 0.34em;
-  margin-right: -0.34em;
-  line-height: 1;
+  letter-spacing: 0.3em;
+  margin-right: -0.3em;
+  line-height: 1.04;
 }
 
-.lobby__title-text {
-  background: linear-gradient(
-    110deg,
-    #8a6526 0%,
-    #c89a47 18%,
-    #f6dd9b 32%,
-    #fff6d8 40%,
-    #e9c77c 48%,
-    #b98a3a 62%,
-    #f4d994 78%,
-    #8a6526 100%
-  );
-  background-size: 250% 100%;
-  background-position: 60% 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 18px rgba(255, 200, 110, 0.35)) drop-shadow(0 4px 2px rgba(0, 0, 0, 0.6));
+.neon {
+  display: inline-flex;
+}
+
+/* A tube switched off: rose glass, a little of the room caught in it. */
+.neon__letter {
+  position: relative;
+  color: #4d1f2c;
+  text-shadow: 0 1px 0 rgba(255, 170, 200, 0.1);
+}
+
+.neon__lit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ffe6ee;
+  text-shadow:
+    0 0 0.02em #fff,
+    0 0 0.05em #ffb3c9,
+    0 0 0.1em #ff5c8f,
+    0 0 0.2em #ff2d6f,
+    0 0 0.38em #f0145a,
+    0 0 0.75em rgba(200, 10, 74, 0.65);
+  will-change: opacity;
+}
+
+/* The tubes strike one after another, the first time the lobby opens. */
+.neon--strike .neon__lit {
+  animation: neon-strike 1.3s steps(1, end) calc(0.45s + var(--i) * 0.17s) both;
+}
+
+/* And one of them never quite settles. */
+.neon__letter:nth-child(4) .neon__lit {
+  animation: neon-buzz 13s steps(1, end) 7s infinite;
+}
+
+.neon--strike .neon__letter:nth-child(4) .neon__lit {
+  animation:
+    neon-strike 1.3s steps(1, end) calc(0.45s + var(--i) * 0.17s) both,
+    neon-buzz 13s steps(1, end) 7s infinite;
+}
+
+@keyframes neon-strike {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  14% {
+    opacity: 0.08;
+  }
+  22% {
+    opacity: 0.8;
+  }
+  27% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 0.4;
+  }
+  52%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes neon-buzz {
+  0%,
+  88% {
+    opacity: 1;
+  }
+  88.6% {
+    opacity: 0.2;
+  }
+  89.2% {
+    opacity: 1;
+  }
+  90.4% {
+    opacity: 0.45;
+  }
+  91% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Lighter effects: a softer glow, and every tube steady once it has struck. */
+[data-effects='reduced'] .neon__lit {
+  text-shadow:
+    0 0 0.03em #fff,
+    0 0 0.12em #ff3d7a,
+    0 0 0.32em rgba(240, 20, 90, 0.8);
+}
+
+[data-effects='reduced'] .neon__letter:nth-child(4) .neon__lit {
+  animation: none;
+}
+
+[data-effects='reduced'] .neon--strike .neon__letter:nth-child(4) .neon__lit {
+  animation: neon-strike 1.3s steps(1, end) calc(0.45s + var(--i) * 0.17s) both;
 }
 
 /*
- * The light running across the foil. Sliding the gradient itself repainted
- * the lettering and both its shadows every frame; instead the foil is painted
- * once, and a narrow window carrying a bright copy of the word slides over it
- * while the copy slides back the other way, so the copy stays in register
- * with the letters and only the window moves. Both are transforms — the
- * compositor runs it and the page never repaints.
+ * The light running across gold foil: a narrow window carrying a bright copy
+ * of the words slides over them while the copy slides back the other way, so
+ * the copy stays in register and only the window moves — transforms the
+ * compositor runs without a repaint. The gold result banner's lines glint
+ * this way (blackjack.css). 100% of the words is 100 / 36 of the window.
  */
-.lobby__title-word {
-  position: relative;
-  display: inline-block;
-}
-
-.lobby__glint {
-  --glint: 36%;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: var(--glint);
-  overflow: hidden;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(105deg, transparent 4%, #000 38%, #000 62%, transparent 96%);
-  mask-image: linear-gradient(105deg, transparent 4%, #000 38%, #000 62%, transparent 96%);
-  animation: glint-window 7s cubic-bezier(0.45, 0, 0.3, 1) infinite;
-}
-
-.lobby__glint > span {
-  position: absolute;
-  top: 0;
-  left: 0;
-  white-space: nowrap;
-  color: #fff7dc;
-  opacity: 0.85;
-  animation: glint-word 7s cubic-bezier(0.45, 0, 0.3, 1) infinite;
-}
-
-/* The window crosses from just off the first letter to just past the last
-   (100% of the word is 100 / 36 of the window), then rests out of sight. The
-   copy moves back by exactly as much, as a share of its own width. The gold
-   result banner's lines glint the same way. */
 @keyframes glint-window {
   0% {
     transform: translateX(-100%);
@@ -208,15 +293,10 @@
   }
 }
 
-/* Lighter effects: the foil sits still. */
-[data-effects='reduced'] .lobby__glint {
-  display: none;
-}
-
 .lobby__subtitle {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 500;
@@ -226,9 +306,25 @@
 }
 
 .lobby__rule {
-  width: 60px;
+  width: 52px;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold-3), transparent);
+}
+
+.lobby__pips {
+  display: inline-flex;
+  gap: 0.28em;
+}
+
+.lobby__pip {
+  width: 0.62em;
+  height: 0.62em;
+  fill: var(--gold-2);
+}
+
+.lobby__pip--red {
+  fill: #ff5a8c;
+  filter: drop-shadow(0 0 3px rgba(255, 45, 111, 0.7));
 }
 
 .lobby__games {
