@@ -4,7 +4,7 @@ import { ChipTube } from '../components/ChipTube'
 import { denomination } from '../components/chips'
 import { Soft } from '../components/Soft'
 import { CardBackFace } from '../components/PlayingCard'
-import { Monogram } from '../components/TopBar'
+import { MonogramPrint } from '../components/TopBar'
 import type { RuleSet } from '../engine/types'
 import { useEffectsLevel } from '../lib/effects'
 import { noiseDataUrl } from '../lib/noise'
@@ -174,7 +174,7 @@ export const BlackjackTable = memo(function BlackjackTable({ rules }: { rules: R
         <circle cx={CIRCLE.x} cy={CIRCLE.y} r={CIRCLE.r} fill="none" stroke="url(#gold-foil)" strokeWidth="3" />
         <circle cx={CIRCLE.x} cy={CIRCLE.y} r={CIRCLE.r - 8} fill="none" stroke="#e3c170" strokeOpacity="0.45" strokeWidth="1" strokeDasharray="2 5" />
         <g transform={`translate(${CIRCLE.x - 24} ${CIRCLE.y - 24}) scale(0.75)`} opacity="0.28">
-          <Monogram size={64} />
+          <MonogramPrint />
         </g>
       </g>
 

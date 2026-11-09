@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion, useSpring, type MotionStyle } from 'motion/react'
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { play } from '../audio'
 import { ruleLines } from '../blackjack/rulesText'
 import { CardFace } from '../components/PlayingCard'
@@ -23,6 +23,7 @@ import { useSharedBankroll } from '../store/sharedBankroll'
 import { clampStartingBankroll, MAX_STARTING_BANKROLL, MIN_STARTING_BANKROLL } from '../store/stake'
 import { selectCanChooseUthBankroll, selectUthHasRun, useUthStore } from '../store/uthStore'
 import { BaccaratArt, RouletteArt, UthArt } from './TableArt'
+import { CrestRays, MarqueeBulbs, NeonWord, SuitPips } from './Sign'
 import { UpdatePill } from './UpdatePill'
 
 /**
@@ -128,19 +129,17 @@ export function Lobby() {
         <div className="marquee">
           <MarqueeBulbs />
           <div className="marquee__crest">
+            <CrestRays />
             <Monogram size={58} />
           </div>
-          <h1 className="lobby__title">
-            <span className="lobby__title-word">
-              <span className="lobby__title-text">ARENA</span>
-              <span className="lobby__glint" aria-hidden="true">
-                <span>ARENA</span>
-              </span>
-            </span>
+          <h1 className="lobby__title" aria-label="Arena">
+            <NeonWord word="ARENA" flicker={entrance} />
           </h1>
           <p className="lobby__subtitle">
             <span className="lobby__rule" />
+            <SuitPips suits={['S', 'H']} />
             Las Vegas Table Games
+            <SuitPips suits={['D', 'C']} />
             <span className="lobby__rule" />
           </p>
         </div>
@@ -379,43 +378,6 @@ function RackReset({ ready, played, entrance }: { ready: boolean; played: string
         )}
       </AnimatePresence>
     </>
-  )
-}
-
-/**
- * The bulbs round the sign, laid out clockwise from the top-left so that a
- * three-phase chase runs round the frame the way a theatre marquee's does.
- */
-const BULBS = (() => {
-  const across = 24
-  const down = 6
-  const out: Array<{ x: number; y: number }> = []
-  for (let i = 0; i <= across; i++) out.push({ x: (i / across) * 100, y: 0 })
-  for (let i = 1; i <= down; i++) out.push({ x: 100, y: (i / (down + 1)) * 100 })
-  for (let i = across; i >= 0; i--) out.push({ x: (i / across) * 100, y: 100 })
-  for (let i = down; i >= 1; i--) out.push({ x: 0, y: (i / (down + 1)) * 100 })
-  return out
-})()
-
-/**
- * The sockets, and the lamps lit in three banks — every third bulb in each —
- * so the chase is three layers fading in turn rather than sixty bulbs each
- * animated on its own.
- */
-function MarqueeBulbs() {
-  return (
-    <div className="marquee__bulbs" aria-hidden="true">
-      {BULBS.map((bulb, i) => (
-        <span key={i} className="marquee__bulb" style={{ left: `${bulb.x}%`, top: `${bulb.y}%` }} />
-      ))}
-      {[0, 1, 2].map((phase) => (
-        <div key={phase} className="marquee__lights" style={{ '--phase': phase } as CSSProperties}>
-          {BULBS.map((bulb, i) =>
-            i % 3 === phase ? <span key={i} className="marquee__lamp" style={{ left: `${bulb.x}%`, top: `${bulb.y}%` }} /> : null,
-          )}
-        </div>
-      ))}
-    </div>
   )
 }
 

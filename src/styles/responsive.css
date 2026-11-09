@@ -17,9 +17,8 @@
     padding-bottom: 14px;
   }
 
-  .lobby__head .monogram {
-    width: 50px;
-    height: 50px;
+  .lobby__head {
+    --crest: 56px;
   }
 
   .lobby__title {
@@ -192,23 +191,10 @@
 
 /* Short windows: the marquee gives up some of its frame so the tables fit. */
 @media (max-height: 940px) {
-  .lobby__head {
-    padding-top: 20px;
-  }
-
   .marquee {
-    padding: 28px 58px 16px;
+    --bulb: 11px;
+    padding: 30px 60px 18px;
     border-radius: 22px;
-  }
-
-  .marquee__crest {
-    width: 64px;
-    height: 64px;
-  }
-
-  .marquee__crest .monogram {
-    width: 46px;
-    height: 46px;
   }
 }
 
@@ -250,12 +236,9 @@
     right: 8px;
   }
 
-  .lobby__head {
-    padding-top: 30px;
-  }
-
   .marquee {
-    padding: 26px 18px 16px;
+    --bulb: 10px;
+    padding: 28px 20px 16px;
   }
 
   .lobby__title {
@@ -655,10 +638,12 @@
   }
 
   .lobby__head {
-    padding-top: 4px;
+    --crest: 28px;
+    padding-top: calc(var(--crest) * 1.02);
   }
 
   .marquee {
+    --bulb: 7px;
     padding: 18px 44px 10px;
     border-radius: 16px;
   }
@@ -667,14 +652,9 @@
     inset: 8px;
   }
 
-  .marquee__crest {
-    width: 34px;
-    height: 34px;
-  }
-
-  .marquee__crest .monogram {
-    width: 24px;
-    height: 24px;
+  .crest-rays {
+    width: calc(var(--crest) * 2.4);
+    height: calc(var(--crest) * 1.2);
   }
 
   .lobby__title {

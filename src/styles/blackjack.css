@@ -522,8 +522,8 @@
 }
 
 /* Gold lines are foil, painted once. The light crossing them is a window
-   carrying a bright copy of the words, moved by transforms alone (the lobby
-   sign's glint, in lobby.css): sliding the gradient instead repainted the
+   carrying a bright copy of the words, moved by transforms alone (the
+   keyframes are in lobby.css): sliding the gradient instead repainted the
    lettering and its glow on every frame, a stutter on a phone. */
 .banner__foil {
   position: relative;

@@ -370,8 +370,10 @@ hit). There is no music, floor ambience, dealer voice or interface chime.
 The room is drawn the same way: gilt-panelled walls with a sconce on every
 pilaster, a bank of slot machines glowing along the far wall, chandeliers, and
 the loud patterned carpet every casino floor has. The lobby looks across the
-room under a marquee in chasing lights; taking a seat tilts the camera down
-until the table sits in its own pool of light on the carpet.
+room under a marquee: the name in neon, the house chip (a blackjack on a
+crimson chip, the app's icon too) in a gold starburst, and a frame of bulbs
+running a chaser's light show. Taking a seat tilts the camera down until the
+table sits in its own pool of light on the carpet.
 
 Sound starts off; `M` turns it on and off, and Settings has its volume.
 Settings also choose the felt (crimson to start; emerald, sapphire, amethyst,

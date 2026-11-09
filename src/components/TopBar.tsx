@@ -8,6 +8,7 @@ import { useSharedBankroll } from '../store/sharedBankroll'
 import { IconBack, IconMute, IconVolume } from './icons'
 import { Money } from './Money'
 import { RackMenu, type RackControl } from './RackMenu'
+import { SUIT_PATH } from './suits'
 
 /**
  * The permanent chrome across the top of a table: the way back to the lobby,
@@ -170,14 +171,42 @@ export function MuteButton() {
   )
 }
 
-/** The house mark: a gold A inside an Art Deco lozenge. */
+/**
+ * The house mark: a blackjack — the ace of spades over the king of hearts —
+ * on a crimson chip. It is the app's own icon (public/favicon.svg), so the
+ * mark in the corner of every table is the one on the home screen.
+ */
 export function Monogram({ size = 38 }: { size?: number }) {
   return (
-    <svg className="monogram" width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
-      <rect x="8" y="8" width="48" height="48" rx="6" transform="rotate(45 32 32)" fill="#0d0c11" stroke="url(#gold-foil)" strokeWidth="2" />
-      <rect x="14" y="14" width="36" height="36" rx="3" transform="rotate(45 32 32)" fill="none" stroke="url(#gold-foil)" strokeWidth="0.8" opacity="0.7" />
-      <path d="M32 17 L44 46 H38.6 L36.3 40 H27.7 L25.4 46 H20 Z M32 26.5 L29.3 34.6 H34.7 Z" fill="url(#gold-foil)" />
-    </svg>
+    <img
+      className="monogram"
+      src={`${import.meta.env.BASE_URL}favicon.svg`}
+      width={size}
+      height={size}
+      alt=""
+      draggable={false}
+    />
+  )
+}
+
+/**
+ * The same mark printed in gold on the felt: two cards fanned, a spade on the
+ * ace and a heart in the king's corner, drawn in a 64-unit box for use inside
+ * a table's SVG.
+ */
+export function MonogramPrint() {
+  const card = (deg: number) => `rotate(${deg} 32 60)`
+  return (
+    <g>
+      <g transform={card(-15)}>
+        <rect x="18.5" y="11" width="27" height="38" rx="3.5" fill="#0d0c11" stroke="url(#gold-foil)" strokeWidth="1.8" />
+        <path d={SUIT_PATH.H} transform="translate(21.5 14) scale(0.07)" fill="url(#gold-foil)" />
+      </g>
+      <g transform={card(13)}>
+        <rect x="18.5" y="11" width="27" height="38" rx="3.5" fill="#0d0c11" stroke="url(#gold-foil)" strokeWidth="1.8" />
+        <path d={SUIT_PATH.S} transform="translate(23 21) scale(0.18)" fill="url(#gold-foil)" />
+      </g>
+    </g>
   )
 }
 
