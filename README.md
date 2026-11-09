@@ -64,9 +64,11 @@ point and puck, a hand half played. Anything already decided when it closed
 raised or folded) is paid as the app opens, once.
 
 Pasted into iMessage, WhatsApp, Discord or Slack, the link shows a card with
-the lobby on it. That picture, `public/og-image.jpg` (1200×630), is the one
-image file in the project: a screenshot of the lobby, so retake it if the
-lobby changes much.
+the game on it. That picture, `public/og-image.jpg` (1200×630), is the one
+image file in the project: a screenshot of a blackjack hand, 11 against a
+dealer 9, with the coach's prices open over Double. Retake it if the table
+changes much, and bump the `?v=` on its two addresses in `index.html` so chat
+apps fetch the new one instead of a cached copy.
 
 To install a build that is not pushed yet, `npm run app` builds it, serves it at
 http://localhost:4747 and opens it, ready to install the same way. That copy
