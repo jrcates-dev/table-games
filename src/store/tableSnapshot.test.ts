@@ -31,6 +31,7 @@ async function open(local = storage()) {
   const { useBaccaratStore } = await import('./baccaratStore')
   const { useRouletteStore } = await import('./rouletteStore')
   const { useUthStore } = await import('./uthStore')
+  const { usePaiGowStore } = await import('./paigowStore')
   const { setSharedBankroll } = await import('./racks')
   await Promise.all([
     useGameStore.getState().init(),
@@ -38,8 +39,9 @@ async function open(local = storage()) {
     useBaccaratStore.getState().init(),
     useRouletteStore.getState().init(),
     useUthStore.getState().init(),
+    usePaiGowStore.getState().init(),
   ])
-  return { local, useGameStore, useCrapsStore, useBaccaratStore, useRouletteStore, useUthStore, setSharedBankroll }
+  return { local, useGameStore, useCrapsStore, useBaccaratStore, useRouletteStore, useUthStore, usePaiGowStore, setSharedBankroll }
 }
 
 beforeEach(() => {
@@ -262,6 +264,49 @@ describe("hold'em: closing mid-hand", () => {
   })
 })
 
+describe('pai gow: closing mid-hand', () => {
+  async function dealt() {
+    const first = await open()
+    first.usePaiGowStore.getState().placeAt('wager')
+    first.usePaiGowStore.getState().deal()
+    expect(first.usePaiGowStore.getState().game.phase).toBe('setting')
+    return first
+  }
+
+  it('brings back the seven cards, and the two already picked for the low hand', async () => {
+    const first = await dealt()
+    first.usePaiGowStore.getState().toggleCard(0)
+    const before = first.usePaiGowStore.getState().game
+
+    const { usePaiGowStore } = await open(first.local)
+    const { game, profile, low } = usePaiGowStore.getState()
+    expect(game.phase).toBe('setting')
+    expect(game.player).toEqual(before.player)
+    expect(game.dealer).toEqual(before.dealer)
+    expect(game.bets).toEqual(before.bets)
+    expect(profile.bankroll).toBe(before.bankroll)
+    expect(low).toEqual([0])
+  })
+
+  it('pays a hand set before the close, once', async () => {
+    const first = await dealt()
+    first.usePaiGowStore.getState().setHouseWay()
+    first.usePaiGowStore.getState().confirmSet()
+    expect(first.usePaiGowStore.getState().game.phase).toBe('reveal')
+
+    const second = await open(first.local)
+    const paid = second.usePaiGowStore.getState()
+    expect(paid.game.phase).toBe('showdown')
+    expect(paid.profile.stats.hands).toBe(1)
+    expect(paid.profile.stats.houseWaySets).toBe(1)
+    expect(paid.profile.bankroll).toBe(paid.game.bankroll)
+
+    const third = await open(first.local)
+    expect(third.usePaiGowStore.getState().profile.stats.hands).toBe(1)
+    expect(third.usePaiGowStore.getState().game.bankroll).toBe(paid.game.bankroll)
+  })
+})
+
 describe('blackjack: closing mid-hand', () => {
   type Floor = Awaited<ReturnType<typeof open>>
 
@@ -368,7 +413,7 @@ describe('one bankroll for every table', () => {
 
     const second = await open(first.local)
     expect(second.useRouletteStore.getState().game.bets).toEqual(first.useRouletteStore.getState().game.bets)
-    for (const store of [second.useGameStore, second.useCrapsStore, second.useBaccaratStore, second.useRouletteStore, second.useUthStore]) {
+    for (const store of [second.useGameStore, second.useCrapsStore, second.useBaccaratStore, second.useRouletteStore, second.useUthStore, second.usePaiGowStore]) {
       expect(store.getState().game.bankroll).toBe(rack)
     }
   })

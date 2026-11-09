@@ -9,7 +9,7 @@ import { create } from 'zustand'
  * one pit to the other should feel like changing games, not like carrying one
  * game's baggage into another.
  */
-export type GameId = 'blackjack' | 'craps' | 'baccarat' | 'roulette' | 'uth'
+export type GameId = 'blackjack' | 'craps' | 'baccarat' | 'roulette' | 'uth' | 'paigow'
 export type Screen = 'lobby' | GameId
 
 export interface GameMeta {
@@ -25,6 +25,7 @@ export const GAMES: GameMeta[] = [
   { id: 'baccarat', name: 'Baccarat', subtitle: 'Eight decks · Banker pays 5% commission' },
   { id: 'roulette', name: 'Roulette', subtitle: 'Double zero · Single zero in the high-limit room' },
   { id: 'uth', name: "Ultimate Texas Hold'em", subtitle: 'Ante · Blind · Play · Trips' },
+  { id: 'paigow', name: 'Pai Gow Poker', subtitle: 'Joker wild · 5% commission · Fortune Bonus' },
 ]
 
 const KEY = 'cta:game:v1'

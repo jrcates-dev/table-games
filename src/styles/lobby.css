@@ -520,8 +520,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  /* Five tables abreast on a desktop screen. */
-  width: clamp(250px, calc((100vw - 136px) / 5), 340px);
+  /* Six tables abreast on a wide desktop screen. */
+  width: clamp(250px, calc((100vw - 160px) / 6), 340px);
   border-radius: 28px;
   cursor: pointer;
   background: linear-gradient(180deg, #1c1013 0%, #0e090b 100%);
@@ -1127,6 +1127,21 @@
 
 .art__chips--uth {
   left: 86%;
+  bottom: 40px;
+}
+
+/* ---- Pai Gow Poker: the high five set behind, the low two in front ------------- */
+
+.art--paigow .art__board {
+  top: 34px;
+}
+
+.art--paigow .art__hole {
+  top: 112px;
+}
+
+.art__chips--paigow {
+  left: 14%;
   bottom: 40px;
 }
 

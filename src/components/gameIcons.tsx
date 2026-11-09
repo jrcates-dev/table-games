@@ -550,3 +550,29 @@ export const ArtFold = (p: ArtProps) => (
     <Card x={26.5} y={19.5} rotate={-6} back w={18} h={25} />
   </Art>
 )
+
+// ---------------------------------------------------------------------------
+// Pai Gow
+
+/** Set the hand: the five behind, fanned, and the two in front. */
+export const ArtSetHand = (p: ArtProps) => (
+  <Art {...p}>
+    <Card x={22} y={16} rotate={-24} w={13} h={18} />
+    <Card x={27} y={14} rotate={-8} w={13} h={18} />
+    <Card x={32} y={14} rotate={8} w={13} h={18} />
+    <Card x={37} y={16} rotate={24} w={13} h={18} />
+    <Card x={14} y={32} rotate={-10} w={14} h={20} />
+    <Card x={22} y={34} rotate={6} w={14} h={20} />
+    <path d="M30 40h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </Art>
+)
+
+/** The house way: the dealer's hand set by the book, with a star for the book's call. */
+export const ArtHouseWay = (p: ArtProps) => (
+  <Art {...p}>
+    <Card x={18} y={27} rotate={-14} back w={16} h={22} />
+    <Card x={28} y={26} rotate={10} w={16} h={22} />
+    <Sparkle x={38} y={11} r={6} />
+    <path d="M8 42h32" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="3 3" />
+  </Art>
+)

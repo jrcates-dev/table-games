@@ -1,0 +1,370 @@
+/* ---------------------------------------------------------------------------
+   Pai Gow Poker
+   --------------------------------------------------------------------------- */
+
+/* Fourteen cards on the felt, dealt a size down: the layer is scaled, the cards are not. */
+.pg-cards {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  transform-style: preserve-3d;
+}
+
+/* Your seven, while you set them: each one picks up or puts down. */
+.bj-card__face.is-pickable {
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    filter 280ms ease,
+    box-shadow 160ms ease;
+}
+
+@media (hover: hover) {
+  .bj-card__face.is-pickable:hover {
+    box-shadow:
+      0 0 0 3px rgba(245, 223, 160, 0.9),
+      0 0 18px rgba(245, 223, 160, 0.45);
+  }
+}
+
+/* The house way's two low cards, marked in the corner while the coach is on. */
+.bj-card__face.is-hint::after {
+  content: '';
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fbe9b4, #d6ae5c 70%);
+  box-shadow:
+    0 0 0 2px rgba(20, 14, 6, 0.85),
+    0 0 14px rgba(245, 223, 160, 0.7);
+  pointer-events: none;
+}
+
+/* ---- Hand names --------------------------------------------------------------- */
+
+.pg-hand {
+  min-width: 120px;
+  transform-origin: 50% 100%;
+}
+
+.pg-hand strong {
+  font-size: 23px;
+  white-space: nowrap;
+}
+
+.pg-hand.is-win {
+  border-color: rgba(79, 224, 160, 0.6);
+}
+
+.pg-hand.is-win strong,
+.pg-hand.is-win .total-pill__who {
+  color: var(--win);
+}
+
+.pg-hand.is-lose .total-pill__who,
+.pg-hand.is-copy .total-pill__who {
+  color: var(--lose);
+}
+
+.pg-hand.is-lose strong,
+.pg-hand.is-copy strong {
+  color: var(--text-2);
+}
+
+.pg-hand.is-foul {
+  border-color: rgba(255, 107, 114, 0.6);
+  box-shadow:
+    0 0 0 3px rgba(255, 107, 114, 0.18),
+    0 3px 8px rgba(0, 0, 0, 0.45);
+}
+
+.pg-hand.is-foul .total-pill__who {
+  color: var(--lose);
+}
+
+/* ---- The dock ----------------------------------------------------------------- */
+
+.pg-info {
+  /* One width whatever the hands are called, so the buttons beside it stay put. */
+  width: 230px;
+}
+
+.pg-info__high {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 25px;
+  line-height: 1.15;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pg-info__low {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-3);
+}
+
+.pg-info.is-foul .eyebrow,
+.pg-info.is-foul .pg-info__high,
+.pg-info.is-foul .pg-info__low {
+  color: var(--lose);
+}
+
+.pg-action--house {
+  --accent: var(--gold-1);
+}
+
+.pg-action--clear {
+  --accent: #9fc2ff;
+}
+
+.pg-action--set {
+  --accent: var(--win);
+}
+
+.pg-action--set.is-foul {
+  --accent: var(--lose);
+  border-color: rgba(255, 107, 114, 0.75);
+}
+
+.pg-action--house.is-done {
+  opacity: 0.6;
+}
+
+.pg-action .action__label {
+  white-space: nowrap;
+}
+
+.pg-coach {
+  /* One width whatever the advice runs to, so the dock doesn't resize under the buttons. */
+  width: 300px;
+  cursor: pointer;
+  transition: border-color 160ms ease;
+}
+
+@media (hover: hover) {
+  .pg-coach:hover {
+    border-color: var(--gold-line-strong);
+  }
+}
+
+.pg-coach__reason {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.pg-coach__evs {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* One width whatever the result, so it never nudges Rebet & deal. */
+.dock--paigow.dock--over .settled {
+  width: 190px;
+}
+
+.pg-prices {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.pg-prices .ba-book__text {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+/* A phone sideways has the height for two lines, not three: the picture moves beside the words. */
+@media (max-height: 500px) {
+  .dock--paigow .pg-action {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-content: center;
+    justify-content: center;
+    column-gap: 5px;
+    row-gap: 0;
+    padding: 0 8px;
+  }
+
+  .dock--paigow .pg-action .action__icon {
+    grid-row: span 2;
+  }
+
+  .dock--paigow .pg-action .action__icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .pg-info {
+    width: 180px;
+  }
+
+  .pg-info__high {
+    font-size: 20px;
+  }
+}
+
+/* ---- The rail ----------------------------------------------------------------- */
+
+.pg-rail__note {
+  margin: 4px 2px 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+.pg-score {
+  margin-top: 8px;
+}
+
+.pg-score__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pg-score__list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 1px 8px;
+  padding: 5px 9px 5px 11px;
+  border-radius: 9px;
+  border-left: 3px solid transparent;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 11.5px;
+}
+
+.pg-score__list li span {
+  color: var(--text-3);
+}
+
+.pg-score__list li strong {
+  color: var(--text-1);
+  text-align: right;
+}
+
+.pg-score__list li em {
+  grid-column: 1 / -1;
+  font-style: normal;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.pg-score__list li.is-right {
+  border-left-color: var(--win);
+}
+
+.pg-score__list li.is-right em {
+  color: var(--win);
+}
+
+.pg-score__list li.is-wrong {
+  border-left-color: var(--lose);
+}
+
+.pg-score__list li.is-wrong em {
+  color: var(--lose);
+}
+
+.pg-score__list li.is-total {
+  border-left-color: var(--gold-1);
+}
+
+.pg-score__list li.is-total em {
+  color: var(--text-2);
+}
+
+/* ---- The book ----------------------------------------------------------------- */
+
+.pg-way .reference__main strong {
+  font-size: 13px;
+}
+
+.pg-paytable {
+  width: 100%;
+}
+
+.pg-paytable__odds {
+  color: var(--text-3);
+  font-size: 11px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hand history: the joker, and a gap between the low two and the high five. */
+.card-chip.is-joker {
+  color: #a3172c;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.card-chip.pg-gap {
+  margin-left: 8px;
+}
+
+/* The result belongs over your boxes, not over the paytable it might describe. */
+.tv--paigow .banner-anchor {
+  top: 56%;
+}
+
+.pg-names {
+  margin-top: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.pg-names span {
+  color: var(--text-4);
+}
+
+/* Upright on a phone: the hand's name over its low hand, then the plays, then the coach. */
+@media (orientation: portrait) and (max-width: 600px) {
+  .tv .hand-info.pg-info {
+    width: auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    text-align: center;
+  }
+
+  .tv .pg-info .eyebrow {
+    display: block;
+  }
+
+  .tv .pg-info__high {
+    font-size: 22px;
+  }
+
+  .tv .pg-coach {
+    flex: 1 1 100%;
+    width: auto;
+  }
+}
+
+.history__outcome + .history__net {
+  margin-left: 10px;
+}

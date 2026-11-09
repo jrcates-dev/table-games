@@ -4,7 +4,7 @@ import { play } from '../audio'
 import { angleBetween, cardAt, cardLift, cardTurn, shadowAt } from './feltMotion'
 import type { DealtCard } from '../engine/types'
 import type { CardBack } from '../prefs/prefsStore'
-import { CardBackFace, CardFace } from './PlayingCard'
+import { CardBackFace, CardFace, JokerFace } from './PlayingCard'
 
 /**
  * One card on a tilted felt, dealt the way the blackjack table deals: out of
@@ -41,6 +41,9 @@ export function FeltCard({
   back,
   dim = false,
   lit = false,
+  joker = false,
+  onPick,
+  hint = false,
 }: {
   card: DealtCard
   place: CardPlace
@@ -57,6 +60,12 @@ export function FeltCard({
   dim?: boolean
   /** One of the cards that make the hand. */
   lit?: boolean
+  /** Pai gow's joker, which has no rank or suit to draw. */
+  joker?: boolean
+  /** The card can be picked up off the felt (pai gow, setting a hand). */
+  onPick?: () => void
+  /** The coach's mark: where the book would put this card. */
+  hint?: boolean
 }) {
   const { x, y, spin, order } = place
   const [entryDelay] = useState(delay)
@@ -126,8 +135,11 @@ export function FeltCard({
         }
       >
         <motion.div ref={flipScope} className="bj-card__flip" initial={{ transform: cardTurn(180) }}>
-          <div className={`bj-card__face bj-card__face--front${dim ? ' is-dim' : ''}${lit ? ' is-lit' : ''}`}>
-            <CardFace rank={card.rank} suit={card.suit} />
+          <div
+            className={`bj-card__face bj-card__face--front${dim ? ' is-dim' : ''}${lit ? ' is-lit' : ''}${onPick ? ' is-pickable' : ''}${hint ? ' is-hint' : ''}`}
+            onClick={onPick}
+          >
+            {joker ? <JokerFace /> : <CardFace rank={card.rank} suit={card.suit} />}
           </div>
           <div className="bj-card__face bj-card__face--back">
             <CardBackFace theme={back} />

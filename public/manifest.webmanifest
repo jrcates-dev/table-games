@@ -1,7 +1,7 @@
 {
   "name": "Arena · Las Vegas Table Games",
   "short_name": "Arena",
-  "description": "Play-money blackjack, craps, baccarat, roulette and Ultimate Texas Hold'em dealt by Aria's house rules, with a strategy coach at every table and every bet priced.",
+  "description": "Play-money blackjack, craps, baccarat, roulette, Ultimate Texas Hold'em and Pai Gow Poker dealt by Aria's house rules, with a strategy coach at every table and every bet priced.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

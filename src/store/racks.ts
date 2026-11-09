@@ -3,6 +3,7 @@ import { useAppStore, type GameId } from './appStore'
 import { useBaccaratStore } from './baccaratStore'
 import { useCrapsStore } from './crapsStore'
 import { useGameStore } from './gameStore'
+import { usePaiGowStore } from './paigowStore'
 import { useRouletteStore } from './rouletteStore'
 import { clearSessionNets, useSessionNets } from './sessionNets'
 import { useSharedBankroll } from './sharedBankroll'
@@ -44,6 +45,7 @@ const TABLES: Record<GameId, TableStore> = {
   baccarat: useBaccaratStore,
   roulette: useRouletteStore,
   uth: useUthStore,
+  paigow: usePaiGowStore,
 }
 const IDS = Object.keys(TABLES) as GameId[]
 

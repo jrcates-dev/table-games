@@ -210,6 +210,54 @@ export const CardFace = memo(function CardFace({ rank, suit }: { rank: Rank; sui
   )
 })
 
+/**
+ * The joker — Pai Gow's "bug". No suit and no rank: JOKER down each corner and
+ * a gilt star in a sunburst, in the deck's Deco hand.
+ */
+export const JokerFace = memo(function JokerFace() {
+  const letters = ['J', 'O', 'K', 'E', 'R']
+  const corner = (
+    <g>
+      {letters.map((l, i) => (
+        <text
+          key={i}
+          x="28"
+          y={42 + i * 25}
+          textAnchor="middle"
+          fontFamily="Cinzel, Georgia, serif"
+          fontWeight="700"
+          fontSize="25"
+          fill="#a3172c"
+        >
+          {l}
+        </text>
+      ))}
+    </g>
+  )
+  const star = Array.from({ length: 10 }, (_, i) => {
+    const r = i % 2 === 0 ? 46 : 19
+    const a = (i / 10) * Math.PI * 2 - Math.PI / 2
+    return `${(125 + r * Math.cos(a)).toFixed(1)} ${(160 + r * Math.sin(a)).toFixed(1)}`
+  }).join(' L ')
+  return (
+    <svg viewBox={`0 0 ${CARD_W} ${CARD_H}`} width="100%" height="100%" aria-hidden="true" focusable="false">
+      <rect x="0.5" y="0.5" width={CARD_W - 1} height={CARD_H - 1} rx="17" fill="url(#card-paper)" />
+      <rect x="0.5" y="0.5" width={CARD_W - 1} height={CARD_H - 1} rx="17" fill="none" stroke="#d9cfba" strokeWidth="1.2" />
+      <rect x="52" y="40" width="146" height="270" rx="9" fill="#fbf3e2" stroke="#a3172c" strokeWidth="2.4" />
+      <rect x="58" y="46" width="134" height="258" rx="6" fill="none" stroke="#c99c45" strokeWidth="1.2" />
+      <Sunburst cx={125} cy={160} rays={36} r0={52} r1={92} color="#c99c45" opacity={0.5} />
+      <circle cx="125" cy="160" r="54" fill="none" stroke="#c99c45" strokeWidth="1.3" />
+      <path d={`M ${star} Z`} fill="url(#gold-foil)" stroke="#7a5a1c" strokeWidth="1.4" />
+      <circle cx="125" cy="160" r="6" fill="#a3172c" />
+      <text x="125" y="262" textAnchor="middle" fontFamily="Cinzel, Georgia, serif" fontWeight="700" fontSize="30" letterSpacing="4" fill="#a3172c" stroke="#c99c45" strokeWidth="0.8" paintOrder="stroke">
+        JOKER
+      </text>
+      {corner}
+      <g transform={`rotate(180 ${CARD_W / 2} ${CARD_H / 2})`}>{corner}</g>
+    </svg>
+  )
+})
+
 const BACK_COLORS: Record<CardBackTheme, [string, string]> = {
   crimson: ['#8e1a30', '#4d0a18'],
   navy: ['#1c3264', '#0a1430'],

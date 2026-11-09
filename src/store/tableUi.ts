@@ -47,3 +47,4 @@ export type TablePanel = 'reference' | 'stats' | 'settings'
 export const useBaccaratUi = createTableUi<TablePanel>('baccarat')
 export const useRouletteUi = createTableUi<TablePanel>('roulette')
 export const useUthUi = createTableUi<TablePanel>('uth')
+export const usePaiGowUi = createTableUi<TablePanel>('paigow')

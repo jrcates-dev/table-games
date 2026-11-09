@@ -20,6 +20,7 @@ import './styles/tables.css'
 import './styles/baccarat.css'
 import './styles/roulette.css'
 import './styles/uth.css'
+import './styles/paigow.css'
 import './styles/responsive.css'
 import App from './App.tsx'
 import { SvgDefs } from './components/SvgDefs'
@@ -34,16 +35,18 @@ if (import.meta.env.DEV) {
     import('./store/baccaratStore'),
     import('./store/rouletteStore'),
     import('./store/uthStore'),
+    import('./store/paigowStore'),
     import('./store/appStore'),
     import('./audio/context'),
     import('./audio/sfx'),
-  ]).then(([bj, craps, baccarat, roulette, uthStore, app, audioContext, sfx]) => {
+  ]).then(([bj, craps, baccarat, roulette, uthStore, paigowStore, app, audioContext, sfx]) => {
     ;(window as unknown as Record<string, unknown>).__arena = {
       bj: bj.useGameStore,
       craps: craps.useCrapsStore,
       baccarat: baccarat.useBaccaratStore,
       roulette: roulette.useRouletteStore,
       uth: uthStore.useUthStore,
+      paigow: paigowStore.usePaiGowStore,
       app: app.useAppStore,
       audio: audioContext.audio,
       play: sfx.play,
