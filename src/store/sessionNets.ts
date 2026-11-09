@@ -20,7 +20,7 @@ import type { GameId } from './appStore'
  */
 export type SessionNets = Record<GameId, number>
 
-const NOTHING: SessionNets = { blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0 }
+const NOTHING: SessionNets = { blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0, paigow: 0 }
 
 export const useSessionNets = create<SessionNets>(() => ({ ...NOTHING }))
 

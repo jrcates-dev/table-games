@@ -70,7 +70,16 @@
     top: 106px;
   }
 
-  .art__chips--uth {
+  .art--paigow .art__board {
+    top: 24px;
+  }
+
+  .art--paigow .art__hole {
+    top: 94px;
+  }
+
+  .art__chips--uth,
+  .art__chips--paigow {
     bottom: 22px;
   }
 
@@ -168,8 +177,8 @@
   }
 }
 
-/* Not room for five abreast: three and two, a little larger. */
-@media (max-width: 1360px) {
+/* Not room for six abreast: two rows of three, a little larger. */
+@media (max-width: 1720px) {
   .lobby__games {
     max-width: 1040px;
   }
@@ -200,7 +209,7 @@
 
 /*
  * Phones: each table as wide as the screen, its picture shorter and its rules
- * cut to the two that say the most, so the five are a short scroll rather
+ * cut to the two that say the most, so the six are a short scroll rather
  * than three thousand pixels of one.
  */
 @media (max-width: 560px) {
@@ -1222,6 +1231,7 @@
   .btn--sm,
   .ba-book__text,
   .uth-prices .ba-book__text,
+  .pg-prices .ba-book__text,
   .segmented button,
   .mode-picker .segmented button,
   .game-card__foot .btn,
@@ -1297,7 +1307,13 @@
   .uth-coach__evs,
   .uth-rail__note,
   .uth-score__list li,
-  .uth-score__list li em {
+  .uth-score__list li em,
+  .pg-coach__reason,
+  .pg-coach__evs,
+  .pg-rail__note,
+  .pg-info__low,
+  .pg-score__list li,
+  .pg-score__list li em {
     font-size: 12px;
   }
 

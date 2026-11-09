@@ -1,7 +1,7 @@
 # Arena · Las Vegas Table Games
 
-A play-money casino with five tables — **blackjack**, **craps**, **baccarat**,
-**roulette** and **Ultimate Texas Hold'em** — dealt by the rules Aria runs in Las
+A play-money casino with six tables — **blackjack**, **craps**, **baccarat**,
+**roulette**, **Ultimate Texas Hold'em** and **Pai Gow Poker** — dealt by the rules Aria runs in Las
 Vegas in 2026, with the house edge shown on every bet. Everything you see and
 hear is generated at runtime: the cards, chips, felt, wheel and room are vector
 art, the dice are thrown by a physics engine, and every sound, from a clay chip
@@ -31,7 +31,7 @@ games run as a guest against browser local storage. Supabase is optional; see
 
 | Command | What it does |
 |---|---|
-| `npm test` | 330 tests: engine rules, exact and long-run house edges, dice and wheel fairness |
+| `npm test` | 486 tests: engine rules, exact and long-run house edges, dice and wheel fairness |
 | `npm run test:watch` | Tests in watch mode |
 | `npm run lint` | Lint with oxlint |
 | `npm run build` | Type-check and build a production bundle into `dist/` |
@@ -358,6 +358,57 @@ seven-card hands.
 
 ---
 
+## Pai Gow Poker
+
+Heads-up against the dealer, who banks every hand, at the D table: a shuffler
+where the shoe stands and one 53-card deck, joker included, shuffled every
+hand. Your seven cards are dealt across the middle of the felt and set into the
+**low** and **high** boxes in front of you; the dealer's seven wait face down
+under the tray.
+
+| | |
+|---|---|
+| Deal · rebet and deal | `Space` |
+| Pick a chip (between hands) | `1`–`5` |
+| Bet · Fortune | click the circle · right-click to take it back |
+| Move a card between the hands (setting) | click it, or `1`–`7` |
+| Set the house way · start over · set the hand | `H` · `C` · `Space` |
+| Clear · rebet | `C` · `R` (between hands) |
+| The book | `?` |
+
+### Rules — Aria, 2026
+
+Seven cards each: two to the **low hand**, five to the **high**, and the high
+must outrank the low or the hand **fouls** and loses (the dock warns, and the
+button reads *Set anyway*). The joker plays as an ace, or completes a straight,
+flush or straight flush; **five aces** beat a royal flush. A-2-3-4-5 is the
+lowest straight, or, in Settings, the second-highest. Win both hands and the bet
+pays even money **less 5% commission**; win one and it pushes; lose both and it
+loses. **Copies go to the dealer.** Settings also offers a commission-free table,
+where a win over a dealer's queen-high pai gow pushes. Bet $25–$2,000.
+
+Set the house way, the bet costs **2.70%** (**2.80%** commission-free) and four
+hands in ten push — measured over 40 million hands dealt by this engine. The
+**Fortune Bonus** ($5–$100) pays on your seven cards however you set them, from
+straight 2 to 1 to a natural seven-card straight flush 8,000 to 1, and costs
+**7.90%**, counted exactly. Envy pays are shown in the book but never paid:
+heads-up, there is nobody to envy.
+
+### The coach
+
+- **On the cards** — the house way's two low cards are marked while you set,
+  and *House way* sets the hand that way in one tap.
+- **Beside the buttons** — the rule that decides your hand and what the house
+  way's set is worth in bets, against your own set, and the best set when it
+  beats the house way: every one of the 21 ways to set the hand is valued
+  against 4,000 dealer hands, in a background worker.
+- **The scorecard** — on the rail and in statistics: your share of house-way
+  sets, fouls caught before setting, and what your other sets gave up.
+- **The book** — the house way rule by rule, the one covering your hand lit,
+  and every bet priced.
+
+---
+
 ## Sound and appearance
 
 Only the table makes a sound, synthesised with the Web Audio API through a
@@ -393,6 +444,7 @@ src/
     baccarat/     tableau, exact shoe odds, side bets
     roulette/     wheels, bet catalogue, layout summaries
     uth/          hand evaluator, pay tables, the coach
+    paigow/       joker evaluator, the house way, Fortune, set values
   store/          Zustand stores, profiles, persistence
   prefs/          player preferences shared by every table (sound, felt, backs)
   audio/          mixer and reverb, the table's sound library
@@ -404,6 +456,7 @@ src/
   baccarat/       felt, shoe, cards, bets, bead plate, live odds
   roulette/       wheel and ball, layout, click targets, bets, tote board
   uth/            felt and pay tables, shuffler, cards, circles, coach
+  paigow/         felt and Fortune table, low and high boxes, the house-way coach
 ```
 
 ### The engine is pure
@@ -435,7 +488,7 @@ orientations). Real physics, provably fair dice.
 
 ### Correctness
 
-`npm test` runs 439 tests. Beyond per-rule unit tests:
+`npm test` runs 486 tests. Beyond per-rule unit tests:
 
 - **Blackjack** plays 200,000 hands of perfect basic strategy and checks the
   realised edge, and plays Aria's high-limit shoe and its 6:5 tables through the
@@ -459,6 +512,11 @@ orientations). Real physics, provably fair dice.
   prices Trips exactly, checks the coach against the chart, the flop rule, the
   exact flop and river calculations and what the rack can cover, and plays a
   long session to check every chip moves where it should.
+- **Pai Gow Poker** counts every five-card hand of the 53-card deck, joker
+  included, into the right category; enumerates all 154,143,080 seven-card
+  hands for the Fortune pay table; sets 60,000 random hands the house way
+  without a foul and reaches every rule; and plays a long session to check the
+  edge against the 40-million-hand simulation.
 - **Closing the app** with chips down at every table, before, during and after
   a hand, checks the felt comes back as it was left, that whatever was already
   decided is paid exactly once, and that a hand paid before the close is never

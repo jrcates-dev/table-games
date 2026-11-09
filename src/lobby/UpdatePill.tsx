@@ -9,6 +9,7 @@ import { selectCanChooseCrapsBankroll, useCrapsStore } from '../store/crapsStore
 import { selectCanChooseBankroll, useGameStore } from '../store/gameStore'
 import { rouletteAtRisk, selectCanChooseRouletteBankroll, useRouletteStore } from '../store/rouletteStore'
 import { selectCanChooseUthBankroll, uthAtRisk, useUthStore } from '../store/uthStore'
+import { paigowAtRisk, selectCanChoosePaiGowBankroll, usePaiGowStore } from '../store/paigowStore'
 
 /**
  * "A new version is ready", over the lobby once a newer deploy has downloaded.
@@ -29,7 +30,8 @@ export function UpdatePill() {
   const baIdle = useBaccaratStore((s) => selectCanChooseBaccaratBankroll(s) && baccaratAtRisk(s.game) === 0)
   const roIdle = useRouletteStore((s) => selectCanChooseRouletteBankroll(s) && rouletteAtRisk(s.game) === 0)
   const uthIdle = useUthStore((s) => selectCanChooseUthBankroll(s) && uthAtRisk(s.game) === 0)
-  const idle = bjIdle && crapsIdle && baIdle && roIdle && uthIdle
+  const pgIdle = usePaiGowStore((s) => selectCanChoosePaiGowBankroll(s) && paigowAtRisk(s.game) === 0)
+  const idle = bjIdle && crapsIdle && baIdle && roIdle && uthIdle && pgIdle
 
   const show = ready && !dismissed && (idle || applying)
 

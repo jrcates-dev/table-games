@@ -12,6 +12,7 @@ import { useAppStore } from './store/appStore'
 import { useBaccaratStore } from './store/baccaratStore'
 import { useRouletteStore } from './store/rouletteStore'
 import { useUthStore } from './store/uthStore'
+import { usePaiGowStore } from './store/paigowStore'
 import { useCrapsStore } from './store/crapsStore'
 import { useGameStore } from './store/gameStore'
 
@@ -21,6 +22,7 @@ const CrapsView = lazy(() => import('./craps/CrapsView'))
 const BaccaratView = lazy(() => import('./baccarat/BaccaratView'))
 const RouletteView = lazy(() => import('./roulette/RouletteView'))
 const UthView = lazy(() => import('./uth/UthView'))
+const PaiGowView = lazy(() => import('./paigow/PaiGowView'))
 // A sheet of every card and chip for checking the artwork: ?gallery, in development only.
 const Gallery = lazy(() => import('./dev/Gallery').then((m) => ({ default: m.Gallery })))
 const showGallery = import.meta.env.DEV && new URLSearchParams(window.location.search).has('gallery')
@@ -46,6 +48,7 @@ export default function App() {
     void useBaccaratStore.getState().init()
     void useRouletteStore.getState().init()
     void useUthStore.getState().init()
+    void usePaiGowStore.getState().init()
   }, [])
 
   useGlobalShortcuts()
@@ -84,6 +87,7 @@ export default function App() {
               {screen === 'baccarat' && <BaccaratView />}
               {screen === 'roulette' && <RouletteView />}
               {screen === 'uth' && <UthView />}
+              {screen === 'paigow' && <PaiGowView />}
             </Suspense>
           </motion.div>
         </AnimatePresence>

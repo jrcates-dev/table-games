@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, type CSSProperties, type RefObject } from 'react'
 import { ChipStack } from '../components/ChipStack'
-import { CardBackFace, CardFace } from '../components/PlayingCard'
+import { CardBackFace, CardFace, JokerFace } from '../components/PlayingCard'
 import { DOUBLE_ZERO_ORDER, pocketColor, pocketLabel } from '../engine/roulette/wheel'
 import { usePrefs } from '../prefs/prefsStore'
 
@@ -200,6 +200,36 @@ export function UthArt() {
       <div className="art__chips art__chips--uth">
         <div className="art__stack">
           <ChipStack amount={100} size={48} tilt={40} seed={8} billboard={false} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** A hand set: a straight flush the joker fills in the high five, ace-king in front. */
+export function PaiGowArt() {
+  const high: Array<['Q' | 'J' | '10' | '9', 'H'] | null> = [['Q', 'H'], ['J', 'H'], ['10', 'H'], ['9', 'H'], null]
+  return (
+    <div className="art art--paigow">
+      <div className="art__felt" />
+      <div className="art__board">
+        {high.map((card, i) => (
+          <div key={i} className="art__mini" style={{ '--slot': i } as CSSProperties}>
+            {card ? <CardFace rank={card[0]} suit={card[1]} /> : <JokerFace />}
+          </div>
+        ))}
+      </div>
+      <div className="art__hole">
+        <div className="art__card art__card--a">
+          <CardFace rank="A" suit="S" />
+        </div>
+        <div className="art__card art__card--b">
+          <CardFace rank="K" suit="D" />
+        </div>
+      </div>
+      <div className="art__chips art__chips--paigow">
+        <div className="art__stack">
+          <ChipStack amount={125} size={48} tilt={40} seed={11} billboard={false} />
         </div>
       </div>
     </div>

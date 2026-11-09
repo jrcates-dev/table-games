@@ -30,6 +30,7 @@ async function freshFloor(local = storage()) {
   const { useBaccaratStore } = await import('./baccaratStore')
   const { useRouletteStore } = await import('./rouletteStore')
   const { useUthStore } = await import('./uthStore')
+  const { usePaiGowStore } = await import('./paigowStore')
   const { useAppStore } = await import('./appStore')
   const { resetAllRacks, setSharedBankroll } = await import('./racks')
   const { useSharedBankroll } = await import('./sharedBankroll')
@@ -40,14 +41,16 @@ async function freshFloor(local = storage()) {
     useBaccaratStore.getState().init(),
     useRouletteStore.getState().init(),
     useUthStore.getState().init(),
+    usePaiGowStore.getState().init(),
   ])
-  const stores = [useGameStore, useCrapsStore, useBaccaratStore, useRouletteStore, useUthStore] as const
+  const stores = [useGameStore, useCrapsStore, useBaccaratStore, useRouletteStore, useUthStore, usePaiGowStore] as const
   return {
     useGameStore,
     useCrapsStore,
     useBaccaratStore,
     useRouletteStore,
     useUthStore,
+    usePaiGowStore,
     useAppStore,
     useSharedBankroll,
     useSessionNets,
@@ -322,7 +325,7 @@ describe('what each table has won or lost this session', () => {
 
     const { useSessionNets, useCrapsStore } = await freshFloor(local)
     expect(useCrapsStore.getState().profile.stats.netResult).toBe(settled)
-    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0 })
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0, paigow: 0 })
   })
 
   it('counts each table only for what it settles, while every rack moves together', async () => {
@@ -355,7 +358,7 @@ describe('what each table has won or lost this session', () => {
     useCrapsStore.getState().resetRack(useCrapsStore.getState().game.bankroll + 1_000)
     useCrapsStore.getState().rebuy()
 
-    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: dice, baccarat: 0, roulette: 0, uth: 0 })
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: dice, baccarat: 0, roulette: 0, uth: 0, paigow: 0 })
   })
 
   it('starts the count again when the bankroll is reset from the lobby', async () => {
@@ -367,7 +370,7 @@ describe('what each table has won or lost this session', () => {
     playBlackjackHand(floor)
 
     resetAllRacks(3_000)
-    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0 })
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0, paigow: 0 })
 
     // And counts on from the new figure.
     const before = floor.useCrapsStore.getState().profile.stats.netResult
@@ -385,10 +388,10 @@ describe('what each table has won or lost this session', () => {
     playBlackjackHand(floor)
 
     clearSessionNets('blackjack')
-    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: dice, baccarat: 0, roulette: 0, uth: 0 })
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: dice, baccarat: 0, roulette: 0, uth: 0, paigow: 0 })
 
     clearSessionNets()
-    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0 })
+    expect(useSessionNets.getState()).toEqual({ blackjack: 0, craps: 0, baccarat: 0, roulette: 0, uth: 0, paigow: 0 })
   })
 
   it('keeps what a table won this session when its history is erased, and counts on from there', async () => {

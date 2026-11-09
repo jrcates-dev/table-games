@@ -22,7 +22,8 @@ import { clearSessionNets } from '../store/sessionNets'
 import { useSharedBankroll } from '../store/sharedBankroll'
 import { clampStartingBankroll, MAX_STARTING_BANKROLL, MIN_STARTING_BANKROLL } from '../store/stake'
 import { selectCanChooseUthBankroll, selectUthHasRun, useUthStore } from '../store/uthStore'
-import { BaccaratArt, RouletteArt, UthArt } from './TableArt'
+import { selectCanChoosePaiGowBankroll, selectPaiGowHasRun, usePaiGowStore } from '../store/paigowStore'
+import { BaccaratArt, PaiGowArt, RouletteArt, UthArt } from './TableArt'
 import { CrestRays, MarqueeBulbs, NeonWord, SuitPips } from './Sign'
 import { UpdatePill } from './UpdatePill'
 
@@ -37,7 +38,7 @@ let entered = false
  * The lobby.
  *
  * The first thing anyone sees, so it carries the whole identity: the name in
- * lights on a Vegas marquee, the casino floor behind it, and five tables to
+ * lights on a Vegas marquee, the casino floor behind it, and six tables to
  * choose between — each with its limit sign lit, its rules, and your own rack
  * before you sit down.
  */
@@ -81,18 +82,26 @@ export function Lobby() {
   const uthChoosing = useUthStore(selectCanChooseUthBankroll)
   const uthHasRun = useUthStore(selectUthHasRun)
   const chooseUth = useUthStore((s) => s.chooseBankroll)
+  const pgBankroll = usePaiGowStore((s) => s.profile.bankroll)
+  const pgReady = usePaiGowStore((s) => s.ready)
+  const pgLimits = usePaiGowStore((s) => s.game.limits)
+  const pgFree = usePaiGowStore((s) => s.game.rules.commissionFree)
+  const pgChoosing = usePaiGowStore(selectCanChoosePaiGowBankroll)
+  const pgHasRun = usePaiGowStore(selectPaiGowHasRun)
+  const choosePg = usePaiGowStore((s) => s.chooseBankroll)
   const shared = useSharedBankroll((s) => s.shared)
   const sharedBankroll = useSharedBankroll((s) => s.bankroll)
 
   const preset = RULE_PRESETS[rulePreset] ?? RULE_PRESETS[DEFAULT_RULE_PRESET]
   const bjRules = ruleLines(preset.rules)
-  const allReady = bjReady && crapsReady && baReady && roReady && uthReady
+  const allReady = bjReady && crapsReady && baReady && roReady && uthReady && pgReady
   const played = [
     bjHasRun && 'Blackjack',
     crapsHasRun && 'Craps',
     baHasRun && 'Baccarat',
     roHasRun && 'Roulette',
     uthHasRun && "Hold'em",
+    pgHasRun && 'Pai Gow',
   ].filter((name) => name !== false)
 
   // While the bankroll is shared every card shows the one rack, and it is set
@@ -232,6 +241,22 @@ export function Lobby() {
           art={<UthArt />}
           limits={`${money(uthLimits.minAnte)}–${money(uthLimits.maxAnte)}`}
         />
+        <GameCard
+          id="paigow"
+          index={5}
+          entrance={entrance}
+          title="Pai Gow"
+          tagline="Aria Pai Gow Poker"
+          lines={['53 cards · joker semi-wild', 'Five cards high, two low', pgFree ? 'No commission · queen-high pushes' : 'Wins pay 5% commission', 'Fortune Bonus to 8,000 to 1', 'A house-way coach']}
+          bankroll={rack(pgReady, pgBankroll)}
+          onChooseBankroll={choose('paigow', pgChoosing, pgBankroll, choosePg)}
+          shared={shared}
+          hasRun={pgHasRun}
+          featured={lastGame === 'paigow'}
+          onSit={() => sit('paigow')}
+          art={<PaiGowArt />}
+          limits={`${money(pgLimits.minBet)}–${money(pgLimits.maxBet)}`}
+        />
       </div>
 
       <RackReset ready={allReady} played={played} entrance={entrance} />
@@ -244,7 +269,7 @@ const LIST = new Intl.ListFormat('en-US', { style: 'long', type: 'conjunction' }
 /**
  * One figure for every rack on the floor — or, with the bankroll shared, for
  * the one rack every table plays from. Each table still files its own runs, so
- * this is the choice on each card made five times at once — and it asks first,
+ * this is the choice on each card made six times at once — and it asks first,
  * because a table that has been played closes its run on the way and anything
  * left in play is swept off. The question comes up in the middle of the screen
  * over the whole floor, wherever the lobby is scrolled to.
