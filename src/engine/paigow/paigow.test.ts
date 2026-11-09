@@ -227,6 +227,7 @@ describe('the house way', () => {
     expect(houseLow('JK AS 9H 7D 5C 3S 2H')).toBe(low('9H 7D'))
   })
 
+  // Sixty thousand hands take about 4.5s on a CI runner, so it gets more than Vitest's 5s default.
   it('never fouls, and every rule in the book is reached', () => {
     const next = lcg(2024)
     const used = new Set<string>()
@@ -241,7 +242,7 @@ describe('the house way', () => {
     // The rarest (five aces, quads with a pair) are covered by the examples above.
     const rare = new Set(['five-aces', 'quads-plus', 'quad-aces', 'quads-high', 'quads-mid', 'quads-low', 'two-trips', 'trips-two-pair'])
     for (const rule of HOUSE_WAY) if (!rare.has(rule.id)) expect(used, rule.id).toContain(rule.id)
-  })
+  }, 30_000)
 })
 
 describe('Fortune', () => {
