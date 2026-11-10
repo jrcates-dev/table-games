@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ARIA_ODDS_MULTIPLE, LAY_ODDS, pay, TRUE_ODDS } from './bets'
 import * as c from './craps'
-import { CRAPS_TABLES, limitsFor } from './rules'
+import { CRAPS_TABLE, limitsFor } from './rules'
 import { POINT_NUMBERS, type BetKind, type CrapsState, type DieFace, type PointNumber } from './types'
 
 /**
@@ -17,7 +17,7 @@ import { POINT_NUMBERS, type BetKind, type CrapsState, type DieFace, type PointN
  * are the combinations nobody thought to write a case for.
  */
 
-const LIMITS = limitsFor(CRAPS_TABLES[0])
+const LIMITS = limitsFor(CRAPS_TABLE)
 const fresh = () => c.createGame(100_000, 1, LIMITS)
 
 const bet = (s: CrapsState, kind: BetKind, amount: number, number?: number) =>

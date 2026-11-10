@@ -3,8 +3,8 @@ import { create } from 'zustand'
 /**
  * Where on the floor you are standing.
  *
- * Deliberately the only thing the games share. Statistics, histories and
- * leaderboards are separate all the way down, and so are bankrolls unless the
+ * Deliberately the only thing the games share. Statistics and histories
+ * are separate all the way down, and so are bankrolls unless the
  * player chooses to carry one between tables (see `racks.ts`) — walking from
  * one pit to the other should feel like changing games, not like carrying one
  * game's baggage into another.

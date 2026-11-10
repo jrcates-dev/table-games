@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import * as c from '../engine/craps/craps'
-import { CRAPS_TABLES, limitsFor } from '../engine/craps/rules'
+import { CRAPS_TABLE, limitsFor } from '../engine/craps/rules'
 import type { BetKind, CrapsState, DieFace } from '../engine/craps/types'
 import { explainRoll } from './rollStory'
 
-const LIMITS = limitsFor(CRAPS_TABLES[0]) // $10 min, 3-4-5x odds
+const LIMITS = limitsFor(CRAPS_TABLE) // $10 min, 3-4-5x odds
 
 function game(): CrapsState {
   return c.createGame(100_000, 1, LIMITS)

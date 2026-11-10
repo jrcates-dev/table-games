@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buyVig, houseEdge, spec } from './bets'
 import * as c from './craps'
-import { CRAPS_TABLES, limitsFor } from './rules'
+import { CRAPS_TABLE, limitsFor } from './rules'
 import type { BetKind, CrapsState, DieFace } from './types'
 
 /**
@@ -17,7 +17,7 @@ import type { BetKind, CrapsState, DieFace } from './types'
  * Seeded, so a failure is reproducible rather than a coin flip.
  */
 
-const LIMITS = limitsFor(CRAPS_TABLES[0])
+const LIMITS = limitsFor(CRAPS_TABLE)
 const BANKROLL = 1_000_000_000
 
 interface Strategy {

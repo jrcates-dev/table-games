@@ -11,7 +11,6 @@ import { TopBar, TopBarButton } from '../components/TopBar'
 import { FORTUNE_LABEL } from '../engine/paigow/fortune'
 import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money, signedMoney } from '../lib/format'
-import { useSessionNet } from '../lib/session'
 import { paigowAtRisk, selectCanChoosePaiGowBankroll, selectPaiGowHasRun, usePaiGowStore } from '../store/paigowStore'
 import { usePaiGowUi } from '../store/tableUi'
 import { paigowDenominations, spotKind, tipFor } from './betInfo'
@@ -40,15 +39,12 @@ export default function PaiGowView() {
   const compact = useCompact()
   const portrait = usePortrait()
   const game = usePaiGowStore((s) => s.game)
-  const ready = usePaiGowStore((s) => s.ready)
   const bankroll = usePaiGowStore((s) => s.profile.bankroll)
-  const run = usePaiGowStore((s) => s.profile.runStartedAt)
   const showEdges = usePaiGowStore((s) => s.profile.settings.showEdges)
   const panel = usePaiGowUi((s) => s.panel)
   const toggle = usePaiGowUi((s) => s.togglePanel)
   const close = usePaiGowUi((s) => s.closePanel)
   const atRisk = paigowAtRisk(game)
-  const session = useSessionNet('paigow', bankroll + atRisk, ready, run)
   const canChangeRack = usePaiGowStore(selectCanChoosePaiGowBankroll)
   const hasRun = usePaiGowStore(selectPaiGowHasRun)
   const resetRack = usePaiGowStore((s) => s.resetRack)
@@ -63,7 +59,6 @@ export default function PaiGowView() {
         game="Pai Gow Poker"
         bankroll={bankroll}
         rack={{ onFelt: atRisk, canChange: canChangeRack, hasRun, reset: resetRack }}
-        session={session}
         cents
         extra={atRisk > 0 ? <span className="bankroll__risk">{money(atRisk)} on the felt</span> : undefined}
         placard={

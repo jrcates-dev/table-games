@@ -20,22 +20,11 @@ import type { Plugin, ResolvedConfig } from 'vite'
  */
 export function offlineCache(): Plugin {
   let config: ResolvedConfig
-  /** Chunks only an account ever loads: the Supabase client (see src/store/supabase.ts). */
-  const cloudOnly = new Set<string>()
   return {
     name: 'arena:offline-cache',
     apply: 'build',
     configResolved(resolved) {
       config = resolved
-    },
-    generateBundle(_options, bundle) {
-      cloudOnly.clear()
-      for (const chunk of Object.values(bundle)) {
-        if (chunk.type !== 'chunk') continue
-        // The client and what it brings with it, and nothing of the app's own.
-        const vendor = chunk.moduleIds.every((id) => id.includes('node_modules'))
-        if (vendor && chunk.moduleIds.some((id) => id.includes('@supabase/supabase-js'))) cloudOnly.add(chunk.fileName)
-      }
     },
     closeBundle() {
       const outDir = config.build.outDir
@@ -44,17 +33,15 @@ export function offlineCache(): Plugin {
         // What the app never asks for is left to the network. Every phone
         // browser reads woff2, so the woff fallbacks never load, and the app is
         // in English, so nor do the Cyrillic, Greek and Vietnamese cuts of each
-        // font; the link-preview image and robots.txt are fetched by chat apps
-        // and crawlers; and the Supabase client loads only for a build with
-        // credentials, and is no use offline even then.
+        // font; and the link-preview image and robots.txt are fetched by chat
+        // apps and crawlers.
         .filter(
           (file) =>
             file !== 'sw.js' &&
             file !== 'robots.txt' &&
             !file.endsWith('.woff') &&
             !/-(cyrillic|cyrillic-ext|greek|greek-ext|vietnamese)-/.test(file) &&
-            !file.startsWith('og-image.') &&
-            !cloudOnly.has(file),
+            !file.startsWith('og-image.'),
         )
         .sort()
       const hash = createHash('sha256')

@@ -4,37 +4,8 @@ import {
   type CrapsProfile,
 } from './crapsProfile'
 
-/**
- * Craps persistence, behind the same narrow interface blackjack uses.
- *
- * Local only for now. The cloud adapter in `supabase.ts` is shaped around a
- * blackjack profile — hands, strategy accuracy — and writes blackjack rows
- * only. `supabase/schema.sql` already keys every row by game, so craps can
- * be filed apart from blackjack once the adapter is generalised; until then
- * craps stays on the device.
- */
-
-export interface CrapsLeaderboardEntry {
-  id: string
-  displayName: string
-  peakBankroll: number
-  shoots: number
-  /** Most rolls held in a single shoot — what craps players actually brag about. */
-  longestRoll: number
-  achievedAt: number
-  isYou?: boolean
-}
-
-export interface CrapsStorageAdapter {
-  readonly kind: 'local'
-  load(): Promise<CrapsProfile | null>
-  save(profile: CrapsProfile): Promise<void>
-  submitRun(profile: CrapsProfile): Promise<void>
-  leaderboard(limit?: number): Promise<CrapsLeaderboardEntry[]>
-}
-
+/** The craps profile in the browser's local storage, kept apart from the blackjack one. */
 const PROFILE_KEY = 'cta:craps:profile:v1'
-const LEADERBOARD_KEY = 'cta:craps:leaderboard:v1'
 
 function safeParse<T>(raw: string | null): T | null {
   if (!raw) return null
@@ -45,10 +16,10 @@ function safeParse<T>(raw: string | null): T | null {
   }
 }
 
-export class LocalCrapsAdapter implements CrapsStorageAdapter {
-  readonly kind = 'local' as const
-
+export class LocalCrapsAdapter {
   async load(): Promise<CrapsProfile | null> {
+    // Earlier builds filed finished runs to a leaderboard nothing showed.
+    localStorage.removeItem('cta:craps:leaderboard:v1')
     const stored = safeParse<CrapsProfile>(localStorage.getItem(PROFILE_KEY))
     if (!stored) return null
     // A version bump means the shape changed; start clean rather than crash on
@@ -72,29 +43,5 @@ export class LocalCrapsAdapter implements CrapsStorageAdapter {
         JSON.stringify({ ...profile, history: profile.history.slice(0, 25) }),
       )
     }
-  }
-
-  async submitRun(profile: CrapsProfile): Promise<void> {
-    const entries = safeParse<CrapsLeaderboardEntry[]>(localStorage.getItem(LEADERBOARD_KEY)) ?? []
-    entries.push(crapsProfileToEntry(profile))
-    entries.sort((a, b) => b.peakBankroll - a.peakBankroll)
-    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries.slice(0, 100)))
-  }
-
-  async leaderboard(limit = 25): Promise<CrapsLeaderboardEntry[]> {
-    const entries = safeParse<CrapsLeaderboardEntry[]>(localStorage.getItem(LEADERBOARD_KEY)) ?? []
-    return entries.slice(0, limit)
-  }
-}
-
-export function crapsProfileToEntry(profile: CrapsProfile): CrapsLeaderboardEntry {
-  return {
-    id: `${profile.userId ?? 'guest'}-${Date.now()}`,
-    displayName: profile.displayName,
-    peakBankroll: profile.peakBankroll,
-    shoots: profile.runShoots,
-    longestRoll: profile.stats.longestRoll,
-    achievedAt: Date.now(),
-    isYou: true,
   }
 }

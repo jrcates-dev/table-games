@@ -23,8 +23,7 @@ npm run dev      # start the dev server
 
 Then open **http://localhost:5173**. Sound starts off; press `M` or the speaker
 button to hear the table. No configuration is required — the
-games run as a guest against browser local storage. Supabase is optional; see
-[Cloud sync](#cloud-sync-optional).
+games run entirely in the browser, saved to its local storage.
 
 > **Windows PowerShell:** if `npm` fails with *"running scripts is disabled on
 > this system"*, run `npm.cmd run dev` instead, or allow local scripts once with
@@ -529,18 +528,6 @@ orientations). Real physics, provably fair dice.
   a hand, checks the felt comes back as it was left, that whatever was already
   decided is paid exactly once, and that a hand paid before the close is never
   paid again.
-
-## Cloud sync (optional)
-
-1. Create a Supabase project and run `supabase/schema.sql` against it.
-2. `cp .env.example .env.local` and fill in the URL and anon key.
-
-Sign-in is a passwordless email link, from blackjack's Settings. The Supabase
-library is only downloaded when credentials exist. Local storage stays the
-write-through cache, so the table never waits on the network. Only blackjack
-syncs: the other five tables are local-only for now. The schema already keys
-every row by game, but the adapter in `src/store/supabase.ts` is still shaped
-around a blackjack profile.
 
 ## Development aids
 

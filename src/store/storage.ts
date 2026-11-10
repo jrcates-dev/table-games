@@ -1,34 +1,10 @@
 import { migrateSettings, PROFILE_VERSION, type Profile } from './profile'
 
 /**
- * Persistence behind a narrow interface.
- *
- * The game plays entirely as a guest against `LocalStorageAdapter`. When
- * Supabase credentials are present the same interface is served by
- * `SupabaseAdapter`, so upgrading a guest to a real account never touches game
- * code.
+ * The blackjack profile in the browser's local storage. The game plays
+ * entirely on the device: bankroll, statistics and hand history live here.
  */
-export interface LeaderboardEntry {
-  id: string
-  displayName: string
-  peakBankroll: number
-  roundsPlayed: number
-  strategyAccuracy: number
-  achievedAt: number
-  /** True for the signed-in player's own row. */
-  isYou?: boolean
-}
-
-export interface StorageAdapter {
-  readonly kind: 'local' | 'supabase'
-  load(): Promise<Profile | null>
-  save(profile: Profile): Promise<void>
-  submitRun(profile: Profile): Promise<void>
-  leaderboard(limit?: number): Promise<LeaderboardEntry[]>
-}
-
 const PROFILE_KEY = 'cta:profile:v1'
-const LEADERBOARD_KEY = 'cta:leaderboard:v1'
 
 function safeParse<T>(raw: string | null): T | null {
   if (!raw) return null
@@ -39,10 +15,10 @@ function safeParse<T>(raw: string | null): T | null {
   }
 }
 
-export class LocalStorageAdapter implements StorageAdapter {
-  readonly kind = 'local' as const
-
+export class LocalStorageAdapter {
   async load(): Promise<Profile | null> {
+    // Earlier builds filed finished runs to a leaderboard nothing showed.
+    localStorage.removeItem('cta:leaderboard:v1')
     const stored = safeParse<Profile>(localStorage.getItem(PROFILE_KEY))
     if (!stored) return null
     // A version bump means the shape changed; start clean rather than crash on
@@ -66,31 +42,4 @@ export class LocalStorageAdapter implements StorageAdapter {
       )
     }
   }
-
-  async submitRun(profile: Profile): Promise<void> {
-    const entries = safeParse<LeaderboardEntry[]>(localStorage.getItem(LEADERBOARD_KEY)) ?? []
-    entries.push(toEntry(profile))
-    entries.sort((a, b) => b.peakBankroll - a.peakBankroll)
-    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries.slice(0, 100)))
-  }
-
-  async leaderboard(limit = 25): Promise<LeaderboardEntry[]> {
-    const entries = safeParse<LeaderboardEntry[]>(localStorage.getItem(LEADERBOARD_KEY)) ?? []
-    return entries.slice(0, limit)
-  }
 }
-
-function toEntry(profile: Profile): LeaderboardEntry {
-  const { strategyCorrect, strategyTotal } = profile.stats
-  return {
-    id: `${profile.userId ?? 'guest'}-${Date.now()}`,
-    displayName: profile.displayName,
-    peakBankroll: profile.peakBankroll,
-    roundsPlayed: profile.runRounds,
-    strategyAccuracy: strategyTotal > 0 ? strategyCorrect / strategyTotal : 1,
-    achievedAt: Date.now(),
-    isYou: true,
-  }
-}
-
-export { toEntry as profileToLeaderboardEntry }

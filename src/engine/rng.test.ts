@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createShoe, reshuffle } from './cards'
 import * as craps from './craps/craps'
-import { CRAPS_TABLES, limitsFor } from './craps/rules'
+import { CRAPS_TABLE, limitsFor } from './craps/rules'
 import type { CrapsState } from './craps/types'
 import { createRng, randomSeed, seedRng, shuffle } from './rng'
 import { RANKS } from './types'
@@ -113,7 +113,7 @@ describe('the shuffle', () => {
 })
 
 describe('the dice', () => {
-  const LIMITS = limitsFor(CRAPS_TABLES[0])
+  const LIMITS = limitsFor(CRAPS_TABLE)
   const WAYS = [1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1]
   const ROLLS = 360_000
 

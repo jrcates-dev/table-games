@@ -170,13 +170,7 @@ export interface RuleSet {
   penetration: number
 }
 
-export interface TableTier {
-  id: string
-  name: string
+export interface TableLimits {
   minBet: number
   maxBet: number
-  /** Bankroll required before this table unlocks. */
-  requiredBankroll: number
-  /** Accent colour used for the felt inlay and chip rail. */
-  accent: string
 }

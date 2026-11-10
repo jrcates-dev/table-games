@@ -4,7 +4,6 @@ import { Stage } from '../components/Stage'
 import { TopBar, TopBarButton } from '../components/TopBar'
 import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_COUNT, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money } from '../lib/format'
-import { useSessionNet } from '../lib/session'
 import { usePrefs } from '../prefs/prefsStore'
 import {
   CARD_FLIGHT,
@@ -65,7 +64,6 @@ export default function BlackjackView() {
   const compact = useCompact()
   const portrait = usePortrait()
   const game = useGameStore((s) => s.game)
-  const ready = useGameStore((s) => s.ready)
   const bankroll = useGameStore((s) => s.profile.bankroll)
   const settings = useGameStore((s) => s.profile.settings)
   const table = useGameStore((s) => s.table())
@@ -75,8 +73,6 @@ export default function BlackjackView() {
   const askShuffle = useUiStore((s) => s.askShuffle)
   const canShuffle = useGameStore(selectCanShuffle)
   const back = usePrefs((s) => s.cardBack)
-  const run = useGameStore((s) => s.profile.runStartedAt)
-  const session = useSessionNet('blackjack', bankroll, ready, run)
   const canChangeRack = useGameStore(selectCanChooseBankroll)
   const hasRun = useGameStore(selectBankrollHasRun)
   const resetRack = useGameStore((s) => s.resetRack)
@@ -98,7 +94,6 @@ export default function BlackjackView() {
         id="blackjack"
         game="Blackjack"
         bankroll={bankroll}
-        session={session}
         rack={{ onFelt: 0, canChange: canChangeRack, hasRun, reset: resetRack }}
         placard={
           <>

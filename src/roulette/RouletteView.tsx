@@ -12,7 +12,6 @@ import { WHEEL_NAME } from '../engine/roulette/rules'
 import { pocketColor, pocketLabel } from '../engine/roulette/wheel'
 import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_SPINS, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money, percent, signedMoney } from '../lib/format'
-import { useSessionNet } from '../lib/session'
 import { rouletteAtRisk, selectCanChooseRouletteBankroll, selectRouletteHasRun, useRouletteStore } from '../store/rouletteStore'
 import { useRouletteUi } from '../store/tableUi'
 import { rouletteDenominations, spotId, tipFor } from './betInfo'
@@ -49,15 +48,12 @@ export default function RouletteView() {
   const compact = useCompact()
   const portrait = usePortrait()
   const game = useRouletteStore((s) => s.game)
-  const ready = useRouletteStore((s) => s.ready)
   const bankroll = useRouletteStore((s) => s.profile.bankroll)
-  const run = useRouletteStore((s) => s.profile.runStartedAt)
   const showEdges = useRouletteStore((s) => s.profile.settings.showEdges)
   const panel = useRouletteUi((s) => s.panel)
   const toggle = useRouletteUi((s) => s.togglePanel)
   const close = useRouletteUi((s) => s.closePanel)
   const atRisk = rouletteAtRisk(game)
-  const session = useSessionNet('roulette', bankroll + atRisk, ready, run)
   const canChangeRack = useRouletteStore(selectCanChooseRouletteBankroll)
   const hasRun = useRouletteStore(selectRouletteHasRun)
   const resetRack = useRouletteStore((s) => s.resetRack)
@@ -72,7 +68,6 @@ export default function RouletteView() {
         game="Roulette"
         bankroll={bankroll}
         rack={{ onFelt: atRisk, canChange: canChangeRack, hasRun, reset: resetRack }}
-        session={session}
         extra={atRisk > 0 ? <span className="bankroll__risk">{money(atRisk)} on the layout</span> : undefined}
         placard={
           <>
