@@ -45,20 +45,20 @@ describe('blackjack: house rules', () => {
       if (phase === 'playerTurn') store.getState().act('stand')
     }
     expect(store.getState().game.round.phase).toBe('roundOver')
-    expect(store.getState().game.rules.blackjackPayout).toBe(1.5)
+    expect(store.getState().game.rules.blackjackPayout).toBe(1.2)
 
-    store.getState().updateSettings({ rulePreset: 'ariaSixFive' })
+    store.getState().updateSettings({ rulePreset: 'ariaSalon' })
 
     const { game, profile } = store.getState()
-    expect(profile.settings.rulePreset).toBe('ariaSixFive')
+    expect(profile.settings.rulePreset).toBe('ariaSalon')
     expect(game.round.phase).toBe('betting')
-    expect(game.rules).toEqual(RULE_PRESETS.ariaSixFive.rules)
+    expect(game.rules).toEqual(RULE_PRESETS.ariaSalon.rules)
     expect(game.pendingBet).toBe(bet)
     expect(game.bankroll).toBe(profile.bankroll)
 
     // And the next hand is dealt under them.
     store.getState().dealRound()
-    expect(store.getState().game.rules.blackjackPayout).toBe(1.2)
+    expect(store.getState().game.rules.blackjackPayout).toBe(1.5)
   })
 
   it('wait for a hand being played to finish', async () => {
@@ -80,7 +80,7 @@ describe('blackjack: house rules', () => {
     expect(store.getState().game.round.phase).toBe('playerTurn')
 
     const before = store.getState().game
-    store.getState().updateSettings({ rulePreset: 'ariaSixFive' })
+    store.getState().updateSettings({ rulePreset: 'ariaSalon' })
     expect(store.getState().game).toBe(before)
   })
 })

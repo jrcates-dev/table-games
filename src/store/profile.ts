@@ -103,9 +103,11 @@ export interface Settings {
   startingBankroll: number
   /**
    * Which generation of rule presets these settings were saved under. The
-   * default moved from the generic Strip game to Aria's; a profile that was
-   * simply sitting on the old default follows it, one that chose a table on
-   * purpose keeps it.
+   * default moved from the generic Strip game to Aria's high-limit shoe; a
+   * profile that was simply sitting on the old default followed it, one that
+   * chose a table on purpose kept it. The default has since moved again, to the
+   * 6:5 shoe, for new players only: a saved profile holds its table outright
+   * and keeps it.
    */
   rulesRevision?: number
 }
@@ -127,12 +129,13 @@ export const DEFAULT_SETTINGS: Settings = {
 
 /**
  * Settings as stored, brought up to date: missing fields back-filled from the
- * defaults, and a profile still on the pre-Aria default moved to the new one.
+ * defaults, and a profile still on the pre-Aria default moved to the Aria
+ * shoe that replaced it.
  */
 export function migrateSettings(stored: Partial<Settings> | undefined): Settings {
   const settings: Settings = { ...DEFAULT_SETTINGS, ...stored }
   if ((stored?.rulesRevision ?? 1) < RULES_REVISION && stored?.rulePreset === 'vegasStrip') {
-    settings.rulePreset = DEFAULT_RULE_PRESET
+    settings.rulePreset = 'ariaSalon'
   }
   settings.rulesRevision = RULES_REVISION
   return settings

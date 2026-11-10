@@ -31,7 +31,7 @@ games run as a guest against browser local storage. Supabase is optional; see
 
 | Command | What it does |
 |---|---|
-| `npm test` | 486 tests: engine rules, exact and long-run house edges, dice and wheel fairness |
+| `npm test` | 494 tests: engine rules, exact and long-run house edges, dice and wheel fairness |
 | `npm run test:watch` | Tests in watch mode |
 | `npm run lint` | Lint with oxlint |
 | `npm run build` | Type-check and build a production bundle into `dist/` |
@@ -123,20 +123,21 @@ short to land in view.
 
 ### Rules — Aria, 2026
 
-The default table is **Aria's high-limit shoe**: six decks, dealer stands on
-all 17s, blackjack pays 3:2, double on any two cards, double after split, split
-to four hands, resplit aces, late surrender, dealer peeks for a natural. The
-other presets in Settings:
+A new player sits down at **Aria's low-limit shoe**, the game most of the
+Strip deals today: six decks, dealer hits soft 17, blackjack pays **6:5**,
+double on any two cards, double after split, split to four hands, no
+surrender, dealer peeks for a natural. The other presets in Settings:
 
 | Preset | What changes |
 |---|---|
-| Aria Main Floor | Dealer hits soft 17 |
-| Aria Double Deck | Two decks, no surrender, no resplitting aces |
-| Aria Low Limit | Hits soft 17 and pays **6:5** — included so the statistics show what that costs |
+| Aria High Limit | Pays 3:2, stands on soft 17, resplits aces, late surrender — the best shoe in the building |
+| Aria Main Floor | As High Limit, but the dealer hits soft 17 |
+| Aria Double Deck | Two decks, 3:2, stands on soft 17, no surrender, no resplitting aces |
 | Classic Strip / Downtown / Single Deck | The original presets, kept for comparison |
 
-A profile still on the old generic default moves to the Aria default once;
-a table chosen on purpose is kept.
+The statistics panel shows what the 6:5 payout costs against the 3:2 tables.
+A saved profile keeps the table it has; only a new player starts at 6:5. A
+profile still on the old generic default moves to Aria High Limit once.
 
 Details covered by tests: a 21 made from a split is not a natural; the dealer
 turns the hole card but draws nothing when every hand has busted or
@@ -492,7 +493,7 @@ orientations). Real physics, provably fair dice.
 
 ### Correctness
 
-`npm test` runs 486 tests. Beyond per-rule unit tests:
+`npm test` runs 494 tests. Beyond per-rule unit tests:
 
 - **Blackjack** plays 200,000 hands of perfect basic strategy and checks the
   realised edge, and plays Aria's high-limit shoe and its 6:5 tables through the

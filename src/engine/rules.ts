@@ -42,9 +42,9 @@ export const SINGLE_DECK: RuleSet = {
  * Aria, 2026.
  *
  * The best shoe game in the building is the six-deck table that stands on all
- * 17s — the high-limit standard, and the one this app deals by default. Late
- * surrender and resplitting aces are both on, which together with S17 is what
- * brings the edge down to roughly a quarter of a percent.
+ * 17s — the high-limit standard. Late surrender and resplitting aces are both
+ * on, which together with S17 is what brings the edge down to roughly a
+ * quarter of a percent.
  */
 export const ARIA_SALON: RuleSet = {
   decks: 6,
@@ -77,9 +77,11 @@ export const ARIA_DOUBLE_DECK: RuleSet = {
 }
 
 /**
- * The low-limit tables. Naturals pay 6:5, which costs the player more than
- * every other rule on this list combined — included so the statistics panel
- * can show exactly how much.
+ * The low-limit tables, and the game most of the Strip deals today: six decks,
+ * the dealer hits soft 17, and naturals pay 6:5, which costs the player more
+ * than every other rule on this list combined. A new player sits down here, as
+ * they would walking in off the floor; the 3:2 tables are a choice away in
+ * Settings, and the statistics panel shows exactly what the difference costs.
  */
 export const ARIA_SIX_FIVE: RuleSet = {
   ...ARIA_SALON,
@@ -105,7 +107,8 @@ export const RULE_PRESETS: Record<string, { name: string; rules: RuleSet; houseE
   singleDeck: { name: 'Single Deck · Classic', rules: SINGLE_DECK, houseEdge: 0.0026 },
 }
 
-export const DEFAULT_RULE_PRESET = 'ariaSalon'
+/** Where a new player sits down: the low-limit 6:5 shoe (see ARIA_SIX_FIVE). */
+export const DEFAULT_RULE_PRESET = 'ariaSixFive'
 
 /**
  * Table tiers. Higher limits unlock as the bankroll grows, which gives the

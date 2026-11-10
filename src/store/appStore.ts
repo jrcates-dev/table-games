@@ -20,7 +20,7 @@ export interface GameMeta {
 }
 
 export const GAMES: GameMeta[] = [
-  { id: 'blackjack', name: 'Blackjack', subtitle: 'Six-deck shoe · 3 to 2' },
+  { id: 'blackjack', name: 'Blackjack', subtitle: 'Six-deck shoe · 6 to 5' },
   { id: 'craps', name: 'Craps', subtitle: '3-4-5x odds · Field pays triple 12' },
   { id: 'baccarat', name: 'Baccarat', subtitle: 'Eight decks · Banker pays 5% commission' },
   { id: 'roulette', name: 'Roulette', subtitle: 'Double zero · Single zero in the high-limit room' },
