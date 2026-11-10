@@ -11,6 +11,7 @@ import { MuteButton, Monogram } from '../components/TopBar'
 import { DEFAULT_RULE_PRESET, RULE_PRESETS, STARTING_BANKROLL } from '../engine/rules'
 import { houseEdge } from '../engine/roulette/bets'
 import { TRIPS_TABLES } from '../engine/uth/rules'
+import { useCompact, usePortrait } from '../lib/compact'
 import { money, percent } from '../lib/format'
 import { gameMeta, useAppStore, type GameId } from '../store/appStore'
 import { selectBaccaratHasRun, selectCanChooseBaccaratBankroll, useBaccaratStore } from '../store/baccaratStore'
@@ -47,6 +48,11 @@ export function Lobby() {
   useEffect(() => {
     entered = true
   }, [])
+  // On a phone, upright or sideways, the sign gives its height to the tables:
+  // the lobby opens on the cards, with only the mute button above them.
+  const portrait = usePortrait()
+  const compact = useCompact()
+  const signless = portrait || compact
   const go = useAppStore((s) => s.go)
   const lastGame = useAppStore((s) => s.lastGame)
   const bjBankroll = useGameStore((s) => s.profile.bankroll)
@@ -123,36 +129,40 @@ export function Lobby() {
   }
 
   return (
-    <main className="lobby">
+    <main className={signless ? 'lobby lobby--signless' : 'lobby'}>
       <div className="lobby__corner">
         <MuteButton />
       </div>
       <UpdatePill />
 
-      <motion.header
-        className="lobby__head"
-        initial={entrance ? { opacity: 0, y: -14 } : false}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="marquee">
-          <MarqueeBulbs />
-          <div className="marquee__crest">
-            <CrestRays />
-            <Monogram size={58} />
+      {signless ? (
+        <h1 className="sr-only">Arena</h1>
+      ) : (
+        <motion.header
+          className="lobby__head"
+          initial={entrance ? { opacity: 0, y: -14 } : false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="marquee">
+            <MarqueeBulbs />
+            <div className="marquee__crest">
+              <CrestRays />
+              <Monogram size={58} />
+            </div>
+            <h1 className="lobby__title" aria-label="Arena">
+              <NeonWord word="ARENA" flicker={entrance} />
+            </h1>
+            <p className="lobby__subtitle">
+              <span className="lobby__rule" />
+              <SuitPips suits={['S', 'H']} />
+              Las Vegas Table Games
+              <SuitPips suits={['D', 'C']} />
+              <span className="lobby__rule" />
+            </p>
           </div>
-          <h1 className="lobby__title" aria-label="Arena">
-            <NeonWord word="ARENA" flicker={entrance} />
-          </h1>
-          <p className="lobby__subtitle">
-            <span className="lobby__rule" />
-            <SuitPips suits={['S', 'H']} />
-            Las Vegas Table Games
-            <SuitPips suits={['D', 'C']} />
-            <span className="lobby__rule" />
-          </p>
-        </div>
-      </motion.header>
+        </motion.header>
+      )}
 
       <div className="lobby__games">
         <GameCard

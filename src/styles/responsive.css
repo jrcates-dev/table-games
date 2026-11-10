@@ -208,9 +208,10 @@
 }
 
 /*
- * Phones: each table as wide as the screen, its picture shorter and its rules
- * cut to the two that say the most, so the six are a short scroll rather
- * than three thousand pixels of one.
+ * Phones: each table as wide as the screen, its picture shorter, its rules cut
+ * to the two that say the most and run together on a line, and the buy-in
+ * without its range under it, so the six are a short scroll rather than three
+ * thousand pixels of one.
  */
 @media (max-width: 560px) {
   .lobby {
@@ -225,14 +226,54 @@
 
   .game-card {
     width: min(100%, 400px);
+    border-radius: 22px;
   }
 
   .game-card__art {
-    height: 140px;
+    height: 112px;
+  }
+
+  .game-card__body {
+    padding: 8px 16px 12px;
+  }
+
+  .game-card__title {
+    font-size: 24px;
+    margin: 0 0 6px;
+  }
+
+  .game-card__rules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 16px;
+    margin-bottom: 10px;
   }
 
   .game-card__rules li:nth-child(n + 3) {
     display: none;
+  }
+
+  /* Without the range line under the field, the field and the button sit side
+     by side on the narrowest phone too. */
+  .game-card__foot {
+    flex-direction: row;
+    align-items: flex-end;
+    padding-top: 10px;
+  }
+
+  .game-card__stake {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 170px;
+  }
+
+  /* The field clamps whatever is typed into the range, so the line saying it goes. */
+  .game-card__stake-hint {
+    display: none;
+  }
+
+  .game-card__bankroll {
+    min-height: 62px;
   }
 
   .art__wheel {
@@ -263,6 +304,17 @@
   .lobby__rule {
     width: 28px;
   }
+}
+
+/* A phone, upright or sideways, leaves the sign out (see Lobby.tsx) and opens
+   on the tables, under a strip just deep enough for the mute button. */
+.lobby.lobby--signless {
+  padding-top: 52px;
+}
+
+.lobby--signless .lobby__corner {
+  top: 6px;
+  right: 10px;
 }
 
 /* ---------------------------------------------------------------------------

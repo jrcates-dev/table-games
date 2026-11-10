@@ -425,7 +425,9 @@ pilaster, a bank of slot machines glowing along the far wall, chandeliers, and
 the loud patterned carpet every casino floor has. The lobby looks across the
 room under a marquee: the name in neon, the house chip (a blackjack on a
 crimson chip, the app's icon too) in a gold starburst, and a frame of bulbs
-running a chaser's light show. Taking a seat tilts the camera down until the
+running a chaser's light show. On a phone the marquee stays off and the lobby
+opens straight on the tables, each card cut down to its two headline rules.
+Taking a seat tilts the camera down until the
 table sits in its own pool of light on the carpet.
 
 Sound starts off; `M` turns it on and off, and Settings has its volume.
