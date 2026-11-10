@@ -80,7 +80,7 @@ export function TopBar({
         </span>
         <Monogram />
         <span className="brand__text">
-          <span className="brand__name">ARENA</span>
+          <span className="brand__name">ARIA</span>
           <span className="brand__game">{game}</span>
         </span>
       </button>

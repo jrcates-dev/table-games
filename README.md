@@ -1,4 +1,4 @@
-# Arena · Las Vegas Table Games
+# Aria · Las Vegas Table Games
 
 A play-money casino with six tables — **blackjack**, **craps**, **baccarat**,
 **roulette**, **Ultimate Texas Hold'em** and **Pai Gow Poker** — dealt by the rules Aria runs in Las

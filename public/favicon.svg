@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<!-- The Arena emblem: a blackjack, the ace of spades over the king of hearts, on a crimson casino chip. The letters are outlines, so it needs no fonts. --><defs>
+<!-- The Aria emblem: a blackjack, the ace of spades over the king of hearts, on a crimson casino chip. The letters are outlines, so it needs no fonts. --><defs>
   <linearGradient id="fpaper" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#fbf7ee"/><stop offset="1" stop-color="#ebe3d2"/></linearGradient>
   <linearGradient id="fgold" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="#fff1c9"/><stop offset="0.25" stop-color="#e8c67a"/><stop offset="0.48" stop-color="#b98a3a"/>

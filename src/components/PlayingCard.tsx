@@ -180,7 +180,7 @@ function Ace({ suit }: { suit: Suit }) {
       <Pip suit={suit} x={125} y={spade ? 172 : 175} size={spade ? 118 : 92} />
       {spade && (
         <text x="125" y="276" textAnchor="middle" fontFamily="Cinzel, Georgia, serif" fontWeight="600" fontSize="12" letterSpacing="5" fill="#9a7630">
-          ARENA
+          ARIA
         </text>
       )}
     </g>
