@@ -1,0 +1,2 @@
+# One line ending everywhere, whatever the machine that edits the file.
+* text=auto eol=lf
