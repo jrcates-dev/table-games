@@ -91,7 +91,6 @@ export interface Settings {
   coachStrict: boolean
   showCount: boolean
   showTotals: boolean
-  soundEnabled: boolean
   dealSpeed: 'relaxed' | 'normal' | 'fast' | 'instant'
   /**
    * Ask about insurance when the dealer shows an ace. Off, the question is
@@ -119,7 +118,6 @@ export const DEFAULT_SETTINGS: Settings = {
   coachStrict: false,
   showCount: false,
   showTotals: true,
-  soundEnabled: true,
   dealSpeed: 'normal',
   offerInsurance: true,
   rulePreset: DEFAULT_RULE_PRESET,

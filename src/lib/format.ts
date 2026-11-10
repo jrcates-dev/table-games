@@ -24,13 +24,6 @@ export function percent(value: number, digits = 1): string {
   return `${(value * 100).toFixed(digits)}%`
 }
 
-export function compactMoney(amount: number): string {
-  const abs = Math.abs(amount)
-  if (abs >= 1_000_000) return `$${(amount / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`
-  if (abs >= 10_000) return `$${(amount / 1_000).toFixed(0)}K`
-  return money(amount)
-}
-
 export function relativeTime(timestamp: number): string {
   const seconds = Math.round((Date.now() - timestamp) / 1000)
   if (seconds < 60) return 'just now'

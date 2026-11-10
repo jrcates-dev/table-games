@@ -63,10 +63,6 @@ export function crapsTableById(id: string): CrapsTable {
   return CRAPS_TABLES.find((t) => t.id === id) ?? CRAPS_TABLES[0]
 }
 
-export function unlockedCrapsTables(peakBankroll: number): CrapsTable[] {
-  return CRAPS_TABLES.filter((t) => peakBankroll >= t.requiredBankroll)
-}
-
 export function limitsFor(table: CrapsTable): CrapsLimits {
   return {
     minBet: table.minBet,

@@ -62,7 +62,6 @@ export interface ShootRecord {
 }
 
 export interface CrapsSettings {
-  soundEnabled: boolean
   rollSpeed: 'relaxed' | 'normal' | 'fast' | 'instant'
   /** Colour every bet by how much the house keeps. */
   showEdges: boolean
@@ -80,7 +79,6 @@ export interface CrapsSettings {
 }
 
 export const DEFAULT_CRAPS_SETTINGS: CrapsSettings = {
-  soundEnabled: true,
   rollSpeed: 'normal',
   showEdges: true,
   showProjection: true,

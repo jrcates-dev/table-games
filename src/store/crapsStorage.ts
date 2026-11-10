@@ -1,5 +1,4 @@
 import {
-  createCrapsProfile,
   CRAPS_PROFILE_VERSION,
   DEFAULT_CRAPS_SETTINGS,
   type CrapsProfile,
@@ -9,10 +8,10 @@ import {
  * Craps persistence, behind the same narrow interface blackjack uses.
  *
  * Local only for now. The cloud adapter in `supabase.ts` is shaped around a
- * blackjack profile — hands, strategy accuracy — and `runs` has no column
- * saying which game a row came from, so wiring craps to it would silently mix
- * two incomparable leaderboards. The schema change is in `supabase/schema.sql`;
- * until it is applied against a real project, craps stays on the device.
+ * blackjack profile — hands, strategy accuracy — and writes blackjack rows
+ * only. `supabase/schema.sql` already keys every row by game, so craps can
+ * be filed apart from blackjack once the adapter is generalised; until then
+ * craps stays on the device.
  */
 
 export interface CrapsLeaderboardEntry {
@@ -98,8 +97,4 @@ export function crapsProfileToEntry(profile: CrapsProfile): CrapsLeaderboardEntr
     achievedAt: Date.now(),
     isYou: true,
   }
-}
-
-export function createCrapsProfileForNewPlayer(startingBankroll: number): CrapsProfile {
-  return createCrapsProfile(startingBankroll)
 }

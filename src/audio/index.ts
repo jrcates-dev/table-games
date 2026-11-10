@@ -1,7 +1,7 @@
 import { installAudioUnlock } from './context'
 
 export { play, diceHit, type Voice, type PlayOptions } from './sfx'
-export { isAudioRunning, onAudioUnlocked } from './context'
+
 
 let installed = false
 

@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { railStartsFolded } from '../lib/compact'
 
 /**
- * Interface chrome for one of the newer tables: which drawer is open, and
+ * Interface chrome for a table with a bet rail: which drawer is open, and
  * whether the bet rail is folded away. Never persisted except the rail, which
  * a player who has folded it once does not want to fold again.
  */

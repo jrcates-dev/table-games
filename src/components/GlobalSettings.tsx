@@ -4,8 +4,8 @@ import { CARD_BACKS, FELT_THEMES, usePrefs, type EffectsPref } from '../prefs/pr
 import { Field, Section, Segmented, Slider, Swatches, Toggle } from './controls'
 
 /**
- * Sound and appearance, shared by both tables' settings drawers — they are the
- * player's preferences, not either game's.
+ * Sound and appearance, shared by every table's settings drawer — they are the
+ * player's preferences, not any one game's.
  */
 export function SoundSettings() {
   const prefs = usePrefs()

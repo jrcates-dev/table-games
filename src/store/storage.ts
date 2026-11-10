@@ -1,5 +1,4 @@
-import { STARTING_BANKROLL } from '../engine/rules'
-import { createProfile, migrateSettings, PROFILE_VERSION, type Profile } from './profile'
+import { migrateSettings, PROFILE_VERSION, type Profile } from './profile'
 
 /**
  * Persistence behind a narrow interface.
@@ -92,10 +91,6 @@ function toEntry(profile: Profile): LeaderboardEntry {
     achievedAt: Date.now(),
     isYou: true,
   }
-}
-
-export function createProfileForNewPlayer(): Profile {
-  return createProfile(STARTING_BANKROLL)
 }
 
 export { toEntry as profileToLeaderboardEntry }

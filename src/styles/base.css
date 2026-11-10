@@ -282,13 +282,6 @@ kbd {
   border: 0;
 }
 
-.gold-text {
-  background: var(--gold-foil);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 .tone-win {
   color: var(--win);
 }

@@ -263,4 +263,4 @@ export function topRank(s: number): number {
 }
 
 export const QUEEN = 10
-export { ACE as ACE_RANK }
+

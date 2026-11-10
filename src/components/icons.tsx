@@ -98,13 +98,6 @@ export const IconChevron = (p: IconProps) => (
   </Svg>
 )
 
-export const IconHistory = (p: IconProps) => (
-  <Svg {...p}>
-    <path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5" />
-    <path d="M4 4v4.5h4.5M12 8v4.5l3 2" />
-  </Svg>
-)
-
 export const IconZoomIn = (p: IconProps) => (
   <Svg {...p}>
     <circle cx="10.5" cy="10.5" r="6.5" />

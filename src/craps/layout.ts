@@ -28,8 +28,6 @@ export const CAMERA = {
 
 /** The playing surface inside the rail and the pyramid wall. */
 export const FELT = { x0: 94, y0: 94, x1: 1906, y1: 828, r: 150 } as const
-/** Width of the rubber-lined wall visible inside the rail. */
-export const WALL = 28
 export const RAIL = 66
 
 export type Shape =
@@ -154,7 +152,6 @@ export const SPOTS: Spot[] = [
   { id: 'all', kind: 'all', tone: 'side', shape: { type: 'circle', cx: SIDE_X[3], cy: SIDE_Y, r: SIDE_R } },
 ]
 
-export const SPOT_BY_ID = new Map(SPOTS.map((s) => [s.id, s]))
 
 export function centreOf(shape: Shape): [number, number] {
   if (shape.type === 'circle') return [shape.cx, shape.cy]

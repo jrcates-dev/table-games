@@ -154,7 +154,3 @@ export const STARTING_BANKROLL = 1_000
 export function tableById(id: string): TableTier {
   return TABLE_TIERS.find((t) => t.id === id) ?? TABLE_TIERS[0]
 }
-
-export function unlockedTables(peakBankroll: number): TableTier[] {
-  return TABLE_TIERS.filter((t) => peakBankroll >= t.requiredBankroll)
-}

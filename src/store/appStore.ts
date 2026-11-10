@@ -15,17 +15,15 @@ export type Screen = 'lobby' | GameId
 export interface GameMeta {
   id: GameId
   name: string
-  /** The house rules, in the few words a sign over the table would use. */
-  subtitle: string
 }
 
 export const GAMES: GameMeta[] = [
-  { id: 'blackjack', name: 'Blackjack', subtitle: 'Six-deck shoe · 6 to 5' },
-  { id: 'craps', name: 'Craps', subtitle: '3-4-5x odds · Field pays triple 12' },
-  { id: 'baccarat', name: 'Baccarat', subtitle: 'Eight decks · Banker pays 5% commission' },
-  { id: 'roulette', name: 'Roulette', subtitle: 'Double zero · Single zero in the high-limit room' },
-  { id: 'uth', name: "Ultimate Texas Hold'em", subtitle: 'Ante · Blind · Play · Trips' },
-  { id: 'paigow', name: 'Pai Gow Poker', subtitle: 'Joker wild · 5% commission · Fortune Bonus' },
+  { id: 'blackjack', name: 'Blackjack' },
+  { id: 'craps', name: 'Craps' },
+  { id: 'baccarat', name: 'Baccarat' },
+  { id: 'roulette', name: 'Roulette' },
+  { id: 'uth', name: "Ultimate Texas Hold'em" },
+  { id: 'paigow', name: 'Pai Gow Poker' },
 ]
 
 const KEY = 'cta:game:v1'

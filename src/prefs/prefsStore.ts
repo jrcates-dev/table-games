@@ -2,11 +2,11 @@ import { create } from 'zustand'
 import { isTouchDevice } from '../lib/device'
 
 /**
- * Preferences that belong to the player rather than to either game.
+ * Preferences that belong to the player rather than to any one game.
  *
  * Volume, the colour of the felt and the design on the back of the cards are
  * the same choice at every table, so they live here once instead of being
- * agreed on separately by two profiles. Game-specific settings — the coach,
+ * agreed on separately by six profiles. Game-specific settings — the coach,
  * the count, roll speed — stay with their games.
  */
 export type FeltTheme = 'emerald' | 'sapphire' | 'crimson' | 'violet' | 'onyx'

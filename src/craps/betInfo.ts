@@ -19,7 +19,7 @@ import {
   type HardNumber,
 } from '../engine/craps/bets'
 import * as craps from '../engine/craps/craps'
-import type { Bet, BetKind, CrapsState, PointNumber, Resolution } from '../engine/craps/types'
+import type { Bet, BetKind, CrapsState, PointNumber } from '../engine/craps/types'
 import { money } from '../lib/format'
 
 /**
@@ -79,56 +79,6 @@ export function totalsText(totals: number[]): string {
 
 export function edgeText(edge: number): string {
   return edge === 0 ? 'no house edge' : `${(edge * 100).toFixed(2)}% edge`
-}
-
-/**
- * What became of the chips, which is a separate question from whether the bet
- * won — and the one a player is actually asking when the rack does not match
- * the number they were shown.
- *
- * A winning pass line is paid and its stake stays on the felt. A winning come
- * bet is paid and comes down. A place bet asleep on a come-out is returned
- * rather than lost. Three different things happen to the money, and "won $10"
- * describes none of them.
- */
-export function chipFate(r: Resolution): string {
-  switch (r.effect) {
-    case 'win':
-      return r.remaining > 0
-        ? `${money(r.stake)} stays up`
-        : `plus ${money(r.stake)} back`
-    case 'lose':
-      return `${money(r.stake)} taken`
-    case 'push':
-      return r.remaining > 0 ? 'still up' : `${money(r.stake)} returned`
-    case 'move':
-    case 'point':
-      return `${money(r.stake)} still riding`
-    case 'sevenOut':
-      return ''
-  }
-}
-
-/**
- * Resolutions grouped the way the eye reads them: what won, what lost, and what
- * merely moved. Sorted by size within each group, so the roll's biggest event
- * is the first thing in view.
- */
-export function groupResolutions(resolutions: readonly Resolution[]) {
-  const by = (effect: Resolution['effect'][]) =>
-    resolutions
-      .filter((r) => effect.includes(r.effect))
-      .slice()
-      .sort((a, b) => Math.abs(b.net) - Math.abs(a.net) || b.stake - a.stake)
-
-  return {
-    won: by(['win']),
-    lost: by(['lose']),
-    // Pushes, travelled come bets and the roll that sets the point: no money
-    // changed hands, but chips visibly moved, which is its own kind of
-    // "where did that go".
-    moved: by(['push', 'move', 'point', 'sevenOut']),
-  }
 }
 
 export const ODDS_KINDS: readonly BetKind[] = [
