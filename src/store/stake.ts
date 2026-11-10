@@ -1,9 +1,9 @@
 /**
  * What a player is allowed to sit down with.
  *
- * Both games let you choose the bankroll you buy back in for, and both need the
- * same guard rails, so the bounds live in one place rather than being agreed on
- * twice. The floor is a real constraint — a bankroll under the table minimum is
+ * Every table lets you choose the bankroll you buy back in for, and all need
+ * the same guard rails, so the bounds live in one place rather than being
+ * agreed on six times. The floor is a real constraint — a bankroll under the table minimum is
  * a seat you cannot bet from — while the ceiling exists only to keep a stray
  * keystroke from turning the rack into scientific notation.
  */

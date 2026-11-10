@@ -11,13 +11,13 @@ import { clampStartingBankroll } from './stake'
 import { useUthStore } from './uthStore'
 
 /**
- * The racks on the floor, and whether they are five or one.
+ * The racks on the floor, and whether they are six or one.
  *
  * By default every table keeps its own bankroll. The player can instead carry
  * one from table to table, so a win at craps is there to bet at roulette. Each
  * table still holds the rack itself — its engine bets from it, and its runs and
- * peaks are filed from it — so sharing is a matter of keeping the five in step:
- * whenever one rack moves, the other four move to match, with whatever they
+ * peaks are filed from it — so sharing is a matter of keeping the six in step:
+ * whenever one rack moves, the other five move to match, with whatever they
  * have in play left where it is.
  */
 
@@ -134,7 +134,7 @@ for (const id of IDS) {
  * Every rack on the floor set to one figure, from the lobby — or, with the
  * bankroll shared, the one bankroll set to it.
  *
- * Either way this is the choice the lobby offers on each card, made five times
+ * Either way this is the choice the lobby offers on each card, made six times
  * at once. A table that has been played closes its run first, filed with its
  * peak like a buy-back, and anything on the felt or in play is cleared rather
  * than waited for.

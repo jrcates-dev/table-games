@@ -272,8 +272,3 @@ export function seenCards(state: BaccaratState): Card[] {
   const seen = state.shoe.cards.slice(start, state.shoe.pos)
   return state.burnCard ? [state.burnCard, ...seen] : seen
 }
-
-/** Cards left before the cut card, roughly — what a player can see in the shoe. */
-export function cardsToCut(state: BaccaratState): number {
-  return Math.max(0, state.shoe.cutIndex - state.shoe.pos)
-}

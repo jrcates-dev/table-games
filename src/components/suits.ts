@@ -28,13 +28,6 @@ export const SUIT_PATH: Record<Suit, string> = {
   ].join(' '),
 }
 
-export const SUIT_NAME: Record<Suit, string> = {
-  S: 'spades',
-  H: 'hearts',
-  D: 'diamonds',
-  C: 'clubs',
-}
-
 export function isRed(suit: Suit): boolean {
   return suit === 'H' || suit === 'D'
 }

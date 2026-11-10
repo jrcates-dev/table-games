@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import * as c from './craps'
-import { CRAPS_TABLES, limitsFor } from './rules'
+import { CRAPS_TABLE, limitsFor } from './rules'
 import type { BetKind, CrapsState, DieFace } from './types'
 
-const LIMITS = limitsFor(CRAPS_TABLES[0]) // $10 min, 3-4-5x odds
+const LIMITS = limitsFor(CRAPS_TABLE) // $10 min, 3-4-5x odds
 
 function game(bankroll = 100_000): CrapsState {
   return c.createGame(bankroll, 1, LIMITS)

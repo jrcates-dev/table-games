@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { BACCARAT_DECKS, BANKER_COMMISSION, TIE_PAYS } from '../engine/baccarat/rules'
-import { CRAPS_TABLES, limitsFor } from '../engine/craps/rules'
+import { CRAPS_TABLE, limitsFor } from '../engine/craps/rules'
 import { TRIPS_TABLES } from '../engine/uth/rules'
 
 /**
@@ -21,7 +21,7 @@ async function stores() {
 
 describe('the pit on a first visit', () => {
   it('craps takes 3-4-5x odds at every table', () => {
-    for (const table of CRAPS_TABLES) expect(limitsFor(table).oddsMultiple).toEqual({ 4: 3, 10: 3, 5: 4, 9: 4, 6: 5, 8: 5 })
+    expect(limitsFor(CRAPS_TABLE).oddsMultiple).toEqual({ 4: 3, 10: 3, 5: 4, 9: 4, 6: 5, 8: 5 })
   })
 
   it('baccarat deals eight decks, takes 5% on the Banker and pays the tie 8 to 1', () => {

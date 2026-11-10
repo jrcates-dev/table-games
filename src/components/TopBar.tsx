@@ -19,21 +19,18 @@ export function TopBar({
   game,
   placard,
   bankroll,
-  session,
   extra,
   cents = false,
   rack,
   children,
 }: {
-  /** Which table this is, for its share of the session while the bankroll is shared. */
+  /** Which table this is, for its results this session. */
   id: GameId
   game: string
   placard: ReactNode
   bankroll: number
   /** The table pays in cents, so the rack is counted in them. */
   cents?: boolean
-  /** Net since this session began, while this table keeps its own rack. */
-  session?: number
   /**
    * A second line under the bankroll, e.g. chips on the felt. With the bankroll
    * shared the session's results take its place; the rail still shows the felt.
@@ -45,6 +42,8 @@ export function TopBar({
 }) {
   const go = useAppStore((s) => s.go)
   const shared = useSharedBankroll((s) => s.shared)
+  // What this table has settled since the visit began (see sessionNets.ts).
+  const session = useSessionNets((s) => s[id])
   const [rackOpen, setRackOpen] = useState(false)
   const closeRack = useCallback(() => setRackOpen(false), [])
 
@@ -56,7 +55,7 @@ export function TopBar({
         <SharedSession id={id} />
       ) : (
         (extra ??
-          (session !== undefined && session !== 0 && (
+          (session !== 0 && (
             <span className={`bankroll__session ${session > 0 ? 'tone-win' : 'tone-lose'}`}>
               <Money value={session} signed flash={false} cents={cents} /> this session
             </span>
@@ -81,7 +80,7 @@ export function TopBar({
         </span>
         <Monogram />
         <span className="brand__text">
-          <span className="brand__name">ARENA</span>
+          <span className="brand__name">ARIA</span>
           <span className="brand__game">{game}</span>
         </span>
       </button>

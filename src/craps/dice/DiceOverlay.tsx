@@ -36,7 +36,7 @@ const TILT = (CAMERA.tilt * Math.PI) / 180
  */
 const QUALITY = {
   full: { shadow: THREE.VSMShadowMap, mapSize: 2048, maxDpr: 2.5, sheen: 0.3 },
-  reduced: { shadow: THREE.PCFSoftShadowMap, mapSize: 1024, maxDpr: 1.75, sheen: 0 },
+  reduced: { shadow: THREE.PCFShadowMap, mapSize: 1024, maxDpr: 1.75, sheen: 0 },
 } as const
 
 type Quality = (typeof QUALITY)[keyof typeof QUALITY]

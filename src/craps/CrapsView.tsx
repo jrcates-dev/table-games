@@ -7,7 +7,6 @@ import { TopBar, TopBarButton } from '../components/TopBar'
 import * as craps from '../engine/craps/craps'
 import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money } from '../lib/format'
-import { useSessionNet } from '../lib/session'
 import { selectCanChooseCrapsBankroll, selectCrapsBankrollHasRun, useCrapsStore } from '../store/crapsStore'
 import { useCrapsUiStore } from '../store/crapsUiStore'
 import { BetLayer, Puck } from './Bets'
@@ -69,15 +68,12 @@ export default function CrapsView() {
   const portrait = usePortrait()
   const diceReady = useAfterEntrance()
   const game = useCrapsStore((s) => s.game)
-  const ready = useCrapsStore((s) => s.ready)
   const bankroll = useCrapsStore((s) => s.profile.bankroll)
   const table = useCrapsStore((s) => s.table())
   const panel = useCrapsUiStore((s) => s.panel)
   const toggle = useCrapsUiStore((s) => s.togglePanel)
   const close = useCrapsUiStore((s) => s.closePanel)
   const atRisk = craps.totalAtRisk(game)
-  const run = useCrapsStore((s) => s.profile.runStartedAt)
-  const session = useSessionNet('craps', bankroll + atRisk, ready, run)
   const canChangeRack = useCrapsStore(selectCanChooseCrapsBankroll)
   const hasRun = useCrapsStore(selectCrapsBankrollHasRun)
   const resetRack = useCrapsStore((s) => s.resetRack)
@@ -122,7 +118,6 @@ export default function CrapsView() {
         id="craps"
         game="Craps"
         bankroll={bankroll}
-        session={session}
         rack={{ onFelt: atRisk, canChange: canChangeRack, hasRun, reset: resetRack }}
         extra={
           atRisk > 0 ? (

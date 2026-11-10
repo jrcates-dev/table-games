@@ -63,7 +63,6 @@ export interface RecordedHand {
 export interface HandRecord {
   id: string
   timestamp: number
-  tableId: string
   dealer: RecordedCard[]
   hands: RecordedHand[]
   insuranceBet: number
@@ -91,7 +90,6 @@ export interface Settings {
   coachStrict: boolean
   showCount: boolean
   showTotals: boolean
-  soundEnabled: boolean
   dealSpeed: 'relaxed' | 'normal' | 'fast' | 'instant'
   /**
    * Ask about insurance when the dealer shows an ace. Off, the question is
@@ -119,7 +117,6 @@ export const DEFAULT_SETTINGS: Settings = {
   coachStrict: false,
   showCount: false,
   showTotals: true,
-  soundEnabled: true,
   dealSpeed: 'normal',
   offerInsurance: true,
   rulePreset: DEFAULT_RULE_PRESET,
@@ -153,14 +150,11 @@ export interface CompletedRun {
 export interface Profile {
   version: number
   displayName: string
-  /** Supabase user id once the guest upgrades to a real account. */
-  userId: string | null
   bankroll: number
-  /** Highest bankroll reached in the current run; drives table unlocks. */
+  /** Highest bankroll reached in the current run. */
   peakBankroll: number
   /** Highest bankroll ever reached, across every run. */
   allTimePeak: number
-  tableId: string
   runStartedAt: number
   runRounds: number
   stats: Stats
@@ -175,11 +169,9 @@ export function createProfile(startingBankroll: number): Profile {
   return {
     version: PROFILE_VERSION,
     displayName: 'Guest',
-    userId: null,
     bankroll: startingBankroll,
     peakBankroll: startingBankroll,
     allTimePeak: startingBankroll,
-    tableId: 'bronze',
     runStartedAt: Date.now(),
     runRounds: 0,
     stats: { ...EMPTY_STATS },

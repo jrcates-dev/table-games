@@ -67,7 +67,7 @@ export function UpdatePill() {
               type="button"
               className="update-pill__later"
               aria-label="Not now"
-              title="Not now — it will update the next time Arena opens"
+              title="Not now — it will update the next time Aria opens"
               onClick={() => {
                 play('click')
                 setDismissed(true)

@@ -125,13 +125,3 @@ export function fan(count: number, cx: number, cy: number, maxWidth = 378, maxSt
     spin: (i - (count - 1) / 2) * 2.2,
   }))
 }
-
-/**
- * The felt's half-width at a given depth — used to keep split hands inside
- * the rail.
- */
-export function feltHalfWidthAt(y: number): number {
-  const dy = y - TABLE.edgeY
-  if (dy < 0 || dy > FELT.ry) return 0
-  return FELT.rx * Math.sqrt(1 - (dy / FELT.ry) ** 2)
-}

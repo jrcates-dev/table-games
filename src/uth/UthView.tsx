@@ -13,7 +13,6 @@ import { TRIPS_TABLES } from '../engine/uth/rules'
 import type { UthDecision } from '../engine/uth/types'
 import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money, signedMoney } from '../lib/format'
-import { useSessionNet } from '../lib/session'
 import { selectCanChooseUthBankroll, selectUthHasRun, useUthStore, uthAtRisk } from '../store/uthStore'
 import { useUthUi } from '../store/tableUi'
 import { spotKind, tipFor, uthDenominations } from './betInfo'
@@ -45,15 +44,12 @@ export default function UthView() {
   const compact = useCompact()
   const portrait = usePortrait()
   const game = useUthStore((s) => s.game)
-  const ready = useUthStore((s) => s.ready)
   const bankroll = useUthStore((s) => s.profile.bankroll)
-  const run = useUthStore((s) => s.profile.runStartedAt)
   const showEdges = useUthStore((s) => s.profile.settings.showEdges)
   const panel = useUthUi((s) => s.panel)
   const toggle = useUthUi((s) => s.togglePanel)
   const close = useUthUi((s) => s.closePanel)
   const atRisk = uthAtRisk(game)
-  const session = useSessionNet('uth', bankroll + atRisk, ready, run)
   const canChangeRack = useUthStore(selectCanChooseUthBankroll)
   const hasRun = useUthStore(selectUthHasRun)
   const resetRack = useUthStore((s) => s.resetRack)
@@ -67,7 +63,6 @@ export default function UthView() {
         game="Ultimate Texas Hold'em"
         bankroll={bankroll}
         rack={{ onFelt: atRisk, canChange: canChangeRack, hasRun, reset: resetRack }}
-        session={session}
         cents
         extra={atRisk > 0 ? <span className="bankroll__risk">{money(atRisk)} on the felt</span> : undefined}
         placard={

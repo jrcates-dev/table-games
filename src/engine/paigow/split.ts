@@ -1,6 +1,5 @@
 import { categoryOf, DEFAULT_HAND_RULES, score2, score5, type HandRules } from './hands'
 import { FLUSH, STRAIGHT, STRAIGHT_FLUSH } from '../uth/poker'
-import { FIVE_ACES } from './hands'
 
 /**
  * Every way to set seven cards: two of them in the low hand, the other five in
@@ -41,10 +40,6 @@ export function allSets(cards: readonly number[], rules: HandRules = DEFAULT_HAN
 export function isStraightOrFlush(highScore: number): boolean {
   const c = categoryOf(highScore)
   return c === STRAIGHT || c === FLUSH || c === STRAIGHT_FLUSH
-}
-
-export function isFiveAces(highScore: number): boolean {
-  return categoryOf(highScore) === FIVE_ACES
 }
 
 export function sameLow(a: readonly number[], b: readonly number[]): boolean {

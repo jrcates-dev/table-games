@@ -1,4 +1,4 @@
-import type { RuleSet, TableTier } from './types'
+import type { RuleSet, TableLimits } from './types'
 
 /**
  * Vegas Strip, the classic high-limit standard and our default.
@@ -110,51 +110,7 @@ export const RULE_PRESETS: Record<string, { name: string; rules: RuleSet; houseE
 /** Where a new player sits down: the low-limit 6:5 shoe (see ARIA_SIX_FIVE). */
 export const DEFAULT_RULE_PRESET = 'ariaSixFive'
 
-/**
- * Table tiers. Higher limits unlock as the bankroll grows, which gives the
- * pure-bankroll economy a sense of progression without bolting on XP or levels.
- */
-export const TABLE_TIERS: TableTier[] = [
-  {
-    id: 'bronze',
-    name: 'The Parlour',
-    minBet: 5,
-    maxBet: 500,
-    requiredBankroll: 0,
-    accent: '#c98f4b',
-  },
-  {
-    id: 'gold',
-    name: 'Gold Room',
-    minBet: 25,
-    maxBet: 2500,
-    requiredBankroll: 25_000,
-    accent: '#e2b857',
-  },
-  {
-    id: 'platinum',
-    name: 'High Limit Salon',
-    minBet: 100,
-    maxBet: 10_000,
-    requiredBankroll: 100_000,
-    accent: '#cfd8e3',
-  },
-  {
-    id: 'noir',
-    name: 'Noir · Invitation Only',
-    minBet: 500,
-    maxBet: 50_000,
-    requiredBankroll: 500_000,
-    accent: '#9b7bd4',
-  },
-]
+/** What the blackjack table takes in the circle. */
+export const BLACKJACK_TABLE: TableLimits = { minBet: 5, maxBet: 500 }
 
 export const STARTING_BANKROLL = 1_000
-
-export function tableById(id: string): TableTier {
-  return TABLE_TIERS.find((t) => t.id === id) ?? TABLE_TIERS[0]
-}
-
-export function unlockedTables(peakBankroll: number): TableTier[] {
-  return TABLE_TIERS.filter((t) => peakBankroll >= t.requiredBankroll)
-}

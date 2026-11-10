@@ -4,10 +4,10 @@ import { play } from '../audio'
 import * as bj from '../engine/blackjack'
 import { countSnapshot } from '../engine/counting'
 import { formatTotal } from '../engine/hand'
-import { DEFAULT_RULE_PRESET, RULE_PRESETS, STARTING_BANKROLL, tableById } from '../engine/rules'
+import { BLACKJACK_TABLE, DEFAULT_RULE_PRESET, RULE_PRESETS, STARTING_BANKROLL } from '../engine/rules'
 import { randomSeed } from '../engine/rng'
 import { basicStrategy } from '../engine/strategy'
-import type { Card, GameState, PlayerAction, PlayerHand, TableTier } from '../engine/types'
+import type { Card, GameState, PlayerAction, PlayerHand, TableLimits } from '../engine/types'
 import {
   createProfile,
   MAX_HISTORY,
@@ -18,8 +18,7 @@ import {
   type StrategyMistake,
 } from './profile'
 import { clampStartingBankroll } from './stake'
-import { LocalStorageAdapter, type LeaderboardEntry, type StorageAdapter } from './storage'
-import { resolveAdapter, supabaseConfigured } from './supabase'
+import { LocalStorageAdapter } from './storage'
 import { tableSnapshot } from './tableSnapshot'
 
 /** Milliseconds between dealt cards, by comfort setting. */
@@ -66,12 +65,10 @@ export interface CoachChallenge {
 interface GameStore {
   game: GameState
   profile: Profile
-  adapter: StorageAdapter
   ready: boolean
   /** True while cards are in flight or the dealer is drawing. */
   animating: boolean
   challenge: CoachChallenge | null
-  leaderboard: LeaderboardEntry[]
   /** Set for a moment after settlement so the felt can flash the result. */
   lastNet: number | null
   /**
@@ -79,10 +76,9 @@ interface GameStore {
    * played the book keeps that square lit, until the next hand is dealt.
    */
   lastDecision: GameState | null
-  cloudAvailable: boolean
 
   init(): Promise<void>
-  table(): TableTier
+  table(): TableLimits
   addChip(amount: number): void
   removeChip(amount: number): void
   doubleBet(): void
@@ -105,14 +101,14 @@ interface GameStore {
    * keeps the figure.
    */
   matchRack(amount: number, save?: boolean): void
-  selectTable(id: string): void
   updateSettings(patch: Partial<Settings>): void
   setDisplayName(name: string): void
-  refreshLeaderboard(): Promise<void>
   resetEverything(): void
 }
 
 let initialising: Promise<void> | null = null
+
+const adapter = new LocalStorageAdapter()
 
 /** Timers are module-level so a hot reload cannot orphan them. */
 let timers: ReturnType<typeof setTimeout>[] = []
@@ -161,8 +157,7 @@ function rulesFor(profile: Profile) {
 export const useGameStore = create<GameStore>((set, get) => {
   /** Persist without blocking the table. */
   const persist = () => {
-    const { adapter, profile } = get()
-    void adapter.save(profile)
+    void adapter.save(get().profile)
   }
 
   const interval = () => DEAL_INTERVAL[get().profile.settings.dealSpeed]
@@ -226,7 +221,6 @@ export const useGameStore = create<GameStore>((set, get) => {
     const entry: HandRecord = {
       id: `${Date.now()}-${stats.roundsPlayed}`,
       timestamp: Date.now(),
-      tableId: profile.tableId,
       dealer: game.round.dealer.map(record),
       hands: game.round.hands.map((hand) => ({
         cards: hand.cards.map(record),
@@ -307,20 +301,16 @@ export const useGameStore = create<GameStore>((set, get) => {
   return {
     game: bj.createGame(rulesFor(createProfile(STARTING_BANKROLL)), STARTING_BANKROLL, randomSeed()),
     profile: createProfile(STARTING_BANKROLL),
-    adapter: new LocalStorageAdapter(),
     ready: false,
     animating: false,
     challenge: null,
-    leaderboard: [],
     lastNet: null,
     lastDecision: null,
-    cloudAvailable: supabaseConfigured,
 
     async init() {
       // Once per page. Walking back to the table from the lobby must find the
       // hand exactly where it was left, not a fresh shoe.
       initialising ??= (async () => {
-        const adapter = await resolveAdapter()
         const stored = await adapter.load()
         const profile = stored ?? createProfile(STARTING_BANKROLL)
         // A first visit's profile is saved straight away: the table saves it
@@ -335,26 +325,24 @@ export const useGameStore = create<GameStore>((set, get) => {
           bj.resumeHandIds(saved.game)
           roundStartBankroll = saved.roundStartBankroll
           pendingMistakes = saved.pendingMistakes ?? []
-          set({ adapter, profile, ready: true, game: saved.game })
+          set({ profile, ready: true, game: saved.game })
           resume()
         } else {
           // The circle opens empty. Every round after this one carries the
           // previous wager forward, but the first wager of a session is the
           // player's to make.
           set({
-            adapter,
             profile,
             ready: true,
             game: bj.createGame(rulesFor(profile), profile.bankroll, randomSeed()),
           })
         }
-        void get().refreshLeaderboard()
       })()
       return initialising
     },
 
     table() {
-      return tableById(get().profile.tableId)
+      return BLACKJACK_TABLE
     },
 
     addChip(amount) {
@@ -501,7 +489,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       clearTimers()
       const { game, profile } = get()
       if (game.round.phase !== 'roundOver') return
-      const table = tableById(profile.tableId)
+      const table = BLACKJACK_TABLE
       let next = bj.nextRound({ ...game, bankroll: profile.bankroll })
       // The cut card was reached during the last round; the shoe is now fresh
       // and the running count has reset to zero.
@@ -526,9 +514,9 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     rebuy() {
-      const { profile, adapter } = get()
-      // Archive the finished run so the leaderboard keeps an honest record of
-      // how high this bankroll actually got before it went to zero.
+      const { profile } = get()
+      // Archive the finished run, an honest record of how high this bankroll
+      // actually got before it went to zero.
       const run = {
         id: `${profile.runStartedAt}`,
         startedAt: profile.runStartedAt,
@@ -536,8 +524,6 @@ export const useGameStore = create<GameStore>((set, get) => {
         peakBankroll: profile.peakBankroll,
         roundsPlayed: profile.runRounds,
       }
-      void adapter.submitRun(profile)
-
       // Whatever the player said they wanted to sit down with, not what the
       // house hands out.
       const stake = clampStartingBankroll(profile.settings.startingBankroll)
@@ -546,7 +532,6 @@ export const useGameStore = create<GameStore>((set, get) => {
         bankroll: stake,
         peakBankroll: stake,
         allTimePeak: Math.max(profile.allTimePeak, profile.peakBankroll),
-        tableId: 'bronze',
         runStartedAt: Date.now(),
         runRounds: 0,
         runs: [run, ...profile.runs].slice(0, 50),
@@ -558,7 +543,6 @@ export const useGameStore = create<GameStore>((set, get) => {
         lastDecision: null,
       })
       persist()
-      void get().refreshLeaderboard()
     },
 
     chooseBankroll(amount) {
@@ -624,26 +608,6 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (save) persist()
     },
 
-    selectTable(id) {
-      const { game, profile } = get()
-      if (game.round.phase !== 'betting') return
-      const table = tableById(id)
-      if (profile.peakBankroll < table.requiredBankroll) return
-      play('click')
-      set({
-        profile: { ...profile, tableId: id },
-        // An empty circle stays empty; an existing wager is pulled into the new
-        // table's limits.
-        game: bj.setBet(
-          game,
-          game.pendingBet === 0
-            ? 0
-            : Math.min(Math.max(table.minBet, game.pendingBet), table.maxBet, game.bankroll),
-        ),
-      })
-      persist()
-    },
-
     updateSettings(patch) {
       const { profile, game } = get()
       const settings = { ...profile.settings, ...patch }
@@ -674,14 +638,6 @@ export const useGameStore = create<GameStore>((set, get) => {
       const trimmed = name.trim().slice(0, 24) || 'Guest'
       set({ profile: { ...get().profile, displayName: trimmed } })
       persist()
-    },
-
-    async refreshLeaderboard() {
-      try {
-        set({ leaderboard: await get().adapter.leaderboard(25) })
-      } catch {
-        set({ leaderboard: [] })
-      }
     },
 
     resetEverything() {

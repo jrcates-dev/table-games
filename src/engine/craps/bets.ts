@@ -1,4 +1,4 @@
-import type { BetKind, PointNumber, Roll } from './types'
+import type { BetKind, PointNumber } from './types'
 import { POINT_NUMBERS } from './types'
 
 /**
@@ -58,7 +58,7 @@ export const PLACE_ODDS: Record<PointNumber, PayRatio> = {
 }
 
 export type HardNumber = 4 | 6 | 8 | 10
-export const HARD_NUMBERS: readonly HardNumber[] = [4, 6, 8, 10]
+
 
 export const HARD_ODDS: Record<HardNumber, PayRatio> = {
   4: { num: 7, den: 1 },
@@ -612,11 +612,6 @@ export function payoutText(kind: BetKind, number?: number): string {
     case 'all':
       return '150:1'
   }
-}
-
-/** True when the total, as thrown, is a pair — which is all a hardway cares about. */
-export function isHardWay(roll: Roll, number: number): boolean {
-  return roll.total === number && roll.a === roll.b
 }
 
 export { POINT_NUMBERS }

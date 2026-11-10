@@ -4,8 +4,7 @@ import type { RollLogEntry } from '../engine/craps/types'
 /**
  * The craps player's record, kept entirely apart from the blackjack one.
  *
- * Separate bankrolls means separate runs, separate busts and separate
- * leaderboards. It also means nothing here has to be reconciled with a game
+ * Separate bankrolls means separate runs and separate busts. It also means nothing here has to be reconciled with a game
  * whose unit of play is a hand rather than a shoot.
  */
 
@@ -52,7 +51,6 @@ export const EMPTY_CRAPS_STATS: CrapsStats = {
 export interface ShootRecord {
   id: string
   timestamp: number
-  tableId: string
   shootNumber: number
   rolls: RollLogEntry[]
   /** Distinct points made, in the order they were made. */
@@ -62,7 +60,6 @@ export interface ShootRecord {
 }
 
 export interface CrapsSettings {
-  soundEnabled: boolean
   rollSpeed: 'relaxed' | 'normal' | 'fast' | 'instant'
   /** Colour every bet by how much the house keeps. */
   showEdges: boolean
@@ -80,7 +77,6 @@ export interface CrapsSettings {
 }
 
 export const DEFAULT_CRAPS_SETTINGS: CrapsSettings = {
-  soundEnabled: true,
   rollSpeed: 'normal',
   showEdges: true,
   showProjection: true,
@@ -100,12 +96,10 @@ export interface CrapsRun {
 export interface CrapsProfile {
   version: number
   displayName: string
-  userId: string | null
   bankroll: number
-  /** Highest bankroll this run; drives table unlocks. */
+  /** Highest bankroll this run. */
   peakBankroll: number
   allTimePeak: number
-  tableId: string
   runStartedAt: number
   runShoots: number
   stats: CrapsStats
@@ -121,11 +115,9 @@ export function createCrapsProfile(startingBankroll: number): CrapsProfile {
   return {
     version: CRAPS_PROFILE_VERSION,
     displayName: 'Guest',
-    userId: null,
     bankroll: startingBankroll,
     peakBankroll: startingBankroll,
     allTimePeak: startingBankroll,
-    tableId: 'main',
     runStartedAt: Date.now(),
     runShoots: 0,
     stats: { ...EMPTY_CRAPS_STATS },

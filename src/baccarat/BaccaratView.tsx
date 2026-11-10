@@ -11,7 +11,6 @@ import { TopBar, TopBarButton } from '../components/TopBar'
 import { BANKER_COMMISSION } from '../engine/baccarat/rules'
 import { COMPACT_RESERVE, COMPACT_TOPBAR, PORTRAIT_RESERVE, PORTRAIT_TOPBAR, TOPBAR, useCompact, usePortrait } from '../lib/compact'
 import { money, signedMoney } from '../lib/format'
-import { useSessionNet } from '../lib/session'
 import { usePrefs } from '../prefs/prefsStore'
 import { baccaratAtRisk, selectBaccaratHasRun, selectCanChooseBaccaratBankroll, useBaccaratStore, useLiveOdds } from '../store/baccaratStore'
 import { useBaccaratUi } from '../store/tableUi'
@@ -46,9 +45,7 @@ export default function BaccaratView() {
   const compact = useCompact()
   const portrait = usePortrait()
   const game = useBaccaratStore((s) => s.game)
-  const ready = useBaccaratStore((s) => s.ready)
   const bankroll = useBaccaratStore((s) => s.profile.bankroll)
-  const run = useBaccaratStore((s) => s.profile.runStartedAt)
   const showEdges = useBaccaratStore((s) => s.profile.settings.showEdges)
   const panel = useBaccaratUi((s) => s.panel)
   const toggle = useBaccaratUi((s) => s.togglePanel)
@@ -56,7 +53,6 @@ export default function BaccaratView() {
   const back = usePrefs((s) => s.cardBack)
   const live = useLiveOdds()
   const atRisk = baccaratAtRisk(game)
-  const session = useSessionNet('baccarat', bankroll + atRisk, ready, run)
   const canChangeRack = useBaccaratStore(selectCanChooseBaccaratBankroll)
   const hasRun = useBaccaratStore(selectBaccaratHasRun)
   const resetRack = useBaccaratStore((s) => s.resetRack)
@@ -71,7 +67,6 @@ export default function BaccaratView() {
         game="Baccarat"
         bankroll={bankroll}
         rack={{ onFelt: atRisk, canChange: canChangeRack, hasRun, reset: resetRack }}
-        session={session}
         cents
         extra={atRisk > 0 ? <span className="bankroll__risk">{money(atRisk)} on the felt</span> : undefined}
         placard={

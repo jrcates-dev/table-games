@@ -33,10 +33,6 @@ export function encode(card: Pick<Card, 'rank' | 'suit'>): number {
   return rankIndex(card.rank) * 4 + SUIT_CHARS.indexOf(card.suit)
 }
 
-export function decode(code: number): { rank: Rank; suit: Suit } {
-  return { rank: RANK_CHARS[code >> 2], suit: SUIT_CHARS[code & 3] }
-}
-
 /** The top rank of the best straight in a 13-bit rank mask, or −1. The wheel is five-high. */
 const STRAIGHT_TOP = new Int8Array(1 << 13).fill(-1)
 for (let mask = 0; mask < 1 << 13; mask++) {

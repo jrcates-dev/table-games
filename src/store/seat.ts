@@ -1,8 +1,8 @@
 import { clampStartingBankroll } from './stake'
 
 /**
- * A seat at one of the newer tables: baccarat, roulette and Ultimate Texas
- * Hold'em.
+ * A seat at one of the newer tables: baccarat, roulette, Ultimate Texas
+ * Hold'em and Pai Gow Poker.
  *
  * Each keeps its own bankroll, runs and statistics, for the same reason
  * blackjack and craps do — a roulette session and a baccarat shoe are not the

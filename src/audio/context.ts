@@ -24,7 +24,6 @@ export interface Buses {
 
 let buses: Buses | null = null
 let noise: { white: AudioBuffer; pink: AudioBuffer } | null = null
-const unlockListeners = new Set<() => void>()
 
 /** Seconds of noise per buffer. Bursts start at random offsets into it. */
 const NOISE_SECONDS = 3
@@ -140,20 +139,6 @@ export function noiseBuffer(kind: 'white' | 'pink'): AudioBuffer | null {
   return noise ? noise[kind] : null
 }
 
-/** Run `fn` once audio is actually available (immediately, if it already is). */
-export function onAudioUnlocked(fn: () => void): () => void {
-  if (buses && buses.ctx.state === 'running') {
-    fn()
-    return () => {}
-  }
-  unlockListeners.add(fn)
-  return () => unlockListeners.delete(fn)
-}
-
-export function isAudioRunning(): boolean {
-  return Boolean(buses && buses.ctx.state === 'running')
-}
-
 /**
  * Wire the first-gesture unlock. Idempotent; call once at startup.
  */
@@ -165,12 +150,7 @@ export function installAudioUnlock() {
       if (!buses) return
       applyPrefs(currentPrefs())
     }
-    const fire = () => {
-      for (const fn of unlockListeners) fn()
-      unlockListeners.clear()
-    }
-    if (buses.ctx.state === 'running') fire()
-    else void buses.ctx.resume().then(fire)
+    if (buses.ctx.state !== 'running') void buses.ctx.resume()
     window.removeEventListener('pointerdown', unlock, true)
     window.removeEventListener('keydown', unlock, true)
   }

@@ -136,7 +136,7 @@ export function Lobby() {
       <UpdatePill />
 
       {signless ? (
-        <h1 className="sr-only">Arena</h1>
+        <h1 className="sr-only">Aria</h1>
       ) : (
         <motion.header
           className="lobby__head"
@@ -150,8 +150,8 @@ export function Lobby() {
               <CrestRays />
               <Monogram size={58} />
             </div>
-            <h1 className="lobby__title" aria-label="Arena">
-              <NeonWord word="ARENA" flicker={entrance} />
+            <h1 className="lobby__title" aria-label="Aria">
+              <NeonWord word="ARIA" flicker={entrance} />
             </h1>
             <p className="lobby__subtitle">
               <span className="lobby__rule" />

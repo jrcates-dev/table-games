@@ -30,9 +30,19 @@ export function offlineCache(): Plugin {
       const outDir = config.build.outDir
       const files = listFiles(outDir)
         .map((file) => relative(outDir, file).split(sep).join('/'))
-        // Every phone browser reads woff2, so the woff fallbacks never load;
-        // the link-preview image is fetched by chat apps, never by the app.
-        .filter((file) => file !== 'sw.js' && !file.endsWith('.woff') && !file.startsWith('og-image.'))
+        // What the app never asks for is left to the network. Every phone
+        // browser reads woff2, so the woff fallbacks never load, and the app is
+        // in English, so nor do the Cyrillic, Greek and Vietnamese cuts of each
+        // font; and the link-preview image and robots.txt are fetched by chat
+        // apps and crawlers.
+        .filter(
+          (file) =>
+            file !== 'sw.js' &&
+            file !== 'robots.txt' &&
+            !file.endsWith('.woff') &&
+            !/-(cyrillic|cyrillic-ext|greek|greek-ext|vietnamese)-/.test(file) &&
+            !file.startsWith('og-image.'),
+        )
         .sort()
       const hash = createHash('sha256')
       for (const file of files) hash.update(file).update(readFileSync(join(outDir, file)))

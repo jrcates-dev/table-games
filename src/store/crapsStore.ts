@@ -2,12 +2,7 @@ import { useMemo } from 'react'
 import { create } from 'zustand'
 import { play } from '../audio'
 import * as craps from '../engine/craps/craps'
-import {
-  CRAPS_STARTING_BANKROLL,
-  crapsTableById,
-  limitsFor,
-  type CrapsTable,
-} from '../engine/craps/rules'
+import { CRAPS_STARTING_BANKROLL, CRAPS_TABLE, limitsFor, type CrapsTable } from '../engine/craps/rules'
 import type { BetKind, CrapsState } from '../engine/craps/types'
 import { randomSeed } from '../engine/rng'
 import {
@@ -18,11 +13,7 @@ import {
   type CrapsStats,
   type ShootRecord,
 } from './crapsProfile'
-import {
-  LocalCrapsAdapter,
-  type CrapsLeaderboardEntry,
-  type CrapsStorageAdapter,
-} from './crapsStorage'
+import { LocalCrapsAdapter } from './crapsStorage'
 import { clampStartingBankroll } from './stake'
 import { tableSnapshot } from './tableSnapshot'
 
@@ -59,12 +50,10 @@ export type NumberMode = 'place' | 'buy' | 'lay' | 'odds'
 interface CrapsStore {
   game: CrapsState
   profile: CrapsProfile
-  adapter: CrapsStorageAdapter
   ready: boolean
   /** Chip denomination currently in hand. */
   chip: number
   numberMode: NumberMode
-  leaderboard: CrapsLeaderboardEntry[]
   /** Set briefly after a roll settles so the felt can flash the result. */
   lastNet: number | null
   /**
@@ -96,10 +85,8 @@ interface CrapsStore {
   undo(): void
   takeMaxOdds(target?: { kind: BetKind; number?: number }): void
   roll(): void
-  selectTable(id: string): void
   updateSettings(patch: Partial<CrapsSettings>): void
   setDisplayName(name: string): void
-  refreshLeaderboard(): Promise<void>
   rebuy(): void
   /** Choose the opening rack from the lobby, before the first roll. */
   chooseBankroll(amount: number): void
@@ -116,6 +103,8 @@ interface CrapsStore {
 }
 
 let initialising: Promise<void> | null = null
+
+const adapter = new LocalCrapsAdapter()
 
 /** The felt, saved as it changes so closing the app mid-shoot loses nothing (see tableSnapshot.ts). */
 const felt = tableSnapshot<{ game: CrapsState }>('cta:craps:felt:v1', 1)
@@ -136,7 +125,7 @@ function clearTimers() {
 }
 
 function newGame(profile: CrapsProfile): CrapsState {
-  return craps.createGame(profile.bankroll, randomSeed(), limitsFor(crapsTableById(profile.tableId)))
+  return craps.createGame(profile.bankroll, randomSeed(), limitsFor(CRAPS_TABLE))
 }
 
 /** Why a bet will not come down, and what to do instead. */
@@ -153,8 +142,7 @@ export const BIG_WIN_MINIMUMS = 25
 
 export const useCrapsStore = create<CrapsStore>((set, get) => {
   const persist = () => {
-    const { adapter, profile } = get()
-    void adapter.save(profile)
+    void adapter.save(get().profile)
   }
 
   /**
@@ -204,7 +192,6 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
       const entry: ShootRecord = {
         id: `${Date.now()}-${before.shootNumber}`,
         timestamp: Date.now(),
-        tableId: profile.tableId,
         shootNumber: before.shootNumber,
         rolls: done.log,
         pointsMade: done.firePoints,
@@ -252,17 +239,11 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
   }
 
   return {
-    game: craps.createGame(
-      CRAPS_STARTING_BANKROLL,
-      1,
-      limitsFor(crapsTableById('main')),
-    ),
+    game: craps.createGame(CRAPS_STARTING_BANKROLL, 1, limitsFor(CRAPS_TABLE)),
     profile: createCrapsProfile(CRAPS_STARTING_BANKROLL),
-    adapter: new LocalCrapsAdapter(),
     ready: false,
     chip: 5,
     numberMode: 'place',
-    leaderboard: [],
     lastNet: null,
     lastThrow: null,
     notice: null,
@@ -271,7 +252,6 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
     async init() {
       // Once per page, so leaving for the lobby never clears the felt.
       initialising ??= (async () => {
-        const adapter = new LocalCrapsAdapter()
         const stored = await adapter.load()
         const profile = stored ?? createCrapsProfile(CRAPS_STARTING_BANKROLL)
         const saved = felt.load(profile.runStartedAt)
@@ -279,7 +259,7 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
           // The app closed with chips down: the felt comes back as it was, point,
           // puck and every bet, and the rack is what it held beside them.
           const { game } = saved
-          set({ adapter, profile: { ...profile, bankroll: game.bankroll }, ready: true, game, undoStack: [] })
+          set({ profile: { ...profile, bankroll: game.bankroll }, ready: true, game, undoStack: [] })
           if (game.phase === 'rolling') {
             // The dice had landed as far as the engine was concerned; settle the roll.
             const settled = craps.settle(game)
@@ -287,15 +267,14 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
             record(game, settled)
           }
         } else {
-          set({ adapter, profile, ready: true, game: newGame(profile), undoStack: [] })
+          set({ profile, ready: true, game: newGame(profile), undoStack: [] })
         }
-        void get().refreshLeaderboard()
       })()
       return initialising
     },
 
     table() {
-      return crapsTableById(get().profile.tableId)
+      return CRAPS_TABLE
     },
 
     setChip(value) {
@@ -436,20 +415,6 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
       }, ROLL_DURATION[profile.settings.rollSpeed])
     },
 
-    selectTable(id) {
-      const { game, profile } = get()
-      if (Object.keys(game.bets).length > 0) return refuse('Clear the felt before changing tables')
-      const table = crapsTableById(id)
-      if (profile.peakBankroll < table.requiredBankroll) return
-      play('click')
-      set({
-        profile: { ...profile, tableId: id },
-        game: { ...game, limits: limitsFor(table) },
-        undoStack: [],
-      })
-      persist()
-    },
-
     updateSettings(patch) {
       const { profile } = get()
       const settings = { ...profile.settings, ...patch }
@@ -467,18 +432,9 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
       persist()
     },
 
-    async refreshLeaderboard() {
-      try {
-        set({ leaderboard: await get().adapter.leaderboard(25) })
-      } catch {
-        set({ leaderboard: [] })
-      }
-    },
-
     rebuy() {
       clearTimers()
-      const { profile, adapter } = get()
-      void adapter.submitRun(profile)
+      const { profile } = get()
 
       // Whatever the player said they wanted to sit down with, not what the
       // house hands out.
@@ -488,7 +444,6 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
         bankroll: stake,
         peakBankroll: stake,
         allTimePeak: Math.max(profile.allTimePeak, profile.peakBankroll),
-        tableId: 'main',
         runStartedAt: Date.now(),
         runShoots: 0,
         runs: [
@@ -505,7 +460,6 @@ export const useCrapsStore = create<CrapsStore>((set, get) => {
       }
       set({ profile: next, game: newGame(next), lastNet: null, lastThrow: null, notice: null, undoStack: [] })
       persist()
-      void get().refreshLeaderboard()
     },
 
     chooseBankroll(amount) {

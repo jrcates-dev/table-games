@@ -1,12 +1,13 @@
-# Arena · Las Vegas Table Games
+# Aria · Las Vegas Table Games
 
 A play-money casino with six tables — **blackjack**, **craps**, **baccarat**,
 **roulette**, **Ultimate Texas Hold'em** and **Pai Gow Poker** — dealt by the rules Aria runs in Las
 Vegas in 2026, with the house edge shown on every bet. Everything you see and
 hear is generated at runtime: the cards, chips, felt, wheel and room are vector
 art, the dice are thrown by a physics engine, and every sound, from a clay chip
-landing to the ball dropping into a pocket, is synthesised. There are no image
-or audio assets at all.
+landing to the ball dropping into a pocket, is synthesised. The game itself
+uses no image or audio assets at all; the only pictures in the project are the
+app's icons and the link preview.
 
 Play it at **https://jrcates-dev.github.io/table-games/**, or install it there as
 an app ([below](#as-an-app)).
@@ -22,8 +23,7 @@ npm run dev      # start the dev server
 
 Then open **http://localhost:5173**. Sound starts off; press `M` or the speaker
 button to hear the table. No configuration is required — the
-games run as a guest against browser local storage. Supabase is optional; see
-[Cloud sync](#cloud-sync-optional).
+games run entirely in the browser, saved to its local storage.
 
 > **Windows PowerShell:** if `npm` fails with *"running scripts is disabled on
 > this system"*, run `npm.cmd run dev` instead, or allow local scripts once with
@@ -64,8 +64,8 @@ point and puck, a hand half played. Anything already decided when it closed
 raised or folded) is paid as the app opens, once.
 
 Pasted into iMessage, WhatsApp, Discord or Slack, the link shows a card with
-the game on it. That picture, `public/og-image.jpg` (1200×630), is the one
-image file in the project: a screenshot of a blackjack hand, 11 against a
+the game on it. That picture, `public/og-image.jpg` (1200×630), is a
+screenshot of a blackjack hand, 11 against a
 dealer 9, with the coach's prices open over Double. Retake it if the table
 changes much, and bump the `?v=` on its two addresses in `index.html` so chat
 apps fetch the new one instead of a cached copy.
@@ -76,7 +76,9 @@ also works offline, but only updates when `npm run app` runs again. Each address
 keeps its own bankroll, so the published app, a local install and `npm run dev`
 never share one. Uninstall from the app's **⋯** menu or Windows Settings → Apps.
 
-The tables keep entirely separate bankrolls, statistics and histories. Walk
+The tables keep entirely separate statistics and histories, and separate
+bankrolls too unless you tick **One bankroll for every table** under the
+lobby's cards, which carries one rack from table to table. Walk
 between them from the lobby, or with the **←** in the top-left of any table; a
 table left mid-hand is exactly where you left it when you come back.
 
@@ -526,17 +528,6 @@ orientations). Real physics, provably fair dice.
   a hand, checks the felt comes back as it was left, that whatever was already
   decided is paid exactly once, and that a hand paid before the close is never
   paid again.
-
-## Cloud sync (optional)
-
-1. Create a Supabase project and run `supabase/schema.sql` against it.
-2. `cp .env.example .env.local` and fill in the URL and anon key.
-
-Sign-in is a passwordless email link, from blackjack's Settings. The Supabase
-library is only downloaded when credentials exist. Local storage stays the
-write-through cache, so the table never waits on the network. Craps and the
-three newer tables are local-only for now: `runs` needs its `game` column
-before their rows can be filed without mixing incomparable leaderboards.
 
 ## Development aids
 

@@ -8,11 +8,10 @@ import { create } from 'zustand'
  * places need it: the top bar's switcher, the strategy-card button that sits
  * with the play controls, and the keyboard handler.
  */
-export type PanelId = 'chart' | 'stats' | 'leaderboard' | 'settings' | 'account'
+export type PanelId = 'chart' | 'stats' | 'settings'
 
 interface UiStore {
   panel: PanelId | null
-  openPanel(id: PanelId): void
   togglePanel(id: PanelId): void
   closePanel(): void
   /** The "Reshuffle decks?" question is on screen. */
@@ -23,7 +22,6 @@ interface UiStore {
 
 export const useUiStore = create<UiStore>((set) => ({
   panel: null,
-  openPanel: (id) => set({ panel: id }),
   togglePanel: (id) => set((s) => ({ panel: s.panel === id ? null : id })),
   closePanel: () => set({ panel: null }),
   shuffleAsk: false,

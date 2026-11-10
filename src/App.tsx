@@ -16,16 +16,18 @@ import { usePaiGowStore } from './store/paigowStore'
 import { useCrapsStore } from './store/crapsStore'
 import { useGameStore } from './store/gameStore'
 
-// Each table is its own chunk: the lobby paints before either has loaded.
+// Each table is its own chunk: the lobby paints before any of them has loaded.
 const BlackjackView = lazy(() => import('./blackjack/BlackjackView'))
 const CrapsView = lazy(() => import('./craps/CrapsView'))
 const BaccaratView = lazy(() => import('./baccarat/BaccaratView'))
 const RouletteView = lazy(() => import('./roulette/RouletteView'))
 const UthView = lazy(() => import('./uth/UthView'))
 const PaiGowView = lazy(() => import('./paigow/PaiGowView'))
-// A sheet of every card and chip for checking the artwork: ?gallery, in development only.
-const Gallery = lazy(() => import('./dev/Gallery').then((m) => ({ default: m.Gallery })))
+// A sheet of every card and chip for checking the artwork: ?gallery, in
+// development only. The import sits behind the same check, so a production
+// build never carries the sheet.
 const showGallery = import.meta.env.DEV && new URLSearchParams(window.location.search).has('gallery')
+const Gallery = import.meta.env.DEV ? lazy(() => import('./dev/Gallery').then((m) => ({ default: m.Gallery }))) : null
 
 /**
  * The floor.
@@ -53,7 +55,7 @@ export default function App() {
 
   useGlobalShortcuts()
 
-  if (showGallery) {
+  if (showGallery && Gallery) {
     return (
       <Suspense fallback={null}>
         <Gallery />
