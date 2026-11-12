@@ -50,12 +50,15 @@ the right of the address bar. On a phone, add it to the home screen. It opens in
 a window of its own, straight to the lobby, offline too, and a second click
 brings the open window forward rather than dealing a second copy.
 
-Updates need nothing from you. Whenever the app opens online, or comes back
-into view after ten minutes or more away, it checks for a new build and fetches
-it in the background. Once it has, the lobby shows a **New version** pill:
-**Update** reloads onto it there and then, and the **×** leaves it for the next
-launch. The pill waits until every table is between hands with nothing on the
-felt, so a table in play is never swapped out mid-hand.
+Updates need nothing from you. Every visit online opens the newest build, in a
+browser tab as much as from the home screen, and the copy saved on the device
+opens instead when offline or when the network takes more than three seconds
+to answer. An app left open looks for a new build again whenever it comes back
+into view after ten minutes or more away, and fetches it in the background.
+Once it has, the lobby shows a **New version** pill: **Update** reloads onto it
+there and then, and the **×** leaves it for the next launch. The pill waits
+until every table is between hands with nothing on the felt, so a table in play
+is never swapped out mid-hand.
 
 Closing the app costs nothing on the felt either. Each table saves what is in
 play as it changes, and opens again exactly as it was left: chips down, the
